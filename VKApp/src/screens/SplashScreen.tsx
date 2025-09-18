@@ -1,13 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Animated,
   Dimensions,
   Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 interface SplashScreenProps {
   onAnimationComplete: () => void;

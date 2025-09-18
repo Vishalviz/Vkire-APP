@@ -57,15 +57,14 @@ const ReviewScreen = () => {
 
     setLoading(true);
     try {
-      const reviewData = {
-        booking_id: bookingId,
-        reviewer_id: user.id,
-        reviewee_id: mockBooking.pro_id,
-        rating,
-        comment: comment.trim() || null,
-      };
-
       // In a real app, you would save the review to the database
+      // const reviewData = {
+      //   booking_id: bookingId,
+      //   reviewer_id: user.id,
+      //   reviewee_id: mockBooking.pro_id,
+      //   rating,
+      //   comment: comment.trim() || null,
+      // };
       // await DatabaseService.createReview(reviewData);
 
       Alert.alert(
