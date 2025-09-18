@@ -49,6 +49,9 @@ RUN npm install -g @expo/cli
 COPY package*.json ./
 RUN npm ci
 
+# Install web dependencies for Expo
+RUN npx expo install react-dom react-native-web
+
 # Copy source code
 COPY . .
 
@@ -63,7 +66,7 @@ WORKDIR /usr/share/nginx/html
 COPY --from=builder /app/dist .
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Expose port
 EXPOSE 80
