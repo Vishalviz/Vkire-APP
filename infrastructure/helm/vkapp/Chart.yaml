@@ -1,0 +1,27 @@
+apiVersion: v2
+name: vkapp
+description: A Helm chart for VK App - Visual Creator Marketplace
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - react-native
+  - expo
+  - marketplace
+  - photography
+home: https://github.com/your-org/vkapp
+sources:
+  - https://github.com/your-org/vkapp
+maintainers:
+  - name: DevOps Team
+    email: devops@vkapp.com
+dependencies:
+  - name: redis
+    version: 17.3.7
+    repository: https://charts.bitnami.com/bitnami
+  - name: prometheus
+    version: 25.8.4
+    repository: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    version: 6.50.7
+    repository: https://grafana.github.io/helm-charts

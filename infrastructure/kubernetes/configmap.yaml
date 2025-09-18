@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vkapp-config
+  namespace: vkapp
+data:
+  NODE_ENV: "production"
+  APP_NAME: "VK App"
+  APP_VERSION: "1.0.0"
+  LOG_LEVEL: "info"
+  REDIS_URL: "redis://redis-service:6379"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vkapp-secrets
+  namespace: vkapp
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual values
+  SUPABASE_URL: eW91cl9zdXBhYmFzZV91cmxfaGVyZQ==
+  SUPABASE_ANON_KEY: eW91cl9zdXBhYmFzZV9hbm9uX2tleV9oZXJl
+  SUPABASE_SERVICE_ROLE_KEY: eW91cl9zdXBhYmFzZV9zZXJ2aWNlX3JvbGVfa2V5X2hlcmU=
+  STRIPE_SECRET_KEY: eW91cl9zdHJpcGVfc2VjcmV0X2tleV9oZXJl
+  RAZORPAY_KEY_SECRET: eW91cl9yYXpvcnBheV9rZXlfc2VjcmV0X2hlcmU=
+  JWT_SECRET: eW91cl9qd3Rfc2VjcmV0X2hlcmU=
+  ENCRYPTION_KEY: eW91cl9lbmNyeXB0aW9uX2tleV9oZXJl

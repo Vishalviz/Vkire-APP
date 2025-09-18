@@ -1,0 +1,39 @@
+# VK App Terraform Variables Example
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Configuration
+aws_region = "us-west-2"
+environment = "staging"
+project_name = "vkapp"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+enable_nat_gateway = true
+
+# Database Configuration
+db_instance_class = "db.t3.micro"
+db_allocated_storage = 20
+db_max_allocated_storage = 100
+db_name = "vkapp"
+db_username = "vkapp_user"
+db_password = "your-secure-password-here"
+db_backup_retention_period = 7
+
+# Application Configuration
+app_cpu = 256
+app_memory = 512
+app_desired_count = 1
+docker_registry = "your-registry.com"
+
+# Monitoring Configuration
+log_retention_days = 30
+
+# Common Tags
+common_tags = {
+  Project     = "VK App"
+  ManagedBy   = "Terraform"
+  Environment = "staging"
+  Owner       = "DevOps Team"
+}
