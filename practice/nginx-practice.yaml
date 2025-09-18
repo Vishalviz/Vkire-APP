@@ -1,0 +1,94 @@
+# DevOps Learning - Simple Kubernetes Practice
+# This is a basic nginx deployment to practice Kubernetes concepts
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops-practice
+  labels:
+    purpose: learning
+    environment: practice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-practice
+  namespace: devops-practice
+  labels:
+    app: nginx-practice
+    purpose: learning
+spec:
+  replicas: 2  # Run 2 copies
+  selector:
+    matchLabels:
+      app: nginx-practice
+  template:
+    metadata:
+      labels:
+        app: nginx-practice
+        purpose: learning
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine  # Lightweight nginx image
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-practice-service
+  namespace: devops-practice
+  labels:
+    app: nginx-practice
+spec:
+  selector:
+    app: nginx-practice
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP  # Internal access only
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: devops-practice
+data:
+  # Simple nginx configuration
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+    http {
+        server {
+            listen 80;
+            location / {
+                return 200 'Hello from DevOps Learning!\n';
+                add_header Content-Type text/plain;
+            }
+        }
+    }
