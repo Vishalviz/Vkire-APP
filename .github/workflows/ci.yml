@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd VKApp
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run ESLint
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd VKApp
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Install Expo CLI
         run: npm install -g @expo/cli
@@ -117,7 +117,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd VKApp
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run Snyk security scan
         uses: snyk/actions/node@master
