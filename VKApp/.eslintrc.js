@@ -2,14 +2,12 @@ module.exports = {
   extends: [
     'expo',
     '@react-native',
-    '@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   plugins: [
     '@typescript-eslint',
     'react',
     'react-hooks',
-    'react-native',
   ],
   rules: {
     // TypeScript specific rules

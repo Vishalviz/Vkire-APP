@@ -89,8 +89,8 @@ export class PaymentService {
     try {
       const paymentData = {
         booking_id: bookingId,
-        type: type,
-        amount: amount,
+        type,
+        amount,
         processor_ref: paymentIntentId,
         status: 'completed',
       };
@@ -188,7 +188,7 @@ export class PaymentService {
   static formatAmount(amount: number, currency: string = 'INR'): string {
     const formatter = new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: currency,
+      currency,
     });
     return formatter.format(amount);
   }

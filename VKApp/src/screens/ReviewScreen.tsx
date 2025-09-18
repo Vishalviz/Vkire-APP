@@ -61,7 +61,7 @@ const ReviewScreen = () => {
         booking_id: bookingId,
         reviewer_id: user.id,
         reviewee_id: mockBooking.pro_id,
-        rating: rating,
+        rating,
         comment: comment.trim() || null,
       };
 

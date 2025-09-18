@@ -65,8 +65,8 @@ const InquiryScreen = () => {
         pro_id: mockPackage.pro_id,
         package_id: mockPackage.id,
         date: selectedDate,
-        location: location,
-        notes: notes,
+        location,
+        notes,
         status: 'pending',
       };
 

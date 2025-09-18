@@ -70,7 +70,7 @@ const CustomerTabNavigator = () => {
             <Text style={{
               fontSize: Typography.fontSize.xs,
               fontWeight: focused ? Typography.fontWeight.semiBold : Typography.fontWeight.medium,
-              color: color,
+              color,
               marginTop: Spacing.xs,
             }}>
               {label}
@@ -130,7 +130,7 @@ const ProfessionalTabNavigator = () => {
             <Text style={{
               fontSize: Typography.fontSize.xs,
               fontWeight: focused ? Typography.fontWeight.semiBold : Typography.fontWeight.medium,
-              color: color,
+              color,
               marginTop: Spacing.xs,
             }}>
               {label}

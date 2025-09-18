@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: 'demo-user-1',
         role: 'customer',
         name: email.split('@')[0],
-        email: email,
+        email,
         created_at: new Date().toISOString(),
       };
       
@@ -88,9 +88,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // For demo purposes, create a mock user
       const mockUser: User = {
         id: `demo-user-${Date.now()}`,
-        role: role,
+        role,
         name: email.split('@')[0],
-        email: email,
+        email,
         city: 'Delhi', // Default city for demo
         created_at: new Date().toISOString(),
       };
