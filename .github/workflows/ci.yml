@@ -119,15 +119,11 @@ jobs:
           cd VKApp
           npm ci --ignore-scripts
 
-      - name: Run Snyk security scan
-        uses: snyk/actions/node@master
-        env:
-          # Note: SNYK_TOKEN must be configured as a repository secret
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=VKApp/package.json
+      - name: Run npm audit
+        run: |
+          cd VKApp
+          npm audit --audit-level=moderate
         continue-on-error: true
-        if: ${{ secrets.SNYK_TOKEN != '' }}
 
   deploy-staging:
     name: Deploy to Staging
