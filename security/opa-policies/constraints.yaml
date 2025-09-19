@@ -1,0 +1,119 @@
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: vkapp-must-have-labels
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+  parameters:
+    labels: ["app", "version", "environment"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sRequiredAnnotations
+metadata:
+  name: vkapp-must-have-annotations
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+  parameters:
+    annotations: ["prometheus.io/scrape", "prometheus.io/port"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sContainerLimits
+metadata:
+  name: vkapp-container-limits
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+  parameters:
+    cpu: "1000m"
+    memory: "1Gi"
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSRunAsNonRoot
+metadata:
+  name: vkapp-run-as-non-root
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSReadOnlyRootFilesystem
+metadata:
+  name: vkapp-read-only-root-fs
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSPrivileged
+metadata:
+  name: vkapp-no-privileged
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSHostNetwork
+metadata:
+  name: vkapp-no-host-network
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSHostPID
+metadata:
+  name: vkapp-no-host-pid
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSHostIPC
+metadata:
+  name: vkapp-no-host-ipc
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+---
+apiVersion: config.gatekeeper.sh/v1beta1
+kind: K8sPSAllowedUsers
+metadata:
+  name: vkapp-allowed-users
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["vkapp-production", "vkapp-staging"]
+  parameters:
+    runAsUser: [1000, 1001, 1002]
+    runAsGroup: [1000, 1001, 1002]

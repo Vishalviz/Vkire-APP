@@ -1,0 +1,177 @@
+groups:
+  - name: vkapp.rules
+    rules:
+      # High error rate
+      - alert: VKAppHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: vkapp
+        annotations:
+          summary: "VK App high error rate detected"
+          description: "Error rate is {{ $value }} errors per second for the last 5 minutes"
+
+      # High response time
+      - alert: VKAppHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App high response time"
+          description: "95th percentile response time is {{ $value }} seconds"
+
+      # Pod down
+      - alert: VKAppPodDown
+        expr: up{job="vkapp-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: vkapp
+        annotations:
+          summary: "VK App pod is down"
+          description: "Pod {{ $labels.instance }} has been down for more than 1 minute"
+
+      # High CPU usage
+      - alert: VKAppHighCPU
+        expr: rate(container_cpu_usage_seconds_total{container="vkapp"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App high CPU usage"
+          description: "CPU usage is {{ $value }}% for pod {{ $labels.pod }}"
+
+      # High memory usage
+      - alert: VKAppHighMemory
+        expr: (container_memory_usage_bytes{container="vkapp"} / container_spec_memory_limit_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App high memory usage"
+          description: "Memory usage is {{ $value }}% for pod {{ $labels.pod }}"
+
+      # Disk space low
+      - alert: VKAppDiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: vkapp
+        annotations:
+          summary: "VK App disk space low"
+          description: "Disk space is {{ $value }}% available on node {{ $labels.instance }}"
+
+      # Redis connection issues
+      - alert: VKAppRedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance {{ $labels.instance }} is not responding"
+
+      # Database connection issues
+      - alert: VKAppDatabaseDown
+        expr: database_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database is down"
+          description: "Database instance {{ $labels.instance }} is not responding"
+
+      # SSL certificate expiration
+      - alert: VKAppSSLCertExpiring
+        expr: ssl_cert_expiry_days < 30
+        for: 0m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days"
+
+      # Deployment failed
+      - alert: VKAppDeploymentFailed
+        expr: kube_deployment_status_replicas_unavailable > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: vkapp
+        annotations:
+          summary: "VK App deployment failed"
+          description: "Deployment {{ $labels.deployment }} has {{ $value }} unavailable replicas"
+
+      # Too many pods restarting
+      - alert: VKAppTooManyRestarts
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App pod restarting too frequently"
+          description: "Pod {{ $labels.pod }} is restarting {{ $value }} times per second"
+
+      # Ingress errors
+      - alert: VKAppIngressErrors
+        expr: rate(nginx_ingress_controller_requests{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App ingress errors"
+          description: "Ingress error rate is {{ $value }} errors per second"
+
+      # HPA scaling issues
+      - alert: VKAppHPAScalingIssues
+        expr: kube_horizontalpodautoscaler_status_current_replicas != kube_horizontalpodautoscaler_spec_min_replicas
+        for: 10m
+        labels:
+          severity: info
+          service: vkapp
+        annotations:
+          summary: "VK App HPA scaling"
+          description: "HPA {{ $labels.horizontalpodautoscaler }} is scaling to {{ $value }} replicas"
+
+      # Network connectivity issues
+      - alert: VKAppNetworkIssues
+        expr: probe_success{job="blackbox"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: vkapp
+        annotations:
+          summary: "VK App network connectivity issues"
+          description: "External probe to {{ $labels.instance }} is failing"
+
+      # Custom business metrics
+      - alert: VKAppHighUserRegistrationRate
+        expr: rate(user_registrations_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App high user registration rate"
+          description: "User registration rate is {{ $value }} registrations per second"
+
+      - alert: VKAppLowUserActivity
+        expr: rate(user_sessions_total[5m]) < 1
+        for: 10m
+        labels:
+          severity: warning
+          service: vkapp
+        annotations:
+          summary: "VK App low user activity"
+          description: "User activity is {{ $value }} sessions per second"
