@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -155,7 +155,9 @@ const MyBookingsScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // Filter and search functionality
-  const getFilteredItems = useCallback(() => {
+  const [filteredItems, setFilteredItems] = useState<(Booking | Inquiry)[]>([]);
+
+  useEffect(() => {
     let items: (Booking | Inquiry)[] = [];
     
     // Apply type filter
@@ -173,20 +175,35 @@ const MyBookingsScreen: React.FC = () => {
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      items = items.filter(item => 
-        item.proName.toLowerCase().includes(query) ||
-        item.service.toLowerCase().includes(query) ||
-        (item.type === 'booking' && 'location' in item && item.location?.toLowerCase().includes(query))
-      );
+      console.log('Searching for:', query);
+      console.log('Items before search:', items.length);
+      
+      items = items.filter(item => {
+        const matchesName = item.proName.toLowerCase().includes(query);
+        const matchesService = item.service.toLowerCase().includes(query);
+        const matchesLocation = item.type === 'booking' && 'location' in item && item.location?.toLowerCase().includes(query);
+        
+        console.log(`Item: ${item.proName}, matchesName: ${matchesName}, matchesService: ${matchesService}, matchesLocation: ${matchesLocation}`);
+        
+        return matchesName || matchesService || matchesLocation;
+      });
+      
+      console.log('Items after search:', items.length);
     }
     
     // Sort by date (newest first)
-    return items.sort((a, b) => 
+    const sortedItems = items.sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
+    
+    setFilteredItems(sortedItems);
+    
+    // Debug logging
+    console.log('Current searchQuery:', searchQuery);
+    console.log('Current activeFilter:', activeFilter);
+    console.log('Filtered items count:', sortedItems.length);
+    console.log('Filtered items:', sortedItems.map(item => ({ id: item.id, proName: item.proName, service: item.service })));
   }, [bookings, inquiries, activeFilter, searchQuery]);
-
-  const filteredItems = getFilteredItems();
 
   // Pull to refresh functionality
   const onRefresh = useCallback(async () => {
@@ -328,7 +345,10 @@ const MyBookingsScreen: React.FC = () => {
             placeholder="Search bookings, professionals, services..."
             placeholderTextColor={Colors.gray500}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={(text) => {
+              console.log('Search input changed:', text);
+              setSearchQuery(text);
+            }}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
