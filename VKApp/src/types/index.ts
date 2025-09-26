@@ -152,7 +152,13 @@ export type RootStackParamList = {
   Profile: { userId: string };
   CreatorProfile: { proId: string };
   PackageDetails: { packageId: string };
-  Chat: { bookingId: string };
+  Chat: { 
+    bookingId?: string; 
+    professionalId?: string; 
+    professionalName?: string; 
+    packageId?: string; 
+    transactionId?: string; 
+  };
   BookingDetails: { bookingId: string; booking?: any };
   Inquiry: { packageId: string };
   Review: { bookingId: string };

@@ -155,8 +155,13 @@ const CreatorProfileScreen = () => {
     if (!isOwner) {
       PaymentService.showInquiryPaymentModal(
         (transactionId) => {
-          // Payment successful, navigate to inquiry
-          navigation.navigate('Inquiry', { packageId });
+          // Payment successful, navigate directly to chat
+          navigation.navigate('Chat', { 
+            professionalId: mockCreator.id,
+            professionalName: mockCreator.name,
+            packageId: packageId,
+            transactionId: transactionId
+          });
         },
         () => {
           // Payment cancelled

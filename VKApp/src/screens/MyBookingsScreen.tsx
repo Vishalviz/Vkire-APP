@@ -29,6 +29,7 @@ interface Booking {
 
 interface Inquiry {
   id: string;
+  proId: string;
   proName: string;
   service: string;
   date: string;
@@ -69,6 +70,7 @@ const MyBookingsScreen: React.FC = () => {
   const inquiries: Inquiry[] = [
     {
       id: '3',
+      proId: 'pro1',
       proName: 'Creative Lens',
       service: 'Event Photography',
       date: '2024-11-10',
@@ -79,6 +81,7 @@ const MyBookingsScreen: React.FC = () => {
     },
     {
       id: '4',
+      proId: 'pro2',
       proName: 'Photo Magic',
       service: 'Corporate Shoot',
       date: '2024-12-05',
@@ -89,6 +92,7 @@ const MyBookingsScreen: React.FC = () => {
     },
     {
       id: '5',
+      proId: 'pro3',
       proName: 'Studio Pro',
       service: 'Fashion Photography',
       date: '2024-11-25',
@@ -125,7 +129,12 @@ const MyBookingsScreen: React.FC = () => {
     } else if (item.type === 'inquiry') {
       // Navigate to chat if unlocked, otherwise show payment modal
       if (item.chatUnlocked) {
-        navigation.navigate('Chat', { bookingId: item.id });
+        navigation.navigate('Chat', { 
+          professionalId: item.proId,
+          professionalName: item.proName,
+          packageId: item.service,
+          transactionId: 'inquiry_' + item.id
+        });
       } else {
         // Show payment modal to unlock chat
         Alert.alert(
