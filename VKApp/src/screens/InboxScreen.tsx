@@ -20,8 +20,7 @@ const InboxScreen = () => {
   const navigation = useNavigation<InboxScreenNavigationProp>();
   const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
   const [refreshing, setRefreshing] = useState(false);
-
-  const mockConversations = [
+  const [conversations, setConversations] = useState([
     {
       id: '1',
       bookingId: 'booking1',
@@ -48,7 +47,8 @@ const InboxScreen = () => {
     },
   ];
 
-  const mockNotifications = [
+  ]);
+  const [notifications, setNotifications] = useState([
     {
       id: '1',
       type: 'inquiry_response',
@@ -78,13 +78,26 @@ const InboxScreen = () => {
       professionalId: 'pro3',
       professionalName: 'Creative Lens',
     },
-  ];
+  ]);
 
   const handleConversationPress = (bookingId: string) => {
+    // Mark conversation as read when opened
+    setConversations(prev => prev.map(conv => 
+      conv.bookingId === bookingId 
+        ? { ...conv, unreadCount: 0 }
+        : conv
+    ));
     navigation.navigate('Chat', { bookingId });
   };
 
   const handleNotificationPress = (notification: any) => {
+    // Mark notification as read when opened
+    setNotifications(prev => prev.map(notif => 
+      notif.id === notification.id 
+        ? { ...notif, read: true }
+        : notif
+    ));
+
     if (notification.type === 'inquiry_response' || notification.type === 'message') {
       // Navigate to chat with professional
       navigation.navigate('Chat', { 
@@ -120,7 +133,7 @@ const InboxScreen = () => {
             'notifications-outline'
           } 
           size={24} 
-          color={item.read ? '#8E8E93' : '#007AFF'} 
+          color={item.read ? Colors.gray500 : Colors.primary} 
         />
       </View>
       <View style={styles.notificationContent}>
@@ -190,7 +203,7 @@ const InboxScreen = () => {
           onPress={() => setActiveTab('chats')}
         >
           <Text style={[styles.tabText, activeTab === 'chats' && styles.activeTabText]}>
-            Chats ({mockConversations.length})
+            Chats ({conversations.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -198,14 +211,14 @@ const InboxScreen = () => {
           onPress={() => setActiveTab('notifications')}
         >
           <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>
-            Notifications ({mockNotifications.filter(n => !n.read).length})
+            Notifications ({notifications.filter(n => !n.read).length})
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       {activeTab === 'chats' ? (
-        mockConversations.length === 0 ? (
+        conversations.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
             <Text style={styles.emptyTitle}>No messages yet</Text>
@@ -215,7 +228,7 @@ const InboxScreen = () => {
           </View>
         ) : (
           <FlatList
-            data={mockConversations}
+            data={conversations}
             renderItem={renderConversation}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.conversationsList}
@@ -231,7 +244,7 @@ const InboxScreen = () => {
           />
         )
       ) : (
-        mockNotifications.length === 0 ? (
+        notifications.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="notifications-outline" size={64} color="#ccc" />
             <Text style={styles.emptyTitle}>No notifications</Text>
@@ -241,7 +254,7 @@ const InboxScreen = () => {
           </View>
         ) : (
           <FlatList
-            data={mockNotifications}
+            data={notifications}
             renderItem={renderNotification}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.notificationsList}
@@ -318,65 +331,66 @@ const styles = StyleSheet.create({
   // Notification Styles
   notificationItem: {
     flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: Spacing.lg,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: Colors.gray200,
     alignItems: 'flex-start',
   },
   unreadNotification: {
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.gray50,
   },
   notificationIcon: {
-    marginRight: 12,
-    marginTop: 2,
+    marginRight: Spacing.md,
+    marginTop: Spacing.xs,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notificationContent: {
     flex: 1,
+    paddingTop: Spacing.xs,
   },
   notificationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
   },
   unreadText: {
-    fontWeight: '700',
+    fontWeight: Typography.fontWeight.bold,
   },
   notificationMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-    lineHeight: 20,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   notificationTimestamp: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray500,
   },
   unreadDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
-    backgroundColor: '#007AFF',
-    marginTop: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary,
+    marginTop: Spacing.sm,
   },
   notificationsList: {
     paddingBottom: 20,
   },
   conversationsList: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   conversationItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.md,
   },
   avatarContainer: {
     position: 'relative',
