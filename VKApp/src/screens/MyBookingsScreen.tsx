@@ -140,16 +140,21 @@ const MyBookingsScreen: React.FC = () => {
           });
         } else {
           // Show payment modal to unlock chat
-          Alert.alert(
-            'Unlock Chat',
-            'Pay ₹499 to unlock chat with this professional.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Pay ₹499', onPress: () => {
-                // Handle payment and unlock chat
-                console.log('Payment for chat unlock');
-              }}
-            ]
+          PaymentService.showInquiryPaymentModal(
+            item.proId,
+            (transactionId) => {
+              // Payment successful, navigate to chat
+              navigation.navigate('Chat', { 
+                professionalId: item.proId,
+                professionalName: item.proName,
+                packageId: item.service,
+                transactionId: transactionId
+              });
+            },
+            () => {
+              // Payment cancelled
+              console.log('Payment cancelled');
+            }
           );
         }
       });
