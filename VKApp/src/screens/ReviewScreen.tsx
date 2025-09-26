@@ -57,15 +57,24 @@ const ReviewScreen = () => {
 
     setLoading(true);
     try {
+      // Create review data
+      const reviewData = {
+        booking_id: bookingId,
+        reviewer_id: user.id,
+        reviewee_id: mockBooking.pro_id,
+        reviewer_name: user.name || 'Anonymous',
+        rating,
+        comment: comment.trim() || null,
+        created_at: new Date().toISOString(),
+      };
+
       // In a real app, you would save the review to the database
-      // const reviewData = {
-      //   booking_id: bookingId,
-      //   reviewer_id: user.id,
-      //   reviewee_id: mockBooking.pro_id,
-      //   rating,
-      //   comment: comment.trim() || null,
-      // };
       // await DatabaseService.createReview(reviewData);
+      
+      // For now, we'll simulate the API call with a timeout
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Review submitted:', reviewData);
 
       Alert.alert(
         'Review Submitted!',

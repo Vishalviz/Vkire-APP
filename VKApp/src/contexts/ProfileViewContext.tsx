@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProfileViewContextType {
   profileViews: number;
@@ -19,21 +20,25 @@ export const ProfileViewProvider: React.FC<ProfileViewProviderProps> = ({ childr
 
   // Reset views daily (this is a simple implementation)
   useEffect(() => {
-    const resetViewsDaily = () => {
-      const now = new Date();
-      const lastReset = localStorage.getItem('lastViewReset');
-      
-      if (!lastReset) {
-        localStorage.setItem('lastViewReset', now.toDateString());
-        return;
-      }
-      
-      const lastResetDate = new Date(lastReset);
-      const daysDiff = Math.floor((now.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysDiff >= 1) {
-        setViewsLeft(5); // Reset to 5 free views
-        localStorage.setItem('lastViewReset', now.toDateString());
+    const resetViewsDaily = async () => {
+      try {
+        const now = new Date();
+        const lastReset = await AsyncStorage.getItem('lastViewReset');
+        
+        if (!lastReset) {
+          await AsyncStorage.setItem('lastViewReset', now.toDateString());
+          return;
+        }
+        
+        const lastResetDate = new Date(lastReset);
+        const daysDiff = Math.floor((now.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff >= 1) {
+          setViewsLeft(5); // Reset to 5 free views
+          await AsyncStorage.setItem('lastViewReset', now.toDateString());
+        }
+      } catch (error) {
+        console.error('Error resetting profile views:', error);
       }
     };
 

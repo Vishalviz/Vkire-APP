@@ -7,6 +7,9 @@ import {
   StyleSheet,
   Image,
   FlatList,
+  Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
@@ -36,7 +39,7 @@ const CreatorProfileScreen = () => {
     travelRadius: 50,
   };
 
-  const mockPackages = [
+  const [packages, setPackages] = useState([
     {
       id: '1',
       title: 'Wedding Photography',
@@ -55,7 +58,84 @@ const CreatorProfileScreen = () => {
       deliverables: ['500+ edited photos', '5-10 min highlight video', 'Online gallery'],
       type: 'bundle',
     },
-  ];
+  ]);
+
+  const [showCreatePackageModal, setShowCreatePackageModal] = useState(false);
+  const [newPackage, setNewPackage] = useState({
+    title: '',
+    description: '',
+    price: '',
+    duration: '',
+    deliverables: '',
+    type: 'individual',
+  });
+
+  const handleCreatePackage = () => {
+    setShowCreatePackageModal(true);
+  };
+
+  const handleSavePackage = async () => {
+    if (!newPackage.title.trim() || !newPackage.description.trim() || !newPackage.price.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const packageData = {
+        id: Date.now().toString(),
+        title: newPackage.title,
+        description: newPackage.description,
+        price: parseInt(newPackage.price),
+        duration: parseInt(newPackage.duration) || 1,
+        deliverables: newPackage.deliverables.split(',').map(item => item.trim()).filter(item => item.length > 0),
+        type: newPackage.type as 'individual' | 'bundle',
+      };
+
+      setPackages(prevPackages => [...prevPackages, packageData]);
+      
+      // Reset form
+      setNewPackage({
+        title: '',
+        description: '',
+        price: '',
+        duration: '',
+        deliverables: '',
+        type: 'individual',
+      });
+      
+      setShowCreatePackageModal(false);
+      Alert.alert('Success', 'Package created successfully!');
+      
+      // Here you would typically make an API call to save the package
+      // await DatabaseService.createPackage(packageData);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create package. Please try again.');
+    }
+  };
+
+  const handleDeletePackage = (packageId: string) => {
+    Alert.alert(
+      'Delete Package',
+      'Are you sure you want to delete this package?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setPackages(prevPackages => prevPackages.filter(pkg => pkg.id !== packageId));
+            Alert.alert('Success', 'Package deleted successfully!');
+            
+            // Here you would typically make an API call to delete the package
+            // await DatabaseService.deletePackage(packageId);
+          },
+        },
+      ]
+    );
+  };
 
   const mockPortfolio = [
     { id: '1', media_url: 'https://via.placeholder.com/300', media_type: 'image' as const },
@@ -71,10 +151,18 @@ const CreatorProfileScreen = () => {
     <View style={styles.packageCard}>
       <View style={styles.packageHeader}>
         <Text style={styles.packageTitle}>{item.title}</Text>
-        <View style={styles.packageTypeTag}>
-          <Text style={styles.packageTypeText}>
-            {item.type === 'bundle' ? 'Bundle' : 'Individual'}
-          </Text>
+        <View style={styles.packageActions}>
+          <View style={styles.packageTypeTag}>
+            <Text style={styles.packageTypeText}>
+              {item.type === 'bundle' ? 'Bundle' : 'Individual'}
+            </Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.deletePackageButton}
+            onPress={() => handleDeletePackage(item.id)}
+          >
+            <Ionicons name="trash-outline" size={16} color="#FF3B30" />
+          </TouchableOpacity>
         </View>
       </View>
       <Text style={styles.packageDescription}>{item.description}</Text>
@@ -177,13 +265,23 @@ const CreatorProfileScreen = () => {
         )}
 
         {activeTab === 'packages' && (
-          <FlatList
-            data={mockPackages}
-            renderItem={renderPackage}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            contentContainerStyle={styles.packagesList}
-          />
+          <View style={styles.packagesContainer}>
+            <TouchableOpacity 
+              style={styles.createPackageButton}
+              onPress={handleCreatePackage}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+              <Text style={styles.createPackageButtonText}>Create New Package</Text>
+            </TouchableOpacity>
+            
+            <FlatList
+              data={packages}
+              renderItem={renderPackage}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              contentContainerStyle={styles.packagesList}
+            />
+          </View>
         )}
 
         {activeTab === 'reviews' && (
@@ -192,6 +290,132 @@ const CreatorProfileScreen = () => {
           </View>
         )}
       </View>
+
+      {/* Create Package Modal */}
+      <Modal
+        visible={showCreatePackageModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCreatePackageModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Create New Package</Text>
+              <TouchableOpacity onPress={() => setShowCreatePackageModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Package Title *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="e.g., Wedding Photography"
+                  value={newPackage.title}
+                  onChangeText={(text) => setNewPackage({ ...newPackage, title: text })}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Description *</Text>
+                <TextInput
+                  style={[styles.textInput, styles.textArea]}
+                  placeholder="Describe what's included in this package..."
+                  value={newPackage.description}
+                  onChangeText={(text) => setNewPackage({ ...newPackage, description: text })}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Price (₹) *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="25000"
+                  value={newPackage.price}
+                  onChangeText={(text) => setNewPackage({ ...newPackage, price: text })}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Duration (hours)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="8"
+                  value={newPackage.duration}
+                  onChangeText={(text) => setNewPackage({ ...newPackage, duration: text })}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Deliverables</Text>
+                <TextInput
+                  style={[styles.textInput, styles.textArea]}
+                  placeholder="500+ edited photos, Online gallery, USB drive (comma separated)"
+                  value={newPackage.deliverables}
+                  onChangeText={(text) => setNewPackage({ ...newPackage, deliverables: text })}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Package Type</Text>
+                <View style={styles.typeButtons}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      newPackage.type === 'individual' && styles.typeButtonSelected
+                    ]}
+                    onPress={() => setNewPackage({ ...newPackage, type: 'individual' })}
+                  >
+                    <Text style={[
+                      styles.typeButtonText,
+                      newPackage.type === 'individual' && styles.typeButtonTextSelected
+                    ]}>
+                      Individual
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      newPackage.type === 'bundle' && styles.typeButtonSelected
+                    ]}
+                    onPress={() => setNewPackage({ ...newPackage, type: 'bundle' })}
+                  >
+                    <Text style={[
+                      styles.typeButtonText,
+                      newPackage.type === 'bundle' && styles.typeButtonTextSelected
+                    ]}>
+                      Bundle
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.cancelModalButton}
+                onPress={() => setShowCreatePackageModal(false)}
+              >
+                <Text style={styles.cancelModalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.saveModalButton}
+                onPress={handleSavePackage}
+              >
+                <Text style={styles.saveModalButtonText}>Create Package</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -391,6 +615,144 @@ const styles = StyleSheet.create({
   comingSoon: {
     fontSize: 16,
     color: '#666',
+  },
+  // New styles for package creation
+  packagesContainer: {
+    padding: 16,
+  },
+  createPackageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  createPackageButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  packageActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deletePackageButton: {
+    padding: 4,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 500,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalBody: {
+    padding: 20,
+    maxHeight: 400,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  typeButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  typeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  typeButtonSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  typeButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  typeButtonTextSelected: {
+    color: '#fff',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    gap: 12,
+  },
+  cancelModalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  cancelModalButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  saveModalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+  },
+  saveModalButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 
