@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Alert,
   Animated,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -26,8 +27,12 @@ const FeedScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [lastTap, setLastTap] = useState<number>(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const navigation = useNavigation<FeedScreenNavigationProp>();
-  const { profileViews, decrementProfileViews, hasUnlimitedAccess } = useProfileViews();
+  const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
   
   // Animation refs for micro-interactions
   const likeAnimations = useRef<{ [key: string]: Animated.Value }>({});
@@ -155,6 +160,8 @@ const FeedScreen = () => {
       ]).start();
     }
     
+    // TODO: Navigate to comment screen or show comment modal
+    Alert.alert('Comments', 'Comment functionality will be implemented soon!');
     logger.debug('Comment on post:', postId);
   };
 
@@ -181,7 +188,41 @@ const FeedScreen = () => {
       ]).start();
     }
     
+    // TODO: Implement proper sharing functionality
+    Alert.alert('Share', 'Share functionality will be implemented soon!');
     logger.debug('Share post:', postId);
+  };
+
+  const handleSave = (postId: string) => {
+    const isSaved = savedPosts.has(postId);
+    
+    // Toggle save state
+    if (isSaved) {
+      setSavedPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+      Alert.alert('Removed', 'Post removed from saved items');
+    } else {
+      setSavedPosts(prev => new Set(prev).add(postId));
+      Alert.alert('Saved', 'Post saved to your collection');
+    }
+    
+    logger.debug('Save post:', postId, isSaved ? 'unsaved' : 'saved');
+  };
+
+  const handleDoubleTap = (postId: string) => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    
+    if (lastTap && (now - lastTap) < DOUBLE_PRESS_DELAY) {
+      // Double tap detected
+      handleLike(postId);
+      setLastTap(0);
+    } else {
+      setLastTap(now);
+    }
   };
 
   const handleCreatorPress = (proId: string) => {
@@ -191,14 +232,29 @@ const FeedScreen = () => {
       }
       navigation.navigate('CreatorProfile', { proId });
     } else {
+      setSelectedCreatorId(proId);
+      setShowPaymentModal(true);
+    }
+  };
+
+  const handlePaymentOption = (option: 'single' | 'unlimited') => {
+    setShowPaymentModal(false);
+    if (option === 'unlimited') {
+      activateUnlimitedAccess();
       Alert.alert(
-        'Profile View Limit Reached',
-        'You have used all your free profile views. Upgrade to view more profiles.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => navigation.navigate('Profile') }
-        ]
+        'Unlimited Access Activated!',
+        'You now have unlimited profile views for 24 hours.',
+        [{ text: 'OK' }]
       );
+    } else {
+      Alert.alert(
+        'Profile View Purchased!',
+        'You can now view this profile.',
+        [{ text: 'OK' }]
+      );
+    }
+    if (selectedCreatorId) {
+      navigation.navigate('CreatorProfile', { proId: selectedCreatorId });
     }
   };
 
@@ -231,6 +287,7 @@ const FeedScreen = () => {
   const renderPost = ({ item }: { item: PortfolioPost }) => {
     const creator = getCreatorName(item.pro_id);
     const isLiked = likedPosts.has(item.id);
+    const isSaved = savedPosts.has(item.id);
     const likeAnimation = likeAnimations.current[item.id];
     const commentAnimation = commentAnimations.current[item.id];
     const shareAnimation = shareAnimations.current[item.id];
@@ -263,9 +320,13 @@ const FeedScreen = () => {
         </View>
 
         {/* Media Content */}
-        <View style={styles.mediaContainer}>
+        <TouchableOpacity 
+          style={styles.mediaContainer}
+          onPress={() => handleDoubleTap(item.id)}
+          activeOpacity={1}
+        >
           <Image source={{ uri: item.media_url }} style={styles.media} />
-        </View>
+        </TouchableOpacity>
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
@@ -302,8 +363,15 @@ const FeedScreen = () => {
             </Animated.View>
           </View>
           
-          <TouchableOpacity style={styles.bookmarkButton}>
-            <Ionicons name="bookmark-outline" size={24} color={Colors.gray500} />
+          <TouchableOpacity 
+            style={styles.bookmarkButton}
+            onPress={() => handleSave(item.id)}
+          >
+            <Ionicons 
+              name={isSaved ? "bookmark" : "bookmark-outline"} 
+              size={24} 
+              color={isSaved ? Colors.primary : Colors.gray500} 
+            />
           </TouchableOpacity>
         </View>
 
@@ -348,18 +416,22 @@ const FeedScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Enhanced Header */}
+      {/* Modern Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoWrapper}>
-              <Logo size="medium" />
-            </View>
-            <Text style={styles.appTitle}>Vkire</Text>
+          <View style={styles.headerLeft}>
+            <Logo size="small" />
+            <Text style={styles.headerTitle}>Feed</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color={Colors.gray700} />
-            <View style={styles.notificationBadge} />
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            activeOpacity={0.7}
+            onPress={() => {
+              // TODO: Navigate to notifications screen
+              Alert.alert('Notifications', 'Notifications feature coming soon!');
+            }}
+          >
+            <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -388,6 +460,53 @@ const FeedScreen = () => {
           </View>
         }
       />
+
+      {/* Payment Modal */}
+      <Modal
+        visible={showPaymentModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPaymentModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>View Profile</Text>
+              <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+                <Ionicons name="close" size={24} color={Colors.gray600} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>
+              You've used all your free profile views. Choose an option to continue:
+            </Text>
+            <View style={styles.paymentOptions}>
+              <TouchableOpacity
+                style={styles.paymentOption}
+                onPress={() => handlePaymentOption('single')}
+              >
+                <View style={styles.optionHeader}>
+                  <Text style={styles.optionTitle}>View This Profile</Text>
+                  <Text style={styles.optionPrice}>₹59</Text>
+                </View>
+                <Text style={styles.optionDescription}>One-time access to this profile</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.paymentOption, styles.recommendedOption]}
+                onPress={() => handlePaymentOption('unlimited')}
+              >
+                <View style={styles.optionHeader}>
+                  <Text style={styles.optionTitle}>Unlimited Today</Text>
+                  <Text style={styles.optionPrice}>₹299</Text>
+                </View>
+                <Text style={styles.optionDescription}>Unlimited profile views for 24 hours</Text>
+                <View style={styles.recommendedBadge}>
+                  <Text style={styles.recommendedText}>Most Value</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -398,13 +517,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   
-  // Header Styles
+  // Modern Header Styles
   header: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
     ...Shadows.sm,
   },
@@ -413,31 +532,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  logoContainer: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoWrapper: {
-    marginRight: Spacing.sm,
-  },
-  appTitle: {
+  headerTitle: {
     fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.extraBold,
-    color: Colors.primary,
-    letterSpacing: 0.5,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+    marginLeft: Spacing.md,
+    letterSpacing: 0.3,
   },
-  notificationButton: {
+  headerButton: {
     padding: Spacing.sm,
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.error,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray50,
   },
   
   // Loading States
@@ -476,12 +585,14 @@ const styles = StyleSheet.create({
   
   // Post Card Styles
   postCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius['2xl'],
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.sm,
-    ...Shadows.md,
+    ...Shadows.lg,
     overflow: 'hidden',
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   
   // Post Header
@@ -630,6 +741,86 @@ const styles = StyleSheet.create({
     color: Colors.gray500,
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+  },
+  
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  modalDescription: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  paymentOptions: {
+    gap: Spacing.md,
+  },
+  paymentOption: {
+    borderWidth: 1,
+    borderColor: Colors.gray200,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    position: 'relative',
+  },
+  recommendedOption: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + '08',
+  },
+  optionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  optionTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  optionPrice: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.primary,
+  },
+  optionDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+  },
+  recommendedBadge: {
+    position: 'absolute',
+    top: -Spacing.xs,
+    right: Spacing.lg,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+  },
+  recommendedText: {
+    color: Colors.white,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
   },
 });
 

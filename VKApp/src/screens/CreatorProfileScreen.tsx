@@ -15,6 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import PaymentService from '../services/paymentService';
+import { Colors, Spacing, BorderRadius, Typography } from '../constants/designSystem';
 
 type CreatorProfileScreenRouteProp = RouteProp<RootStackParamList, 'CreatorProfile'>;
 type CreatorProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -22,7 +25,11 @@ type CreatorProfileScreenNavigationProp = StackNavigationProp<RootStackParamList
 const CreatorProfileScreen = () => {
   const route = useRoute<CreatorProfileScreenRouteProp>();
   const navigation = useNavigation<CreatorProfileScreenNavigationProp>();
+  const { user } = useAuth();
   const { proId } = route.params;
+  
+  // Check if current user is the profile owner
+  const isOwner = user?.id === proId;
   
   const [activeTab, setActiveTab] = useState<'portfolio' | 'packages' | 'reviews'>('portfolio');
 
@@ -144,7 +151,30 @@ const CreatorProfileScreen = () => {
   ];
 
   const handleInquiry = (packageId: string) => {
-    navigation.navigate('Inquiry', { packageId });
+    // Only show payment for customers, not for the profile owner
+    if (!isOwner) {
+      PaymentService.showInquiryPaymentModal(
+        (transactionId) => {
+          // Payment successful, navigate to inquiry
+          navigation.navigate('Inquiry', { packageId });
+        },
+        () => {
+          // Payment cancelled
+          console.log('Payment cancelled');
+        }
+      );
+    } else {
+      // Owner can directly navigate to inquiry
+      navigation.navigate('Inquiry', { packageId });
+    }
+  };
+
+  const handleBook = (packageItem: any) => {
+    // Navigate to booking screen with package and professional details
+    navigation.navigate('Booking', {
+      packageDetails: packageItem,
+      proDetails: mockCreator,
+    });
   };
 
   const renderPackage = ({ item }: { item: any }) => (
@@ -157,12 +187,14 @@ const CreatorProfileScreen = () => {
               {item.type === 'bundle' ? 'Bundle' : 'Individual'}
             </Text>
           </View>
-          <TouchableOpacity 
-            style={styles.deletePackageButton}
-            onPress={() => handleDeletePackage(item.id)}
-          >
-            <Ionicons name="trash-outline" size={16} color="#FF3B30" />
-          </TouchableOpacity>
+          {isOwner && (
+            <TouchableOpacity 
+              style={styles.deletePackageButton}
+              onPress={() => handleDeletePackage(item.id)}
+            >
+              <Ionicons name="trash-outline" size={16} color="#FF3B30" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <Text style={styles.packageDescription}>{item.description}</Text>
@@ -175,12 +207,22 @@ const CreatorProfileScreen = () => {
           </Text>
         ))}
       </View>
-      <TouchableOpacity
-        style={styles.inquiryButton}
-        onPress={() => handleInquiry(item.id)}
-      >
-        <Text style={styles.inquiryButtonText}>Send Inquiry</Text>
-      </TouchableOpacity>
+      <View style={styles.packageActions}>
+        <TouchableOpacity
+          style={styles.inquiryButton}
+          onPress={() => handleInquiry(item.id)}
+        >
+          <Text style={styles.inquiryButtonText}>Send Inquiry</Text>
+        </TouchableOpacity>
+        {!isOwner && (
+          <TouchableOpacity
+            style={styles.bookButton}
+            onPress={() => handleBook(item)}
+          >
+            <Text style={styles.bookButtonText}>Book</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 
@@ -266,13 +308,15 @@ const CreatorProfileScreen = () => {
 
         {activeTab === 'packages' && (
           <View style={styles.packagesContainer}>
-            <TouchableOpacity 
-              style={styles.createPackageButton}
-              onPress={handleCreatePackage}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.createPackageButtonText}>Create New Package</Text>
-            </TouchableOpacity>
+            {isOwner && (
+              <TouchableOpacity 
+                style={styles.createPackageButton}
+                onPress={handleCreatePackage}
+              >
+                <Ionicons name="add" size={20} color="#fff" />
+                <Text style={styles.createPackageButtonText}>Create New Package</Text>
+              </TouchableOpacity>
+            )}
             
             <FlatList
               data={packages}
@@ -595,16 +639,36 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  packageActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+  },
   inquiryButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 8,
+    flex: 1,
+    backgroundColor: Colors.gray100,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray300,
   },
   inquiryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.gray700,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+  },
+  bookButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+  },
+  bookButtonText: {
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
   },
   reviewsContainer: {
     backgroundColor: '#fff',
@@ -635,11 +699,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
-  },
-  packageActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   deletePackageButton: {
     padding: 4,

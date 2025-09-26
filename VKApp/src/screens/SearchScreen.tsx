@@ -17,18 +17,74 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { DatabaseService } from '../services/supabase';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  // const [activeFilter, setActiveFilter] = useState('all'); // TODO: Implement filter functionality
-  // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // TODO: Implement view mode toggle
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<any>(null);
+  const [creators, setCreators] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation<SearchScreenNavigationProp>();
   const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
+
+  // Load creators on component mount
+  React.useEffect(() => {
+    loadCreators();
+  }, []);
+
+  // Search creators when query changes
+  React.useEffect(() => {
+    if (searchQuery.trim()) {
+      searchCreators(searchQuery);
+    } else {
+      loadCreators();
+    }
+  }, [searchQuery]);
+
+  const loadCreators = async () => {
+    try {
+      setLoading(true);
+      // Use mock data directly to avoid network errors
+      setCreators(mockCreators);
+    } catch (error) {
+      console.error('Error loading creators:', error);
+      setCreators(mockCreators);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchCreators = async (query: string) => {
+    try {
+      setLoading(true);
+      // Use mock data filtering to avoid network errors
+      const filteredCreators = mockCreators.filter(creator => 
+        creator.name.toLowerCase().includes(query.toLowerCase()) ||
+        creator.services.some((service: string) => 
+          service.toLowerCase().includes(query.toLowerCase())
+        ) ||
+        creator.city.toLowerCase().includes(query.toLowerCase())
+      );
+      setCreators(filteredCreators);
+    } catch (error) {
+      console.error('Error searching creators:', error);
+      setCreators(mockCreators.filter(creator => 
+        creator.name.toLowerCase().includes(query.toLowerCase()) ||
+        creator.services.some((service: string) => 
+          service.toLowerCase().includes(query.toLowerCase())
+        ) ||
+        creator.city.toLowerCase().includes(query.toLowerCase())
+      ));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const mockCreators = [
     {
@@ -185,20 +241,23 @@ const SearchScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Modern Header */}
       <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Search</Text>
+        </View>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+          <Ionicons name="search" size={20} color={Colors.gray500} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search creators..."
+            placeholderTextColor={Colors.gray400}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#8E8E93"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchButton}>
-              <Ionicons name="close-circle" size={20} color="#8E8E93" />
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchButton} activeOpacity={0.7}>
+              <Ionicons name="close-circle" size={20} color={Colors.gray500} />
             </TouchableOpacity>
           )}
         </View>
@@ -206,7 +265,7 @@ const SearchScreen = () => {
 
       {/* Creators Grid */}
       <FlatList
-        data={mockCreators}
+        data={creators}
         renderItem={renderCreator}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -242,7 +301,7 @@ const SearchScreen = () => {
               >
                 <View style={styles.optionHeader}>
                   <Text style={styles.optionTitle}>View This Profile</Text>
-                  <Text style={styles.optionPrice}>₹100</Text>
+                  <Text style={styles.optionPrice}>₹59</Text>
                 </View>
                 <Text style={styles.optionDescription}>One-time access to this profile</Text>
               </TouchableOpacity>
@@ -252,11 +311,11 @@ const SearchScreen = () => {
               >
                 <View style={styles.optionHeader}>
                   <Text style={styles.optionTitle}>Unlimited Today</Text>
-                  <Text style={styles.optionPrice}>₹399</Text>
+                  <Text style={styles.optionPrice}>₹299</Text>
                 </View>
                 <Text style={styles.optionDescription}>Unlimited profile views for 24 hours</Text>
                 <View style={styles.recommendedBadge}>
-                  <Text style={styles.recommendedText}>Recommended</Text>
+                  <Text style={styles.recommendedText}>Most Value</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -274,18 +333,32 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: 50,
+    paddingBottom: Spacing.lg,
+    borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
+  },
+  headerContent: {
+    marginBottom: Spacing.lg,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+    letterSpacing: 0.3,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray100,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.gray50,
+    borderRadius: BorderRadius['2xl'],
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.gray200,
+    ...Shadows.sm,
   },
   searchIcon: {
     marginRight: Spacing.sm,
@@ -304,18 +377,21 @@ const styles = StyleSheet.create({
   creatorCard: {
     flex: 1,
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
-    margin: Spacing.xs,
-    ...Shadows.md,
+    borderRadius: BorderRadius['2xl'],
+    margin: Spacing.sm,
+    ...Shadows.lg,
+    overflow: 'hidden',
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   portfolioContainer: {
     position: 'relative',
   },
   portfolioImage: {
     width: '100%',
-    height: 120,
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
+    height: 140,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
   },
   availabilityBadge: {
     position: 'absolute',
@@ -357,7 +433,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.xs,
   },
   creatorInfo: {
-    padding: Spacing.md,
+    padding: Spacing.lg,
   },
   creatorName: {
     fontSize: Typography.fontSize.base,

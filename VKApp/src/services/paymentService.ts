@@ -1,179 +1,219 @@
-// Payment service for handling Stripe payments
-// Note: Stripe integration would be implemented here in a real app
+import { Alert } from 'react-native';
 
-export interface PaymentIntent {
-  id: string;
-  client_secret: string;
-  amount: number;
-  currency: string;
-  status: string;
-  created: number;
+export interface PaymentProduct {
+  productId: string;
+  price: string;
+  title: string;
+  description: string;
 }
 
-export interface PaymentMethod {
-  id: string;
-  type: string;
-  card?: {
-    brand: string;
-    last4: string;
-    exp_month: number;
-    exp_year: number;
-  };
+export interface PaymentResult {
+  success: boolean;
+  transactionId?: string;
+  error?: string;
 }
 
-// Mock payment service - replace with actual Stripe implementation
-export const PaymentService = {
-  // Create payment intent
-  async createPaymentIntent(amount: number, currency: string = 'inr'): Promise<PaymentIntent> {
-    // Mock implementation
-    return {
-      id: 'pi_mock_' + Date.now(),
-      client_secret: 'pi_mock_' + Date.now() + '_secret_mock',
-      amount: amount * 100, // Convert to paise
-      currency,
-      status: 'requires_payment_method',
-      created: Date.now(),
-    };
-  },
+export class PaymentService {
+  private static isInitialized = false;
 
-  // Confirm payment
-  async confirmPayment(
-    _paymentIntentId: string,
-    _paymentMethodId: string
-  ): Promise<{ success: boolean; error?: string }> {
-    // Mock implementation - simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Simulate success/failure
-    const success = Math.random() > 0.1; // 90% success rate
-    
-    if (success) {
-      return { success: true };
-    } else {
-      return { success: false, error: 'Payment failed. Please try again.' };
+  // Initialize the payment service (mock implementation)
+  static async initialize(): Promise<boolean> {
+    try {
+      if (!this.isInitialized) {
+        // Mock initialization - in a real app, this would connect to payment provider
+        console.log('Payment service initialized (mock)');
+        this.isInitialized = true;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error initializing payment service:', error);
+      return false;
     }
-  },
+  }
 
-  // Get payment history
-  async getPaymentHistory(_userId: string): Promise<PaymentIntent[]> {
-    // Mock implementation
-    return [
-      {
-        id: 'pi_1',
-        client_secret: 'pi_1_secret',
-        amount: 250000, // ₹2500
-        currency: 'inr',
-        status: 'succeeded',
-        created: Date.now() - 86400000, // 1 day ago
-      },
-      {
-        id: 'pi_2',
-        client_secret: 'pi_2_secret',
-        amount: 150000, // ₹1500
-        currency: 'inr',
-        status: 'succeeded',
-        created: Date.now() - 172800000, // 2 days ago
-      },
-    ];
-  },
-
-  // Save payment method
-  async savePaymentMethod(
-    _userId: string,
-    _paymentMethodId: string
-  ): Promise<{ success: boolean; error?: string }> {
-    // Mock implementation
-    return { success: true };
-  },
-
-  // Get saved payment methods
-  async getSavedPaymentMethods(_userId: string): Promise<PaymentMethod[]> {
-    // Mock implementation
-    return [
-      {
-        id: 'pm_1',
-        type: 'card',
-        card: {
-          brand: 'visa',
-          last4: '4242',
-          exp_month: 12,
-          exp_year: 2025,
+  // Get available products (mock implementation)
+  static async getProducts(productIds: string[]): Promise<PaymentProduct[]> {
+    try {
+      await this.initialize();
+      
+      // Mock products - in a real app, these would come from the payment provider
+      const mockProducts: PaymentProduct[] = [
+        {
+          productId: 'inquiry_chat_unlock',
+          price: '₹499',
+          title: 'Chat Access',
+          description: 'Unlock chat with this professional',
         },
-      },
-    ];
-  },
-
-  // Delete payment method
-  async deletePaymentMethod(_paymentMethodId: string): Promise<{ success: boolean; error?: string }> {
-    // Mock implementation
-    return { success: true };
-  },
-
-  // Refund payment
-  async refundPayment(
-    _paymentIntentId: string,
-    _amount: number
-  ): Promise<{ success: boolean; error?: string }> {
-    // Mock implementation
-    return { success: true };
-  },
-
-  // Create deposit payment intent (for booking deposits)
-  async createDepositPaymentIntent(
-    _bookingId: string,
-    amount: number,
-    currency: string = 'inr'
-  ): Promise<PaymentIntent> {
-    // Mock implementation
-    return {
-      id: 'pi_deposit_' + Date.now(),
-      client_secret: 'pi_deposit_' + Date.now() + '_secret_mock',
-      amount: amount * 100, // Convert to paise
-      currency,
-      status: 'requires_payment_method',
-      created: Date.now(),
-    };
-  },
-
-  // Process payment
-  async processPayment(
-    _clientSecret: string,
-    _paymentMethodId?: string
-  ): Promise<{ success: boolean; paymentIntentId?: string; error?: string }> {
-    // Mock implementation - simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Simulate success/failure
-    const success = Math.random() > 0.1; // 90% success rate
-    
-    if (success) {
-      return { 
-        success: true, 
-        paymentIntentId: 'pi_processed_' + Date.now() 
-      };
-    } else {
-      return { success: false, error: 'Payment failed. Please try again.' };
+        {
+          productId: 'booking_payment',
+          price: '₹299',
+          title: 'Booking Payment',
+          description: 'Complete your booking payment',
+        },
+      ];
+      
+      return mockProducts.filter(product => productIds.includes(product.productId));
+    } catch (error) {
+      console.error('Error getting products:', error);
+      return [];
     }
-  },
+  }
 
-  // Save payment record
-  async savePaymentRecord(
-    _bookingId: string,
-    _paymentIntentId: string,
-    _amount: number,
-    _type: string
-  ): Promise<{ success: boolean; error?: string }> {
-    // Mock implementation
-    return { success: true };
-  },
+  // Purchase a product (mock implementation)
+  static async purchaseProduct(productId: string): Promise<PaymentResult> {
+    try {
+      await this.initialize();
+      
+      // Mock purchase - simulate a delay and random success/failure
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 90% success rate for demo purposes
+      const success = Math.random() > 0.1;
+      
+      if (success) {
+        return {
+          success: true,
+          transactionId: `mock_txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Payment failed - please try again',
+        };
+      }
+    } catch (error) {
+      console.error('Error purchasing product:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // Format amount for display
-  formatAmount(amount: number, currency: string = 'inr'): string {
-    const symbol = currency === 'inr' ? '₹' : '$';
-    const formattedAmount = (amount / 100).toLocaleString('en-IN', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-    return `${symbol}${formattedAmount}`;
-  },
-};
+  // Restore purchases (mock implementation)
+  static async restorePurchases(): Promise<PaymentResult> {
+    try {
+      await this.initialize();
+      
+      // Mock restore - in a real app, this would check with the payment provider
+      console.log('Mock: Restoring purchases');
+      
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error('Error restoring purchases:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  // Check if user has purchased a specific product (mock implementation)
+  static async hasPurchased(productId: string): Promise<boolean> {
+    try {
+      await this.initialize();
+      
+      // Mock check - in a real app, this would check with the payment provider
+      // For demo purposes, we'll simulate some purchases
+      const mockPurchases = ['inquiry_chat_unlock'];
+      return mockPurchases.includes(productId);
+    } catch (error) {
+      console.error('Error checking purchase status:', error);
+      return false;
+    }
+  }
+
+  // Show payment modal for inquiry
+  static async showInquiryPaymentModal(
+    onSuccess: (transactionId: string) => void,
+    onCancel: () => void
+  ): Promise<void> {
+    Alert.alert(
+      'Unlock Chat Access',
+      'Pay ₹499 to unlock chat with this professional and send unlimited messages.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: onCancel,
+        },
+        {
+          text: 'Pay ₹499',
+          onPress: async () => {
+            const result = await this.purchaseProduct('inquiry_chat_unlock');
+            
+            if (result.success && result.transactionId) {
+              Alert.alert(
+                'Payment Successful!',
+                'You can now chat with this professional.',
+                [{ text: 'OK', onPress: () => onSuccess(result.transactionId!) }]
+              );
+            } else {
+              Alert.alert(
+                'Payment Failed',
+                result.error || 'Please try again.',
+                [{ text: 'OK' }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  }
+
+  // Show payment modal for booking
+  static async showBookingPaymentModal(
+    amount: number,
+    onSuccess: (transactionId: string) => void,
+    onCancel: () => void
+  ): Promise<void> {
+    Alert.alert(
+      'Complete Booking',
+      `Pay ₹${amount.toLocaleString()} to confirm your booking.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: onCancel,
+        },
+        {
+          text: `Pay ₹${amount.toLocaleString()}`,
+          onPress: async () => {
+            const result = await this.purchaseProduct('booking_payment');
+            
+            if (result.success && result.transactionId) {
+              Alert.alert(
+                'Payment Successful!',
+                'Your booking has been confirmed.',
+                [{ text: 'OK', onPress: () => onSuccess(result.transactionId!) }]
+              );
+            } else {
+              Alert.alert(
+                'Payment Failed',
+                result.error || 'Please try again.',
+                [{ text: 'OK' }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  }
+
+  // Cleanup (mock implementation)
+  static async disconnect(): Promise<void> {
+    try {
+      if (this.isInitialized) {
+        // Mock disconnect - in a real app, this would disconnect from payment provider
+        console.log('Payment service disconnected (mock)');
+        this.isInitialized = false;
+      }
+    } catch (error) {
+      console.error('Error disconnecting payment service:', error);
+    }
+  }
+}
+
+export default PaymentService;

@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   Animated,
-  Image,
   // Dimensions, // TODO: Use dimensions for responsive design if needed
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SplashScreenProps {
   onAnimationComplete: () => void;
@@ -137,10 +137,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onAnimationComplete }) => {
               },
             ]}
           >
-            <Image 
-              source={require('../../assets/icon.png')} 
-              style={styles.cameraImage}
-              resizeMode="contain"
+            <Ionicons 
+              name="camera" 
+              size={60} 
+              color="#007AFF"
             />
           </Animated.View>
           
@@ -197,10 +197,6 @@ const styles = StyleSheet.create({
   cameraIcon: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  cameraImage: {
-    width: 60,
-    height: 60,
   },
   flashEffect: {
     position: 'absolute',

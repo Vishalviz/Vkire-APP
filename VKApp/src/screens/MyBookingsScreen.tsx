@@ -5,11 +5,13 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -22,10 +24,24 @@ interface Booking {
   status: 'confirmed' | 'completed' | 'cancelled';
   amount: number;
   proAvatar?: string;
+  type: 'booking';
+}
+
+interface Inquiry {
+  id: string;
+  proName: string;
+  service: string;
+  date: string;
+  status: 'pending' | 'accepted' | 'declined';
+  amount: number;
+  proAvatar?: string;
+  type: 'inquiry';
+  chatUnlocked: boolean;
 }
 
 const MyBookingsScreen: React.FC = () => {
   const navigation = useNavigation<MyBookingsScreenNavigationProp>();
+  
   // Mock data for demo
   const bookings: Booking[] = [
     {
@@ -36,6 +52,7 @@ const MyBookingsScreen: React.FC = () => {
       location: 'Delhi',
       status: 'confirmed',
       amount: 25000,
+      type: 'booking',
     },
     {
       id: '2',
@@ -45,29 +62,91 @@ const MyBookingsScreen: React.FC = () => {
       location: 'Mumbai',
       status: 'completed',
       amount: 15000,
+      type: 'booking',
     },
   ];
 
+  const inquiries: Inquiry[] = [
+    {
+      id: '3',
+      proName: 'Creative Lens',
+      service: 'Event Photography',
+      date: '2024-11-10',
+      status: 'pending',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+    {
+      id: '4',
+      proName: 'Photo Magic',
+      service: 'Corporate Shoot',
+      date: '2024-12-05',
+      status: 'accepted',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+    {
+      id: '5',
+      proName: 'Studio Pro',
+      service: 'Fashion Photography',
+      date: '2024-11-25',
+      status: 'declined',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: false,
+    },
+  ];
+
+  // Combine bookings and inquiries
+  const allItems = [...bookings, ...inquiries].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return '#007AFF';
-      case 'completed': return '#34C759';
-      case 'cancelled': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'confirmed': return Colors.primary;
+      case 'completed': return Colors.success;
+      case 'cancelled': return Colors.error;
+      case 'pending': return Colors.warning;
+      case 'accepted': return Colors.success;
+      case 'declined': return Colors.error;
+      default: return Colors.gray500;
     }
   };
 
-  const handleBookingPress = (booking: Booking) => {
-    navigation.navigate('BookingDetails', { 
-      bookingId: booking.id, 
-      booking: booking 
-    });
+  const handleItemPress = (item: Booking | Inquiry) => {
+    if (item.type === 'booking') {
+      navigation.navigate('BookingDetails', { 
+        bookingId: item.id, 
+        booking: item 
+      });
+    } else if (item.type === 'inquiry') {
+      // Navigate to chat if unlocked, otherwise show payment modal
+      if (item.chatUnlocked) {
+        navigation.navigate('Chat', { bookingId: item.id });
+      } else {
+        // Show payment modal to unlock chat
+        Alert.alert(
+          'Unlock Chat',
+          'Pay ₹499 to unlock chat with this professional.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Pay ₹499', onPress: () => {
+              // Handle payment and unlock chat
+              console.log('Payment for chat unlock');
+            }}
+          ]
+        );
+      }
+    }
   };
 
-  const renderBookingItem = ({ item }: { item: Booking }) => (
+  const renderItem = ({ item }: { item: Booking | Inquiry }) => (
     <TouchableOpacity 
       style={styles.bookingCard}
-      onPress={() => handleBookingPress(item)}
+      onPress={() => handleItemPress(item)}
     >
       <View style={styles.bookingHeader}>
         <View style={styles.proInfo}>
@@ -79,8 +158,15 @@ const MyBookingsScreen: React.FC = () => {
             <Text style={styles.service}>{item.service}</Text>
           </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+            <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+          </View>
+          {item.type === 'inquiry' && (
+            <View style={styles.typeBadge}>
+              <Text style={styles.typeText}>INQUIRY</Text>
+            </View>
+          )}
         </View>
       </View>
       
@@ -89,14 +175,28 @@ const MyBookingsScreen: React.FC = () => {
           <Ionicons name="calendar-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>{item.date}</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Ionicons name="location-outline" size={16} color="#8E8E93" />
-          <Text style={styles.detailText}>{item.location}</Text>
-        </View>
+        {item.type === 'booking' && 'location' in item && (
+          <View style={styles.detailRow}>
+            <Ionicons name="location-outline" size={16} color="#8E8E93" />
+            <Text style={styles.detailText}>{item.location}</Text>
+          </View>
+        )}
         <View style={styles.detailRow}>
           <Ionicons name="card-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
         </View>
+        {item.type === 'inquiry' && (
+          <View style={styles.detailRow}>
+            <Ionicons 
+              name={item.chatUnlocked ? "chatbubble-outline" : "lock-closed-outline"} 
+              size={16} 
+              color={item.chatUnlocked ? Colors.success : Colors.gray500} 
+            />
+            <Text style={[styles.detailText, { color: item.chatUnlocked ? Colors.success : Colors.gray500 }]}>
+              {item.chatUnlocked ? 'Chat Available' : 'Chat Locked'}
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -104,13 +204,15 @@ const MyBookingsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Bookings</Text>
-        <Text style={styles.subtitle}>Track your photography bookings</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>My Bookings</Text>
+          <Text style={styles.subtitle}>Track your photography bookings</Text>
+        </View>
       </View>
 
       <FlatList
-        data={bookings}
-        renderItem={renderBookingItem}
+        data={allItems}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
@@ -131,44 +233,50 @@ const MyBookingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.gray50,
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    paddingHorizontal: Spacing.xl,
+    paddingTop: 50,
+    paddingBottom: Spacing.lg,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
+  },
+  headerContent: {
+    alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
+    letterSpacing: 0.3,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.regular,
+    textAlign: 'center',
   },
   listContainer: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   bookingCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius['2xl'],
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.lg,
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   bookingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   proInfo: {
     flexDirection: 'row',
@@ -176,66 +284,90 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
+    borderWidth: 2,
+    borderColor: Colors.gray200,
   },
   proDetails: {
     flex: 1,
   },
   proName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 2,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
   },
   service: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    alignItems: 'center',
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.lg,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.white,
+  },
+  typeBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.primary + '20',
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  typeText: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
   },
   bookingDetails: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.medium,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Spacing['6xl'],
+    paddingHorizontal: Spacing.xl,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray600,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray500,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.regular,
   },
 });
 

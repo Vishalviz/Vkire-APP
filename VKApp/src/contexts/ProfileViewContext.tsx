@@ -18,13 +18,26 @@ export const ProfileViewProvider: React.FC<ProfileViewProviderProps> = ({ childr
   const [viewsLeft, setViewsLeft] = useState(5); // Start with 5 free views
   const [unlimitedAccessActive, setUnlimitedAccessActive] = useState(false);
 
-  // Reset views daily (this is a simple implementation)
+  // Reset views daily and check unlimited access expiry
   useEffect(() => {
-    const resetViewsDaily = async () => {
+    const initializeViews = async () => {
       try {
         const now = new Date();
         const lastReset = await AsyncStorage.getItem('lastViewReset');
+        const unlimitedExpiry = await AsyncStorage.getItem('unlimitedAccessExpiry');
         
+        // Check unlimited access expiry
+        if (unlimitedExpiry) {
+          const expiryTime = parseInt(unlimitedExpiry);
+          if (now.getTime() > expiryTime) {
+            setUnlimitedAccessActive(false);
+            await AsyncStorage.removeItem('unlimitedAccessExpiry');
+          } else {
+            setUnlimitedAccessActive(true);
+          }
+        }
+        
+        // Reset daily views
         if (!lastReset) {
           await AsyncStorage.setItem('lastViewReset', now.toDateString());
           return;
@@ -38,11 +51,11 @@ export const ProfileViewProvider: React.FC<ProfileViewProviderProps> = ({ childr
           await AsyncStorage.setItem('lastViewReset', now.toDateString());
         }
       } catch (error) {
-        console.error('Error resetting profile views:', error);
+        console.error('Error initializing profile views:', error);
       }
     };
 
-    resetViewsDaily();
+    initializeViews();
   }, []);
 
   const decrementProfileViews = () => {
@@ -53,8 +66,10 @@ export const ProfileViewProvider: React.FC<ProfileViewProviderProps> = ({ childr
 
   const activateUnlimitedAccess = () => {
     setUnlimitedAccessActive(true);
-    // In a real app, this would integrate with payment processing
-    console.log('Unlimited access activated!');
+    // Set expiry for 24 hours
+    const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+    AsyncStorage.setItem('unlimitedAccessExpiry', expiryTime.toString());
+    console.log('Unlimited access activated for 24 hours!');
   };
 
   const value: ProfileViewContextType = {

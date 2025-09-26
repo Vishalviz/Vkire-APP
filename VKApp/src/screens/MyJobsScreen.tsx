@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 interface Job {
   id: string;
@@ -69,8 +71,14 @@ const MyJobsScreen: React.FC = () => {
         [{ text: 'OK' }]
       );
       
-      // Here you would typically make an API call to update the job status
-      // await DatabaseService.updateJobStatus(jobId, 'confirmed');
+      // Update job status in database
+      await DatabaseService.updateJobStatus(jobId, 'confirmed');
+      
+      // Send notification to customer
+      const job = jobs.find(j => j.id === jobId);
+      if (job) {
+        await NotificationService.notifyJobAccepted(job.customerName, job.service);
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to accept the job. Please try again.');
     }
@@ -105,8 +113,14 @@ const MyJobsScreen: React.FC = () => {
                 [{ text: 'OK' }]
               );
               
-              // Here you would typically make an API call to update the job status
-              // await DatabaseService.updateJobStatus(jobId, 'cancelled');
+              // Update job status in database
+              await DatabaseService.updateJobStatus(jobId, 'cancelled');
+              
+              // Send notification to customer
+              const job = jobs.find(j => j.id === jobId);
+              if (job) {
+                await NotificationService.notifyJobDeclined(job.customerName, job.service);
+              }
             } catch (error) {
               Alert.alert('Error', 'Failed to decline the job. Please try again.');
             }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,247 +6,210 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { PaymentService, PaymentIntent } from '../services/paymentService';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import PaymentService from '../services/paymentService';
 
-type PaymentScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
-type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
+type PaymentScreenRouteProp = RouteProp<RootStackParamList, 'Payment'>;
+type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Payment'>;
 
-const PaymentScreen = () => {
-  const route = useRoute<PaymentScreenRouteProp>();
+interface PaymentScreenProps {}
+
+const PaymentScreen: React.FC<PaymentScreenProps> = () => {
   const navigation = useNavigation<PaymentScreenNavigationProp>();
-  const { user } = useAuth();
-  const { bookingId } = route.params;
+  const route = useRoute<PaymentScreenRouteProp>();
+  const { amount = 0, bookingDetails, packageDetails } = route.params || {};
 
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'card' | 'upi' | 'wallet'>('card');
+  const [loading, setLoading] = useState(false);
 
-  // Mock booking data
-  const mockBooking = {
-    id: bookingId,
-    total_amount: 25000,
-    deposit_amount: 7500, // 30% of total
-    currency: 'INR',
-    service: 'Wedding Photography',
-    creator_name: 'John Photography',
-    date: '2024-01-15',
-  };
+  const paymentMethods = [
+    {
+      id: 'card' as const,
+      title: 'Credit/Debit Card',
+      icon: 'card-outline',
+      description: 'Pay with your card',
+    },
+    {
+      id: 'upi' as const,
+      title: 'UPI',
+      icon: 'phone-portrait-outline',
+      description: 'Pay with UPI',
+    },
+    {
+      id: 'wallet' as const,
+      title: 'Digital Wallet',
+      icon: 'wallet-outline',
+      description: 'Pay with wallet',
+    },
+  ];
 
-  useEffect(() => {
-    initializePayment();
-  }, []);
-
-  const initializePayment = async () => {
+  const handlePayment = async () => {
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      const intent = await PaymentService.createDepositPaymentIntent(
-        bookingId,
-        mockBooking.deposit_amount,
-        mockBooking.currency
-      );
-      setPaymentIntent(intent);
+      const result = await PaymentService.purchaseProduct('booking_payment');
+      
+      if (result.success && result.transactionId) {
+        Alert.alert(
+          'Payment Successful!',
+          'Your booking has been confirmed. You will receive a confirmation email shortly.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Navigate back to main screen or booking confirmation
+                navigation.navigate('Main' as any, { screen: 'MyBookings' });
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Payment Failed',
+          result.error || 'Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
     } catch (error) {
-      console.error('Error initializing payment:', error);
-      Alert.alert('Error', 'Failed to initialize payment. Please try again.');
+      Alert.alert(
+        'Error',
+        'Something went wrong. Please try again.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePayment = async () => {
-    if (!paymentIntent || !user) return;
-
-    setProcessing(true);
-    try {
-      const result = await PaymentService.processPayment(
-        paymentIntent.client_secret,
-        selectedPaymentMethod || undefined
-      );
-
-      if (result.success) {
-        // Save payment record
-        await PaymentService.savePaymentRecord(
-          bookingId,
-          result.paymentIntentId!,
-          mockBooking.deposit_amount,
-          'deposit'
-        );
-
-        Alert.alert(
-          'Payment Successful!',
-          'Your deposit has been processed successfully. The creator will be notified.',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
-      } else {
-        Alert.alert('Payment Failed', result.error || 'Please try again.');
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      Alert.alert('Error', 'Payment failed. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const renderPaymentMethod = (method: any) => (
-    <TouchableOpacity
-      key={method.id}
-      style={[
-        styles.paymentMethodCard,
-        selectedPaymentMethod === method.id && styles.selectedPaymentMethod,
-      ]}
-      onPress={() => setSelectedPaymentMethod(method.id)}
-    >
-      <View style={styles.paymentMethodInfo}>
-        <View style={styles.cardIcon}>
-          <Ionicons
-            name={method.card.brand === 'visa' ? 'card' : 'card-outline'}
-            size={24}
-            color="#007AFF"
-          />
-        </View>
-        <View style={styles.cardDetails}>
-          <Text style={styles.cardBrand}>
-            {method.card.brand.toUpperCase()} •••• {method.card.last4}
-          </Text>
-          <Text style={styles.cardExpiry}>
-            Expires {method.card.exp_month}/{method.card.exp_year}
-          </Text>
-        </View>
-      </View>
-      {selectedPaymentMethod === method.id && (
-        <Ionicons name="checkmark-circle" size={24} color="#007AFF" />
-      )}
-    </TouchableOpacity>
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Initializing payment...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment</Text>
-        <View style={styles.headerSpacer} />
+        <View style={styles.placeholder} />
       </View>
-      
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-      {/* Booking Summary */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Payment Summary</Text>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Service</Text>
-          <Text style={styles.summaryValue}>{mockBooking.service}</Text>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Booking Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Booking Summary</Text>
+          <View style={styles.summaryCard}>
+            {packageDetails?.title && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Package</Text>
+                <Text style={styles.summaryValue}>{packageDetails.title}</Text>
+              </View>
+            )}
+            {bookingDetails?.date && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Date</Text>
+                <Text style={styles.summaryValue}>
+                  {new Date(bookingDetails.date).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
+            {bookingDetails?.time && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Time</Text>
+                <Text style={styles.summaryValue}>{bookingDetails.time}</Text>
+              </View>
+            )}
+            {bookingDetails?.location && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Location</Text>
+                <Text style={styles.summaryValue}>{bookingDetails.location}</Text>
+              </View>
+            )}
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>Total Amount</Text>
+              <Text style={styles.totalValue}>₹{amount.toLocaleString()}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Creator</Text>
-          <Text style={styles.summaryValue}>{mockBooking.creator_name}</Text>
+
+        {/* Payment Methods */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <View style={styles.paymentMethods}>
+            {paymentMethods.map((method) => (
+              <TouchableOpacity
+                key={method.id}
+                style={[
+                  styles.paymentMethod,
+                  selectedPaymentMethod === method.id && styles.selectedPaymentMethod,
+                ]}
+                onPress={() => setSelectedPaymentMethod(method.id)}
+              >
+                <View style={styles.paymentMethodContent}>
+                  <View style={styles.paymentMethodIcon}>
+                    <Ionicons
+                      name={method.icon as any}
+                      size={24}
+                      color={selectedPaymentMethod === method.id ? Colors.primary : Colors.gray600}
+                    />
+                  </View>
+                  <View style={styles.paymentMethodInfo}>
+                    <Text
+                      style={[
+                        styles.paymentMethodTitle,
+                        selectedPaymentMethod === method.id && styles.selectedPaymentMethodText,
+                      ]}
+                    >
+                      {method.title}
+                    </Text>
+                    <Text style={styles.paymentMethodDescription}>
+                      {method.description}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={[
+                    styles.radioButton,
+                    selectedPaymentMethod === method.id && styles.selectedRadioButton,
+                  ]}
+                >
+                  {selectedPaymentMethod === method.id && (
+                    <View style={styles.radioButtonInner} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Date</Text>
-          <Text style={styles.summaryValue}>{mockBooking.date}</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Total Amount</Text>
-          <Text style={styles.summaryValue}>
-            {PaymentService.formatAmount(mockBooking.total_amount, mockBooking.currency)}
+
+        {/* Terms and Conditions */}
+        <View style={styles.section}>
+          <Text style={styles.termsText}>
+            By proceeding with the payment, you agree to our Terms of Service and Privacy Policy.
+            A 30% deposit is required to confirm your booking.
           </Text>
         </View>
-        <View style={[styles.summaryRow, styles.depositRow]}>
-          <Text style={styles.depositLabel}>Deposit (30%)</Text>
-          <Text style={styles.depositValue}>
-            {PaymentService.formatAmount(mockBooking.deposit_amount, mockBooking.currency)}
-          </Text>
-        </View>
-      </View>
-
-      {/* Payment Methods */}
-      <View style={styles.paymentMethodsCard}>
-        <Text style={styles.sectionTitle}>Payment Method</Text>
-        <Text style={styles.sectionSubtitle}>
-          Choose your preferred payment method
-        </Text>
-
-        {/* Mock payment methods */}
-        {[
-          {
-            id: 'pm_1',
-            card: { brand: 'visa', last4: '4242', exp_month: 12, exp_year: 2025 },
-          },
-          {
-            id: 'pm_2',
-            card: { brand: 'mastercard', last4: '5555', exp_month: 8, exp_year: 2026 },
-          },
-        ].map(renderPaymentMethod)}
-
-        <TouchableOpacity style={styles.addPaymentMethodButton}>
-          <Ionicons name="add-circle-outline" size={24} color="#007AFF" />
-          <Text style={styles.addPaymentMethodText}>Add New Payment Method</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Security Info */}
-      <View style={styles.securityCard}>
-        <View style={styles.securityHeader}>
-          <Ionicons name="shield-checkmark" size={20} color="#34C759" />
-          <Text style={styles.securityTitle}>Secure Payment</Text>
-        </View>
-        <Text style={styles.securityText}>
-          Your payment information is encrypted and secure. We use industry-standard 
-          security measures to protect your data.
-        </Text>
-      </View>
-
-      {/* Terms */}
-      <View style={styles.termsCard}>
-        <Text style={styles.termsText}>
-          By proceeding with this payment, you agree to our terms and conditions. 
-          The deposit is non-refundable unless the creator cancels the booking.
-        </Text>
-      </View>
+      </ScrollView>
 
       {/* Payment Button */}
-      <TouchableOpacity
-        style={[styles.paymentButton, processing && styles.paymentButtonDisabled]}
-        onPress={handlePayment}
-        disabled={processing || !selectedPaymentMethod}
-      >
-        {processing ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <>
-            <Ionicons name="card" size={20} color="#fff" />
-            <Text style={styles.paymentButtonText}>
-              Pay {PaymentService.formatAmount(mockBooking.deposit_amount, mockBooking.currency)}
-            </Text>
-          </>
-        )}
-      </TouchableOpacity>
-      </ScrollView>
+      <View style={styles.paymentFooter}>
+        <TouchableOpacity
+          style={[styles.payButton, loading && styles.payButtonDisabled]}
+          onPress={handlePayment}
+          disabled={loading}
+        >
+          <Text style={styles.payButtonText}>
+            {loading ? 'Processing...' : `Pay ₹${amount.toLocaleString()}`}
+          </Text>
+          <Ionicons name="card" size={20} color={Colors.white} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -254,212 +217,182 @@ const PaymentScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    paddingTop: 60,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: 50,
+    paddingBottom: Spacing.lg,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
   },
   backButton: {
     padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray50,
   },
   headerTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.gray900,
-    flex: 2,
-    textAlign: 'center',
+    letterSpacing: 0.3,
   },
-  headerSpacer: {
-    flex: 1,
+  placeholder: {
+    width: 40,
   },
   content: {
     flex: 1,
+    paddingHorizontal: Spacing.xl,
   },
-  contentContainer: {
-    padding: Spacing.lg,
+  section: {
+    marginTop: Spacing.xl,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.gray50,
-  },
-  loadingText: {
-    marginTop: Spacing.md,
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+  sectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.md,
   },
   summaryCard: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  summaryTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
-    color: Colors.gray900,
-    marginBottom: Spacing.md,
+    ...Shadows.lg,
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    paddingVertical: Spacing.sm,
   },
   summaryLabel: {
-    fontSize: Typography.fontSize.sm,
+    fontSize: Typography.fontSize.base,
     color: Colors.gray600,
   },
   summaryValue: {
-    fontSize: Typography.fontSize.sm,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
     color: Colors.gray900,
-    fontWeight: '500',
   },
-  depositRow: {
+  totalRow: {
     borderTopWidth: 1,
     borderTopColor: Colors.gray200,
-    paddingTop: Spacing.md,
     marginTop: Spacing.sm,
+    paddingTop: Spacing.md,
   },
-  depositLabel: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
-    fontWeight: '600',
-  },
-  depositValue: {
+  totalLabel: {
     fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  totalValue: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.primary,
-    fontWeight: '700',
   },
-  paymentMethodsCard: {
+  paymentMethods: {
+    gap: Spacing.md,
+  },
+  paymentMethod: {
     backgroundColor: Colors.white,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  sectionSubtitle: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginBottom: Spacing.md,
-  },
-  paymentMethodCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.gray200,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
-    backgroundColor: Colors.gray50,
+    justifyContent: 'space-between',
+    ...Shadows.lg,
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   selectedPaymentMethod: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.blue50,
+    borderWidth: 2,
   },
-  paymentMethodInfo: {
+  paymentMethodContent: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  cardIcon: {
-    marginRight: Spacing.sm,
-  },
-  cardDetails: {
     flex: 1,
   },
-  cardBrand: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '500',
-    color: Colors.gray900,
-  },
-  cardExpiry: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-  },
-  addPaymentMethodButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  paymentMethodIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray50,
     justifyContent: 'center',
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    borderStyle: 'dashed',
-  },
-  addPaymentMethodText: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.primary,
-    marginLeft: Spacing.sm,
-    fontWeight: '500',
-  },
-  securityCard: {
-    backgroundColor: Colors.blue50,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  securityHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginRight: Spacing.md,
   },
-  securityTitle: {
+  paymentMethodInfo: {
+    flex: 1,
+  },
+  paymentMethodTitle: {
     fontSize: Typography.fontSize.base,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
-    marginLeft: Spacing.sm,
+    marginBottom: 2,
   },
-  securityText: {
+  selectedPaymentMethodText: {
+    color: Colors.primary,
+  },
+  paymentMethodDescription: {
     fontSize: Typography.fontSize.sm,
     color: Colors.gray600,
-    lineHeight: 20,
   },
-  termsCard: {
-    backgroundColor: Colors.yellow50,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.gray300,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedRadioButton: {
+    borderColor: Colors.primary,
+  },
+  radioButtonInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.primary,
   },
   termsText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.yellow700,
-    lineHeight: 20,
+    color: Colors.gray600,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+    textAlign: 'center',
   },
-  paymentButton: {
+  paymentFooter: {
+    padding: Spacing.xl,
+    backgroundColor: Colors.white,
+    borderTopWidth: 0.5,
+    borderTopColor: Colors.gray200,
+    ...Shadows.lg,
+  },
+  payButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.lg,
-    ...Shadows.sm,
+    ...Shadows.lg,
   },
-  paymentButtonDisabled: {
-    backgroundColor: Colors.gray300,
+  payButtonDisabled: {
+    backgroundColor: Colors.gray400,
   },
-  paymentButtonText: {
+  payButtonText: {
     color: Colors.white,
-    fontSize: Typography.fontSize.base,
-    fontWeight: '600',
-    marginLeft: Spacing.sm,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    marginRight: Spacing.sm,
   },
 });
 

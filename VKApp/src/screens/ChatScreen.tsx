@@ -14,7 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList, Message } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-// import { DatabaseService } from '../services/supabase';
+import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 
@@ -67,12 +68,13 @@ const ChatScreen = () => {
 
   const loadMessages = async () => {
     try {
-      // In a real app, you would fetch messages from the database
-      // const data = await DatabaseService.getMessages(chatId);
-      setMessages(mockMessages);
+      // Fetch messages from the database
+      const data = await DatabaseService.getMessages(bookingId);
+      setMessages(data || mockMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
-      Alert.alert('Error', 'Failed to load messages');
+      // Fallback to mock data if database fails
+      setMessages(mockMessages);
     } finally {
       setLoading(false);
     }
@@ -97,12 +99,22 @@ const ChatScreen = () => {
       // Add message to local state immediately for better UX
       setMessages(prev => [...prev, newMsg]);
 
-      // In a real app, you would save to database
-      // await DatabaseService.sendMessage({
-      //   chat_id: chatId,
-      //   sender_id: user.id,
-      //   text: messageText,
-      // });
+      // Save to database
+      try {
+        await DatabaseService.sendMessage({
+          chat_id: bookingId,
+          sender_id: user.id,
+          text: messageText,
+        });
+        
+        // Send notification to recipient (in a real app, you'd get recipient info from booking)
+        await NotificationService.notifyNewMessage(user.name || 'Someone', messageText);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // Remove the message from UI if database save fails
+        setMessages(prev => prev.filter(msg => msg.id !== newMsg.id));
+        Alert.alert('Error', 'Failed to send message. Please try again.');
+      }
 
       // Scroll to bottom after sending
       setTimeout(() => {

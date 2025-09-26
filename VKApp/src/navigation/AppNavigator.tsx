@@ -26,6 +26,7 @@ import BookingDetailsScreen from '../screens/BookingDetailsScreen';
 import InquiryScreen from '../screens/InquiryScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import PaymentScreen from '../screens/PaymentScreen';
+import BookingScreen from '../screens/BookingScreen';
 
 // New role-specific screens
 import MyBookingsScreen from '../screens/MyBookingsScreen';
@@ -224,6 +225,11 @@ const AppNavigator = () => {
             <Stack.Screen 
               name="Payment" 
               component={PaymentScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="Booking" 
+              component={BookingScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen 

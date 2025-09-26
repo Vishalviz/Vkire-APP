@@ -141,12 +141,12 @@ const BookingDetailsScreen = () => {
             </View>
           </View>
           
-          <Text style={styles.packageTitle}>{mockBooking.package_details.title}</Text>
-          <Text style={styles.packageDescription}>{mockBooking.package_details.description}</Text>
+          <Text style={styles.packageTitle}>{mockBooking.package_details?.title || 'Package Details'}</Text>
+          <Text style={styles.packageDescription}>{mockBooking.package_details?.description || 'No description available'}</Text>
           
           <View style={styles.deliverablesContainer}>
             <Text style={styles.deliverablesTitle}>What's Included:</Text>
-            {mockBooking.package_details.deliverables.map((item, index) => (
+            {(mockBooking.package_details?.deliverables || []).map((item, index) => (
               <View key={index} style={styles.deliverableItem}>
                 <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
                 <Text style={styles.deliverableText}>{item}</Text>
@@ -179,7 +179,7 @@ const BookingDetailsScreen = () => {
             <Ionicons name="time-outline" size={20} color={Colors.gray600} />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Duration</Text>
-              <Text style={styles.detailValue}>{mockBooking.package_details.duration} hours</Text>
+              <Text style={styles.detailValue}>{mockBooking.package_details?.duration || 0} hours</Text>
             </View>
           </View>
         </View>
@@ -190,17 +190,17 @@ const BookingDetailsScreen = () => {
           
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>Total Amount</Text>
-            <Text style={styles.paymentValue}>₹{mockBooking.total_amount.toLocaleString()}</Text>
+            <Text style={styles.paymentValue}>₹{(mockBooking.total_amount || 0).toLocaleString()}</Text>
           </View>
           
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>Deposit Paid</Text>
-            <Text style={styles.paymentValue}>₹{mockBooking.deposit_amount.toLocaleString()}</Text>
+            <Text style={styles.paymentValue}>₹{(mockBooking.deposit_amount || 0).toLocaleString()}</Text>
           </View>
           
           <View style={[styles.paymentRow, styles.paymentTotal]}>
             <Text style={styles.paymentTotalLabel}>Remaining Balance</Text>
-            <Text style={styles.paymentTotalValue}>₹{(mockBooking.total_amount - mockBooking.deposit_amount).toLocaleString()}</Text>
+            <Text style={styles.paymentTotalValue}>₹{((mockBooking.total_amount || 0) - (mockBooking.deposit_amount || 0)).toLocaleString()}</Text>
           </View>
           
           <View style={styles.paymentStatus}>
@@ -221,13 +221,13 @@ const BookingDetailsScreen = () => {
           
           <TouchableOpacity style={styles.contactRow}>
             <Ionicons name="call-outline" size={20} color={Colors.primary} />
-            <Text style={styles.contactValue}>{mockBooking.contact_info.phone}</Text>
+            <Text style={styles.contactValue}>{mockBooking.contact_info?.phone || 'Not available'}</Text>
             <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.contactRow}>
             <Ionicons name="mail-outline" size={20} color={Colors.primary} />
-            <Text style={styles.contactValue}>{mockBooking.contact_info.email}</Text>
+            <Text style={styles.contactValue}>{mockBooking.contact_info?.email || 'Not available'}</Text>
             <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
           </TouchableOpacity>
         </View>

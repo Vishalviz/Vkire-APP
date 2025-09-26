@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Colors, Shadows } from '../constants/designSystem';
 
 interface LogoProps {
@@ -42,24 +42,31 @@ const Logo: React.FC<LogoProps> = ({
   const logoSize = getSize();
   const backgroundSize = getBackgroundSize();
 
+  const getTextSize = () => {
+    switch (size) {
+      case 'small':
+        return { fontSize: 14 };
+      case 'medium':
+        return { fontSize: 18 };
+      case 'large':
+        return { fontSize: 24 };
+      default:
+        return { fontSize: 18 };
+    }
+  };
+
+  const textSize = getTextSize();
+
   if (showBackground) {
     return (
       <View style={[styles.logoContainer, backgroundSize, style]}>
-        <Image 
-          source={require('../../assets/icon.png')} 
-          style={[styles.logoImage, logoSize]}
-          resizeMode="contain"
-        />
+        <Text style={[styles.logoText, textSize]}>V</Text>
       </View>
     );
   }
 
   return (
-    <Image 
-      source={require('../../assets/icon.png')} 
-      style={[styles.logoImage, logoSize, style]}
-      resizeMode="contain"
-    />
+    <Text style={[styles.logoText, textSize, style]}>V</Text>
   );
 };
 
@@ -70,8 +77,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...Shadows.sm,
   },
-  logoImage: {
-    // Image will be sized by the width/height props
+  logoText: {
+    color: Colors.white,
+    fontWeight: '800',
+    textAlign: 'center',
   },
 });
 

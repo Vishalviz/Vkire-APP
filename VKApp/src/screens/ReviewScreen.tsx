@@ -15,7 +15,8 @@ import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-// import { DatabaseService } from '../services/supabase';
+import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 type ReviewScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type ReviewScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
@@ -68,8 +69,11 @@ const ReviewScreen = () => {
         created_at: new Date().toISOString(),
       };
 
-      // In a real app, you would save the review to the database
-      // await DatabaseService.createReview(reviewData);
+      // Save the review to the database
+      await DatabaseService.createReview(reviewData);
+      
+      // Send notification to the professional
+      await NotificationService.notifyReviewReceived(user.name || 'A customer', rating);
       
       // For now, we'll simulate the API call with a timeout
       await new Promise(resolve => setTimeout(resolve, 1000));

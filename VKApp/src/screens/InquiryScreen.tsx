@@ -18,6 +18,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Package } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 type InquiryScreenRouteProp = RouteProp<RootStackParamList, 'PackageDetails'>;
 type InquiryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PackageDetails'>;
@@ -75,6 +76,9 @@ const InquiryScreen = () => {
 
       // Create inquiry
       await DatabaseService.createInquiry(inquiryData);
+      
+      // Send notification to the professional
+      await NotificationService.notifyNewBooking(user.name || 'A customer', mockPackage.title);
       
       Alert.alert(
         'Inquiry Sent!',

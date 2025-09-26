@@ -153,10 +153,22 @@ export type RootStackParamList = {
   CreatorProfile: { proId: string };
   PackageDetails: { packageId: string };
   Chat: { bookingId: string };
-  BookingDetails: { bookingId: string };
+  BookingDetails: { bookingId: string; booking?: any };
   Inquiry: { packageId: string };
   Review: { bookingId: string };
-  Payment: { bookingId: string };
+  Payment: { 
+    amount: number; 
+    bookingDetails: {
+      date: Date;
+      time: string;
+      location: string;
+    };
+    packageDetails: any;
+  };
+  Booking: {
+    packageDetails: any;
+    proDetails: any;
+  };
   ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
 };
 
