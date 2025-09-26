@@ -150,24 +150,39 @@ const CreatorProfileScreen = () => {
     { id: '3', media_url: 'https://via.placeholder.com/300', media_type: 'image' as const },
   ];
 
-  const handleInquiry = (packageId: string) => {
+  const handleInquiry = async (packageId: string) => {
     // Only show payment for customers, not for the profile owner
     if (!isOwner) {
-      PaymentService.showInquiryPaymentModal(
-        (transactionId) => {
-          // Payment successful, navigate directly to chat
-          navigation.navigate('Chat', { 
-            professionalId: mockCreator.id,
-            professionalName: mockCreator.name,
-            packageId: packageId,
-            transactionId: transactionId
-          });
-        },
-        () => {
-          // Payment cancelled
-          console.log('Payment cancelled');
-        }
-      );
+      // Check if user has already purchased chat access for this professional
+      const hasAccess = await PaymentService.hasPurchasedChatAccess(mockCreator.id);
+      
+      if (hasAccess) {
+        // User already has access, navigate directly to chat
+        navigation.navigate('Chat', { 
+          professionalId: mockCreator.id,
+          professionalName: mockCreator.name,
+          packageId: packageId,
+          transactionId: 'existing_access'
+        });
+      } else {
+        // User needs to purchase access
+        PaymentService.showInquiryPaymentModal(
+          mockCreator.id,
+          (transactionId) => {
+            // Payment successful, navigate directly to chat
+            navigation.navigate('Chat', { 
+              professionalId: mockCreator.id,
+              professionalName: mockCreator.name,
+              packageId: packageId,
+              transactionId: transactionId
+            });
+          },
+          () => {
+            // Payment cancelled
+            console.log('Payment cancelled');
+          }
+        );
+      }
     } else {
       // Owner can directly navigate to inquiry
       navigation.navigate('Inquiry', { packageId });

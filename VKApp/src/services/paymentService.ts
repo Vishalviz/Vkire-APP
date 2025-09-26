@@ -125,8 +125,53 @@ export class PaymentService {
     }
   }
 
+  // Check if user has purchased chat access for a specific professional
+  static async hasPurchasedChatAccess(professionalId: string): Promise<boolean> {
+    try {
+      await this.initialize();
+      
+      // In a real app, this would check the database for purchase records
+      // For now, we'll use AsyncStorage to track purchases locally
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const purchasedChats = await AsyncStorage.getItem('purchased_chat_access');
+      
+      if (purchasedChats) {
+        const purchasedList = JSON.parse(purchasedChats);
+        return purchasedList.includes(professionalId);
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking chat access purchase:', error);
+      return false;
+    }
+  }
+
+  // Record that user has purchased chat access for a professional
+  static async recordChatAccessPurchase(professionalId: string, transactionId: string): Promise<void> {
+    try {
+      await this.initialize();
+      
+      // In a real app, this would save to the database
+      // For now, we'll use AsyncStorage to track purchases locally
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const purchasedChats = await AsyncStorage.getItem('purchased_chat_access');
+      
+      let purchasedList = purchasedChats ? JSON.parse(purchasedChats) : [];
+      
+      if (!purchasedList.includes(professionalId)) {
+        purchasedList.push(professionalId);
+        await AsyncStorage.setItem('purchased_chat_access', JSON.stringify(purchasedList));
+        console.log('Chat access purchase recorded for professional:', professionalId);
+      }
+    } catch (error) {
+      console.error('Error recording chat access purchase:', error);
+    }
+  }
+
   // Show payment modal for inquiry
   static async showInquiryPaymentModal(
+    professionalId: string,
     onSuccess: (transactionId: string) => void,
     onCancel: () => void
   ): Promise<void> {
@@ -145,6 +190,9 @@ export class PaymentService {
             const result = await this.purchaseProduct('inquiry_chat_unlock');
             
             if (result.success && result.transactionId) {
+              // Record the purchase for this professional
+              await this.recordChatAccessPurchase(professionalId, result.transactionId);
+              
               Alert.alert(
                 'Payment Successful!',
                 'You can now chat with this professional.',

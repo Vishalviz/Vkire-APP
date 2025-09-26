@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import PaymentService from '../services/paymentService';
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -127,28 +128,31 @@ const MyBookingsScreen: React.FC = () => {
         booking: item 
       });
     } else if (item.type === 'inquiry') {
-      // Navigate to chat if unlocked, otherwise show payment modal
-      if (item.chatUnlocked) {
-        navigation.navigate('Chat', { 
-          professionalId: item.proId,
-          professionalName: item.proName,
-          packageId: item.service,
-          transactionId: 'inquiry_' + item.id
-        });
-      } else {
-        // Show payment modal to unlock chat
-        Alert.alert(
-          'Unlock Chat',
-          'Pay ₹499 to unlock chat with this professional.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Pay ₹499', onPress: () => {
-              // Handle payment and unlock chat
-              console.log('Payment for chat unlock');
-            }}
-          ]
-        );
-      }
+      // Check if user has purchased chat access for this professional
+      PaymentService.hasPurchasedChatAccess(item.proId).then(hasAccess => {
+        if (hasAccess) {
+          // User has access, navigate to chat
+          navigation.navigate('Chat', { 
+            professionalId: item.proId,
+            professionalName: item.proName,
+            packageId: item.service,
+            transactionId: 'existing_access'
+          });
+        } else {
+          // Show payment modal to unlock chat
+          Alert.alert(
+            'Unlock Chat',
+            'Pay ₹499 to unlock chat with this professional.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Pay ₹499', onPress: () => {
+                // Handle payment and unlock chat
+                console.log('Payment for chat unlock');
+              }}
+            ]
+          );
+        }
+      });
     }
   };
 
