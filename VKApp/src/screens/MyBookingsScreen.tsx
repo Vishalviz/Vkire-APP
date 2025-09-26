@@ -212,10 +212,11 @@ const MyBookingsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Modern Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>My Bookings</Text>
-          <Text style={styles.subtitle}>Track your photography bookings</Text>
+          <Text style={styles.headerTitle}>My Bookings</Text>
+          <Text style={styles.headerSubtitle}>Track your bookings and inquiries</Text>
         </View>
       </View>
 
@@ -245,10 +246,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray50,
   },
   header: {
-    paddingHorizontal: Spacing.xl,
+    backgroundColor: Colors.white,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
-    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.xl,
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
     ...Shadows.sm,
@@ -256,14 +257,14 @@ const styles = StyleSheet.create({
   headerContent: {
     alignItems: 'center',
   },
-  title: {
+  headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.gray900,
+    textAlign: 'center',
     marginBottom: Spacing.xs,
-    letterSpacing: 0.3,
   },
-  subtitle: {
+  headerSubtitle: {
     fontSize: Typography.fontSize.base,
     color: Colors.gray600,
     fontWeight: Typography.fontWeight.regular,
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.full,
   },
   statusText: {
     fontSize: Typography.fontSize.xs,
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   typeBadge: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary + '20',
     borderWidth: 1,
     borderColor: Colors.primary,
