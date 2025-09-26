@@ -45,9 +45,8 @@ const InboxScreen = () => {
       unreadCount: 0,
       type: 'booking',
     },
-  ];
-
   ]);
+
   const [notifications, setNotifications] = useState([
     {
       id: '1',
