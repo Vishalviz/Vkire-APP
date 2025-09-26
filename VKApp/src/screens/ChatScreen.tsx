@@ -11,16 +11,19 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Message } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { DatabaseService } from '../services/supabase';
 import NotificationService from '../services/notificationService';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
+type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
+  const navigation = useNavigation<ChatScreenNavigationProp>();
   const { bookingId, professionalId, professionalName, packageId, transactionId } = route.params;
   const { user } = useAuth();
   
@@ -76,6 +79,13 @@ const ChatScreen = () => {
       setMessages(mockMessages);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle navigation to professional profile
+  const handleProfilePress = () => {
+    if (professionalId) {
+      navigation.navigate('CreatorProfile', { proId: professionalId });
     }
   };
 
@@ -197,7 +207,11 @@ const ChatScreen = () => {
     >
       {/* Chat Header */}
       <View style={styles.header}>
-        <View style={styles.headerInfo}>
+        <TouchableOpacity 
+          style={styles.headerInfo}
+          onPress={handleProfilePress}
+          activeOpacity={0.7}
+        >
           <View style={styles.avatarPlaceholder}>
             <Ionicons name="person" size={24} color="#666" />
           </View>
@@ -209,7 +223,7 @@ const ChatScreen = () => {
               {transactionId ? 'Chat Unlocked' : 'Online'}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity>
           <Ionicons name="call-outline" size={24} color="#007AFF" />
         </TouchableOpacity>
