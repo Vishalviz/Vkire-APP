@@ -65,17 +65,17 @@ export class PaymentService {
       await this.initialize();
       
       // Mock purchase - simulate a delay and random success/failure
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
       // 90% success rate for demo purposes
       const success = Math.random() > 0.1;
-      
-      if (success) {
-        return {
-          success: true,
+    
+    if (success) {
+      return { 
+        success: true, 
           transactionId: `mock_txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        };
-      } else {
+      };
+    } else {
         return {
           success: false,
           error: 'Payment failed - please try again',

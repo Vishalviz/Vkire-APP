@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  RefreshControl,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -44,31 +46,51 @@ interface Inquiry {
 const MyBookingsScreen: React.FC = () => {
   const navigation = useNavigation<MyBookingsScreenNavigationProp>();
   
-  // Mock data for demo
-  const bookings: Booking[] = [
+  // Enhanced mock data for comprehensive testing
+  const [bookings, setBookings] = useState<Booking[]>([
     {
       id: '1',
       proName: 'Raj Photography',
       service: 'Wedding Photography',
-      date: '2024-10-15',
-      location: 'Delhi',
+      date: '2024-12-15',
+      location: 'Mumbai, Maharashtra',
       status: 'confirmed',
       amount: 25000,
       type: 'booking',
     },
     {
       id: '2',
-      proName: 'Mumbai Studios',
-      service: 'Portfolio Shoot',
-      date: '2024-09-20',
-      location: 'Mumbai',
+      proName: 'Creative Studio',
+      service: 'Corporate Event',
+      date: '2024-11-20',
+      location: 'Delhi, NCR',
       status: 'completed',
       amount: 15000,
       type: 'booking',
     },
-  ];
+    {
+      id: '6',
+      proName: 'Lens Master',
+      service: 'Portrait Session',
+      date: '2024-12-20',
+      location: 'Bangalore, Karnataka',
+      status: 'confirmed',
+      amount: 8000,
+      type: 'booking',
+    },
+    {
+      id: '7',
+      proName: 'Event Captures',
+      service: 'Birthday Party',
+      date: '2024-11-05',
+      location: 'Pune, Maharashtra',
+      status: 'cancelled',
+      amount: 5000,
+      type: 'booking',
+    },
+  ]);
 
-  const inquiries: Inquiry[] = [
+  const [inquiries, setInquiries] = useState<Inquiry[]>([
     {
       id: '3',
       proId: 'pro1',
@@ -102,12 +124,80 @@ const MyBookingsScreen: React.FC = () => {
       type: 'inquiry',
       chatUnlocked: false,
     },
-  ];
+    {
+      id: '8',
+      proId: 'pro4',
+      proName: 'Wedding Dreams',
+      service: 'Pre-Wedding Shoot',
+      date: '2024-12-10',
+      status: 'pending',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: false,
+    },
+    {
+      id: '9',
+      proId: 'pro5',
+      proName: 'Nature Clicks',
+      service: 'Outdoor Photography',
+      date: '2024-11-30',
+      status: 'accepted',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+  ]);
 
-  // Combine bookings and inquiries
-  const allItems = [...bookings, ...inquiries].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  // State management for filtering and search
+  const [activeFilter, setActiveFilter] = useState<'all' | 'bookings' | 'inquiries'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Filter and search functionality
+  const getFilteredItems = useCallback(() => {
+    let items: (Booking | Inquiry)[] = [];
+    
+    // Apply type filter
+    switch (activeFilter) {
+      case 'bookings':
+        items = bookings;
+        break;
+      case 'inquiries':
+        items = inquiries;
+        break;
+      default:
+        items = [...bookings, ...inquiries];
+    }
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter(item => 
+        item.proName.toLowerCase().includes(query) ||
+        item.service.toLowerCase().includes(query) ||
+        (item.type === 'booking' && 'location' in item && item.location?.toLowerCase().includes(query))
+      );
+    }
+    
+    // Sort by date (newest first)
+    return items.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [bookings, inquiries, activeFilter, searchQuery]);
+
+  const filteredItems = getFilteredItems();
+
+  // Pull to refresh functionality
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Simulate API call delay
+    setTimeout(() => {
+      setRefreshing(false);
+      // In a real app, you would refetch data here
+      console.log('Data refreshed');
+    }, 1000);
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -229,19 +319,91 @@ const MyBookingsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={20} color={Colors.gray500} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search bookings, professionals, services..."
+            placeholderTextColor={Colors.gray500}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Filter Tabs */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'all' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('all')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'all' && styles.activeFilterTabText]}>
+            All ({bookings.length + inquiries.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'bookings' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('bookings')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'bookings' && styles.activeFilterTabText]}>
+            Bookings ({bookings.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'inquiries' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('inquiries')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'inquiries' && styles.activeFilterTabText]}>
+            Inquiries ({inquiries.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={allItems}
+        data={filteredItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={64} color="#8E8E93" />
-            <Text style={styles.emptyTitle}>No bookings yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Browse the feed and book your first photography session
+            <Ionicons 
+              name={searchQuery ? "search-outline" : "calendar-outline"} 
+              size={64} 
+              color={Colors.gray400} 
+            />
+            <Text style={styles.emptyTitle}>
+              {searchQuery ? "No results found" : "No bookings yet"}
             </Text>
+            <Text style={styles.emptySubtitle}>
+              {searchQuery 
+                ? `No bookings match "${searchQuery}"`
+                : "Browse the feed and book your first photography session"
+              }
+            </Text>
+            {searchQuery && (
+              <TouchableOpacity 
+                style={styles.clearSearchButton}
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={styles.clearSearchText}>Clear Search</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
@@ -278,6 +440,57 @@ const styles = StyleSheet.create({
     color: Colors.gray600,
     fontWeight: Typography.fontWeight.regular,
     textAlign: 'center',
+  },
+  // Search Bar Styles
+  searchContainer: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray100,
+    borderRadius: BorderRadius.xl,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray900,
+  },
+  // Filter Tabs Styles
+  filterContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginHorizontal: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.gray100,
+    alignItems: 'center',
+  },
+  activeFilterTab: {
+    backgroundColor: Colors.primary,
+  },
+  filterTabText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.gray600,
+  },
+  activeFilterTabText: {
+    color: Colors.white,
   },
   listContainer: {
     padding: Spacing.lg,
@@ -387,6 +600,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     fontWeight: Typography.fontWeight.regular,
+  },
+  clearSearchButton: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+  },
+  clearSearchText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.white,
+    textAlign: 'center',
   },
 });
 
