@@ -6,12 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import PaymentService from '../services/paymentService';
 
 type BookingDetailsScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type BookingDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
@@ -118,16 +120,65 @@ const BookingDetailsScreen = () => {
 
   const isCancellationDisabled = !checkCancellationEligibility().eligible;
 
+  const handleContactCreator = async () => {
+    const professionalId = 'pro_' + mockBooking.id;
+    
+    // If user has a confirmed booking, they automatically have chat access
+    // No need to check IAP since booking confirmation means they already went through inquiry flow
+    if (mockBooking.status === 'confirmed' || mockBooking.status === 'completed') {
+      // Navigate directly to chat - booking confirmation grants chat access
+      navigation.navigate('Chat', {
+        professionalId: professionalId,
+        professionalName: mockBooking.proName,
+        bookingId: mockBooking.id,
+        transactionId: 'booking_access' // Special transaction ID for booking-based access
+      });
+      return;
+    }
+    
+    // Only check IAP for non-confirmed bookings (e.g., pending, draft bookings)
+    const hasAccess = await PaymentService.hasPurchasedChatAccess(professionalId);
+    
+    if (hasAccess) {
+      // Navigate directly to chat
+      navigation.navigate('Chat', {
+        professionalId: professionalId,
+        professionalName: mockBooking.proName,
+        bookingId: mockBooking.id,
+        transactionId: 'existing_access'
+      });
+    } else {
+      // Show payment modal for chat access (only for non-confirmed bookings)
+      PaymentService.showInquiryPaymentModal(
+        professionalId,
+        mockBooking.proName,
+        'Wedding Photography',
+        () => {
+          // On successful payment, navigate to chat
+          navigation.navigate('Chat', {
+            professionalId: professionalId,
+            professionalName: mockBooking.proName,
+            bookingId: mockBooking.id,
+            transactionId: 'new_purchase'
+          });
+        }
+      );
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Booking Details</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Custom Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+          </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Booking Details</Text>
+          </View>
+          <View style={styles.headerRightSpacer} />
+        </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Package Details */}
@@ -245,54 +296,70 @@ const BookingDetailsScreen = () => {
             </Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton} onPress={handleContactCreator}>
             <Ionicons name="chatbubble-outline" size={20} color={Colors.white} />
-            <Text style={styles.contactButtonText}>Contact Creator</Text>
+            <Text style={styles.contactButtonText}>
+              {mockBooking.status === 'confirmed' || mockBooking.status === 'completed' 
+                ? 'Chat with Creator' 
+                : 'Contact Creator'
+              }
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    paddingTop: 60,
-    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
   },
   backButton: {
-    padding: Spacing.sm,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
-    flex: 2,
     textAlign: 'center',
   },
-  headerSpacer: {
-    flex: 1,
+  headerRightSpacer: {
+    width: 40,
   },
   content: {
     flex: 1,
-    padding: Spacing.md,
+    padding: Spacing.lg,
   },
   packageCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
     ...Shadows.md,
   },
   packageHeader: {
