@@ -427,11 +427,15 @@ const FeedScreen = () => {
             style={styles.headerButton} 
             activeOpacity={0.7}
             onPress={() => {
-              // TODO: Navigate to notifications screen
-              Alert.alert('Notifications', 'Notifications feature coming soon!');
+              // Navigate to notifications/chat screen
+              navigation.navigate('Inbox');
             }}
           >
             <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
+            {/* Unread notification badge */}
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>3</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -547,6 +551,26 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
     borderRadius: BorderRadius.lg,
     backgroundColor: Colors.gray50,
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: Colors.error,
+    borderRadius: BorderRadius.full,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  notificationBadgeText: {
+    color: Colors.white,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
   },
   
   // Loading States

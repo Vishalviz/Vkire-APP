@@ -149,6 +149,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   Main: undefined;
+  Inbox: undefined;
   Profile: { userId: string };
   CreatorProfile: { proId: string };
   PackageDetails: { packageId: string };

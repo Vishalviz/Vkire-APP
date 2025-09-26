@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +16,8 @@ type InboxScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>
 
 const InboxScreen = () => {
   const navigation = useNavigation<InboxScreenNavigationProp>();
+  const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
+  const [refreshing, setRefreshing] = useState(false);
 
   const mockConversations = [
     {
@@ -43,9 +46,95 @@ const InboxScreen = () => {
     },
   ];
 
+  const mockNotifications = [
+    {
+      id: '1',
+      type: 'inquiry_response',
+      title: 'New Response to Your Inquiry',
+      message: 'John Photography responded to your wedding photography inquiry',
+      timestamp: '5 minutes ago',
+      read: false,
+      professionalId: 'pro1',
+      professionalName: 'John Photography',
+    },
+    {
+      id: '2',
+      type: 'booking_confirmed',
+      title: 'Booking Confirmed',
+      message: 'Your portrait session with Sarah Studios has been confirmed',
+      timestamp: '1 hour ago',
+      read: false,
+      bookingId: 'booking2',
+    },
+    {
+      id: '3',
+      type: 'message',
+      title: 'New Message',
+      message: 'You have a new message from Creative Lens',
+      timestamp: '2 hours ago',
+      read: true,
+      professionalId: 'pro3',
+      professionalName: 'Creative Lens',
+    },
+  ];
+
   const handleConversationPress = (bookingId: string) => {
     navigation.navigate('Chat', { bookingId });
   };
+
+  const handleNotificationPress = (notification: any) => {
+    if (notification.type === 'inquiry_response' || notification.type === 'message') {
+      // Navigate to chat with professional
+      navigation.navigate('Chat', { 
+        professionalId: notification.professionalId,
+        professionalName: notification.professionalName,
+        transactionId: 'existing_access'
+      });
+    } else if (notification.type === 'booking_confirmed') {
+      // Navigate to booking details
+      navigation.navigate('BookingDetails', { 
+        bookingId: notification.bookingId 
+      });
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
+
+  const renderNotification = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={[styles.notificationItem, !item.read && styles.unreadNotification]}
+      onPress={() => handleNotificationPress(item)}
+    >
+      <View style={styles.notificationIcon}>
+        <Ionicons 
+          name={
+            item.type === 'inquiry_response' ? 'chatbubble-outline' :
+            item.type === 'booking_confirmed' ? 'checkmark-circle-outline' :
+            'notifications-outline'
+          } 
+          size={24} 
+          color={item.read ? '#8E8E93' : '#007AFF'} 
+        />
+      </View>
+      <View style={styles.notificationContent}>
+        <Text style={[styles.notificationTitle, !item.read && styles.unreadText]}>
+          {item.title}
+        </Text>
+        <Text style={styles.notificationMessage}>
+          {item.message}
+        </Text>
+        <Text style={styles.notificationTimestamp}>
+          {item.timestamp}
+        </Text>
+      </View>
+      {!item.read && <View style={styles.unreadDot} />}
+    </TouchableOpacity>
+  );
 
   const renderConversation = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -85,28 +174,85 @@ const InboxScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>Inbox</Text>
         <TouchableOpacity>
           <Ionicons name="create-outline" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
-      {mockConversations.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>No messages yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Start a conversation by sending an inquiry to a creator
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'chats' && styles.activeTab]}
+          onPress={() => setActiveTab('chats')}
+        >
+          <Text style={[styles.tabText, activeTab === 'chats' && styles.activeTabText]}>
+            Chats ({mockConversations.length})
           </Text>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'notifications' && styles.activeTab]}
+          onPress={() => setActiveTab('notifications')}
+        >
+          <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>
+            Notifications ({mockNotifications.filter(n => !n.read).length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      {activeTab === 'chats' ? (
+        mockConversations.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>No messages yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Start a conversation by sending an inquiry to a creator
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={mockConversations}
+            renderItem={renderConversation}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.conversationsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#007AFF"
+                colors={['#007AFF']}
+              />
+            }
+          />
+        )
       ) : (
-        <FlatList
-          data={mockConversations}
-          renderItem={renderConversation}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.conversationsList}
-          showsVerticalScrollIndicator={false}
-        />
+        mockNotifications.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="notifications-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>No notifications</Text>
+            <Text style={styles.emptySubtitle}>
+              You'll see updates about your bookings and inquiries here
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={mockNotifications}
+            renderItem={renderNotification}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.notificationsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#007AFF"
+                colors={['#007AFF']}
+              />
+            }
+          />
+        )
       )}
     </View>
   );
@@ -130,6 +276,83 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: '#333',
+  },
+  // Tab Navigation Styles
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  activeTab: {
+    backgroundColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#fff',
+  },
+  // Notification Styles
+  notificationItem: {
+    flexDirection: 'row',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    alignItems: 'flex-start',
+  },
+  unreadNotification: {
+    backgroundColor: '#f8f9ff',
+  },
+  notificationIcon: {
+    marginRight: 12,
+    marginTop: 2,
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  unreadText: {
+    fontWeight: '700',
+  },
+  notificationMessage: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    lineHeight: 20,
+  },
+  notificationTimestamp: {
+    fontSize: 12,
+    color: '#999',
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
+    marginTop: 8,
+  },
+  notificationsList: {
+    paddingBottom: 20,
   },
   conversationsList: {
     padding: 16,
