@@ -11,7 +11,7 @@ interface SplashScreenProps {
   onAnimationComplete: () => void;
 }
 
-const { width, height } = Dimensions.get('window');
+  // const { width, height } = Dimensions.get('window'); // TODO: Use dimensions for responsive design if needed
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onAnimationComplete }) => {
   const cameraScale = useRef(new Animated.Value(0)).current;

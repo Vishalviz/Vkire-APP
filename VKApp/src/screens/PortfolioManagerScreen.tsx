@@ -11,7 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+// import * as ImagePicker from 'expo-image-picker'; // Not used directly, handled by ImagePickerModal
 import ImagePickerModal from '../components/ImagePickerModal';
 
 interface PortfolioPost {
@@ -104,29 +104,30 @@ const PortfolioManagerScreen: React.FC = () => {
     }
   };
 
-  const handleDeletePost = (postId: string) => {
-    Alert.alert(
-      'Delete Post',
-      'Are you sure you want to delete this portfolio post?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            setPortfolioPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-            Alert.alert('Success', 'Portfolio post deleted successfully!');
-            
-            // Here you would typically make an API call to delete the post
-            // await DatabaseService.deletePortfolioPost(postId);
-          },
-        },
-      ]
-    );
-  };
+  // TODO: Implement delete functionality when needed
+  // const handleDeletePost = (postId: string) => {
+  //   Alert.alert(
+  //     'Delete Post',
+  //     'Are you sure you want to delete this portfolio post?',
+  //     [
+  //       {
+  //         text: 'Cancel',
+  //         style: 'cancel',
+  //       },
+  //       {
+  //         text: 'Delete',
+  //         style: 'destructive',
+  //         onPress: () => {
+  //           setPortfolioPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  //           Alert.alert('Success', 'Portfolio post deleted successfully!');
+  //           
+  //           // Here you would typically make an API call to delete the post
+  //           // await DatabaseService.deletePortfolioPost(postId);
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
 
   const renderPortfolioItem = ({ item }: { item: PortfolioPost }) => (
     <TouchableOpacity style={styles.portfolioCard}>

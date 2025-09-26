@@ -3,7 +3,6 @@ module.exports = {
     'expo',
     '@react-native',
     'eslint:recommended',
-    '@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

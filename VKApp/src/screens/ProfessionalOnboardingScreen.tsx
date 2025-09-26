@@ -24,7 +24,7 @@ const ProfessionalOnboardingScreen = () => {
   const navigation = useNavigation<ProfessionalOnboardingNavigationProp>();
   const route = useRoute<ProfessionalOnboardingRouteProp>();
   const { user, updateProfile, createProfessionalProfile } = useAuth();
-  const { role } = route.params;
+  // const { role } = route.params; // TODO: Use role for conditional logic if needed
 
   const [currentStep, setCurrentStep] = useState(1);
   

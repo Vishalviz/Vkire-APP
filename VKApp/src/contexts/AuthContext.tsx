@@ -130,6 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       setUser(data);
     } catch (error) {
+      console.error('Auth error:', error);
       throw error;
     }
   };
