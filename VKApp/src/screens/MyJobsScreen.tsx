@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,8 +21,7 @@ interface Job {
 }
 
 const MyJobsScreen: React.FC = () => {
-  // Mock data for demo
-  const jobs: Job[] = [
+  const [jobs, setJobs] = useState<Job[]>([
     {
       id: '1',
       customerName: 'Priya Sharma',
@@ -49,7 +49,79 @@ const MyJobsScreen: React.FC = () => {
       status: 'pending',
       amount: 12000,
     },
-  ];
+  ]);
+
+  const handleAcceptJob = async (jobId: string) => {
+    try {
+      // Update job status to confirmed
+      setJobs(prevJobs => 
+        prevJobs.map(job => 
+          job.id === jobId 
+            ? { ...job, status: 'confirmed' as const }
+            : job
+        )
+      );
+      
+      Alert.alert(
+        'Job Accepted!', 
+        'You have successfully accepted this booking. The customer will be notified.',
+        [{ text: 'OK' }]
+      );
+      
+      // Here you would typically make an API call to update the job status
+      // await DatabaseService.updateJobStatus(jobId, 'confirmed');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to accept the job. Please try again.');
+    }
+  };
+
+  const handleDeclineJob = async (jobId: string) => {
+    Alert.alert(
+      'Decline Job',
+      'Are you sure you want to decline this booking? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Decline',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Update job status to cancelled
+              setJobs(prevJobs => 
+                prevJobs.map(job => 
+                  job.id === jobId 
+                    ? { ...job, status: 'cancelled' as const }
+                    : job
+                )
+              );
+              
+              Alert.alert(
+                'Job Declined', 
+                'The booking has been declined and the customer will be notified.',
+                [{ text: 'OK' }]
+              );
+              
+              // Here you would typically make an API call to update the job status
+              // await DatabaseService.updateJobStatus(jobId, 'cancelled');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to decline the job. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewDetails = (job: Job) => {
+    Alert.alert(
+      'Job Details',
+      `Customer: ${job.customerName}\nService: ${job.service}\nDate: ${job.date}\nLocation: ${job.location}\nAmount: ₹${job.amount.toLocaleString()}\nStatus: ${job.status}`,
+      [{ text: 'OK' }]
+    );
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,7 +134,10 @@ const MyJobsScreen: React.FC = () => {
   };
 
   const renderJobItem = ({ item }: { item: Job }) => (
-    <TouchableOpacity style={styles.jobCard}>
+    <TouchableOpacity 
+      style={styles.jobCard}
+      onPress={() => handleViewDetails(item)}
+    >
       <View style={styles.jobHeader}>
         <View style={styles.customerInfo}>
           <View style={styles.avatarPlaceholder}>
@@ -95,10 +170,16 @@ const MyJobsScreen: React.FC = () => {
 
       {item.status === 'pending' && (
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={[styles.actionButton, styles.acceptButton]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.acceptButton]}
+            onPress={() => handleAcceptJob(item.id)}
+          >
             <Text style={styles.acceptButtonText}>Accept</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.declineButton]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.declineButton]}
+            onPress={() => handleDeclineJob(item.id)}
+          >
             <Text style={styles.declineButtonText}>Decline</Text>
           </TouchableOpacity>
         </View>

@@ -17,6 +17,16 @@ export interface User {
 // Professional Profile Types
 export interface ProProfile {
   user_id: string;
+  business_name?: string;
+  bio?: string;
+  main_camera?: string;
+  secondary_camera?: string;
+  equipment?: string;
+  experience_years?: number;
+  photography_style?: string[];
+  video_style?: string[];
+  editing_software?: string[];
+  service_areas?: string[];
   primary_gear?: string;
   services: ServiceType[];
   travel_radius_km?: number;
@@ -147,6 +157,7 @@ export type RootStackParamList = {
   Inquiry: { packageId: string };
   Review: { bookingId: string };
   Payment: { bookingId: string };
+  ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
 };
 
 // Shared tabs for all users
@@ -184,4 +195,5 @@ export interface AuthContextType {
   signUp: (email: string, password: string, role: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  createProfessionalProfile?: (profile: Partial<ProProfile>) => Promise<void>;
 }

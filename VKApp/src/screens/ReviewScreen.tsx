@@ -15,7 +15,7 @@ import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { DatabaseService } from '../services/supabase';
+// import { DatabaseService } from '../services/supabase';
 
 type ReviewScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type ReviewScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;

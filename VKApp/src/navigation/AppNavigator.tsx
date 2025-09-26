@@ -32,6 +32,7 @@ import MyBookingsScreen from '../screens/MyBookingsScreen';
 import MyJobsScreen from '../screens/MyJobsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import PortfolioManagerScreen from '../screens/PortfolioManagerScreen';
+import ProfessionalOnboardingScreen from '../screens/ProfessionalOnboardingScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -224,6 +225,11 @@ const AppNavigator = () => {
               name="Payment" 
               component={PaymentScreen}
               options={{ headerShown: true, title: 'Payment' }}
+            />
+            <Stack.Screen 
+              name="ProfessionalOnboarding" 
+              component={ProfessionalOnboardingScreen}
+              options={{ headerShown: false }}
             />
           </>
         ) : (

@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { PortfolioPost, RootStackParamList } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Animation } from '../constants/designSystem';
 import Logo from '../components/Logo';
+import logger from '../utils/logger';
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -82,7 +83,7 @@ const FeedScreen = () => {
         shareAnimations.current[post.id] = new Animated.Value(1);
       });
     } catch (error) {
-      console.error('Error loading posts:', error);
+      logger.error('Error loading posts:', error);
       Alert.alert('Error', 'Failed to load posts');
     } finally {
       setLoading(false);
@@ -131,7 +132,7 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Like post:', postId, isLiked ? 'unliked' : 'liked');
+    logger.debug('Like post:', postId, isLiked ? 'unliked' : 'liked');
   };
 
   const handleComment = (postId: string) => {
@@ -152,7 +153,7 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Comment on post:', postId);
+    logger.debug('Comment on post:', postId);
   };
 
   const handleShare = (postId: string) => {
@@ -178,7 +179,7 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Share post:', postId);
+    logger.debug('Share post:', postId);
   };
 
   const handleCreatorPress = (proId: string) => {

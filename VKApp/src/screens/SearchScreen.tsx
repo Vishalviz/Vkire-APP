@@ -43,7 +43,7 @@ const SearchScreen = () => {
     navigation.navigate('CreatorProfile', { proId: creatorId });
   };
 
-  const renderCreator = ({ item }: { item: any }) => (
+  const renderCreator = ({ item }: { item: typeof mockCreators[0] }) => (
     <TouchableOpacity
       style={styles.creatorCard}
       onPress={() => handleCreatorPress(item.id)}

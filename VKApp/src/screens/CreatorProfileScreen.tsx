@@ -9,13 +9,16 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 
 type CreatorProfileScreenRouteProp = RouteProp<RootStackParamList, 'CreatorProfile'>;
+type CreatorProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const CreatorProfileScreen = () => {
   const route = useRoute<CreatorProfileScreenRouteProp>();
+  const navigation = useNavigation<CreatorProfileScreenNavigationProp>();
   const { proId } = route.params;
   
   const [activeTab, setActiveTab] = useState<'portfolio' | 'packages' | 'reviews'>('portfolio');

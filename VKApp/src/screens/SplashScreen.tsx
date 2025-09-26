@@ -3,8 +3,8 @@ import {
   View,
   StyleSheet,
   Animated,
-  Dimensions,
   Image,
+  Dimensions,
 } from 'react-native';
 
 interface SplashScreenProps {
@@ -14,8 +14,6 @@ interface SplashScreenProps {
 const { width, height } = Dimensions.get('window');
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onAnimationComplete }) => {
-  const logoScale = useRef(new Animated.Value(0)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
   const cameraScale = useRef(new Animated.Value(0)).current;
   const cameraOpacity = useRef(new Animated.Value(0)).current;
   const flashOpacity = useRef(new Animated.Value(0)).current;

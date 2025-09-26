@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList, Message } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { DatabaseService } from '../services/supabase';
+// import { DatabaseService } from '../services/supabase';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 

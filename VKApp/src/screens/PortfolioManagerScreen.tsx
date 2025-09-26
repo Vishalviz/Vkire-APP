@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,13 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import ImagePickerModal from '../components/ImagePickerModal';
 
 interface PortfolioPost {
   id: string;
@@ -20,8 +25,7 @@ interface PortfolioPost {
 }
 
 const PortfolioManagerScreen: React.FC = () => {
-  // Mock data for demo
-  const portfolioPosts: PortfolioPost[] = [
+  const [portfolioPosts, setPortfolioPosts] = useState<PortfolioPost[]>([
     {
       id: '1',
       mediaUrl: 'https://via.placeholder.com/300x300',
@@ -49,7 +53,80 @@ const PortfolioManagerScreen: React.FC = () => {
       comments: 3,
       createdAt: '2024-09-05',
     },
-  ];
+  ]);
+
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [showAddPostModal, setShowAddPostModal] = useState(false);
+  const [newPostCaption, setNewPostCaption] = useState('');
+  const [newPostTags, setNewPostTags] = useState('');
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+
+  const handleAddPost = () => {
+    setShowAddPostModal(true);
+  };
+
+  const handleImageSelected = (uri: string) => {
+    setSelectedImageUri(uri);
+    setShowImagePicker(false);
+  };
+
+  const handleSavePost = async () => {
+    if (!selectedImageUri || !newPostCaption.trim()) {
+      Alert.alert('Error', 'Please select an image and add a caption.');
+      return;
+    }
+
+    try {
+      const newPost: PortfolioPost = {
+        id: Date.now().toString(),
+        mediaUrl: selectedImageUri,
+        caption: newPostCaption,
+        tags: newPostTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+        likes: 0,
+        comments: 0,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+
+      setPortfolioPosts(prevPosts => [newPost, ...prevPosts]);
+      
+      // Reset form
+      setSelectedImageUri(null);
+      setNewPostCaption('');
+      setNewPostTags('');
+      setShowAddPostModal(false);
+      
+      Alert.alert('Success', 'Portfolio post added successfully!');
+      
+      // Here you would typically make an API call to save the post
+      // await DatabaseService.createPortfolioPost(newPost);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add portfolio post. Please try again.');
+    }
+  };
+
+  const handleDeletePost = (postId: string) => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this portfolio post?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setPortfolioPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+            Alert.alert('Success', 'Portfolio post deleted successfully!');
+            
+            // Here you would typically make an API call to delete the post
+            // await DatabaseService.deletePortfolioPost(postId);
+          },
+        },
+      ]
+    );
+  };
 
   const renderPortfolioItem = ({ item }: { item: PortfolioPost }) => (
     <TouchableOpacity style={styles.portfolioCard}>
@@ -95,7 +172,7 @@ const PortfolioManagerScreen: React.FC = () => {
       </View>
 
       <View style={styles.actionBar}>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddPost}>
           <Ionicons name="add" size={20} color="#fff" />
           <Text style={styles.addButtonText}>Add Post</Text>
         </TouchableOpacity>
@@ -126,6 +203,97 @@ const PortfolioManagerScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         }
+      />
+
+      {/* Add Post Modal */}
+      <Modal
+        visible={showAddPostModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAddPostModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Portfolio Post</Text>
+              <TouchableOpacity onPress={() => setShowAddPostModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              {/* Image Selection */}
+              <View style={styles.imageSection}>
+                {selectedImageUri ? (
+                  <Image source={{ uri: selectedImageUri }} style={styles.selectedImage} />
+                ) : (
+                  <TouchableOpacity 
+                    style={styles.imagePlaceholder}
+                    onPress={() => setShowImagePicker(true)}
+                  >
+                    <Ionicons name="camera" size={32} color="#8E8E93" />
+                    <Text style={styles.imagePlaceholderText}>Select Image</Text>
+                  </TouchableOpacity>
+                )}
+                
+                <TouchableOpacity 
+                  style={styles.changeImageButton}
+                  onPress={() => setShowImagePicker(true)}
+                >
+                  <Text style={styles.changeImageButtonText}>
+                    {selectedImageUri ? 'Change Image' : 'Select Image'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Caption Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Caption *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Describe your work..."
+                  value={newPostCaption}
+                  onChangeText={setNewPostCaption}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+
+              {/* Tags Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Tags (optional)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="wedding, photography, delhi (comma separated)"
+                  value={newPostTags}
+                  onChangeText={setNewPostTags}
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.cancelModalButton}
+                onPress={() => setShowAddPostModal(false)}
+              >
+                <Text style={styles.cancelModalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.saveModalButton}
+                onPress={handleSavePost}
+              >
+                <Text style={styles.saveModalButtonText}>Save Post</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Image Picker Modal */}
+      <ImagePickerModal
+        visible={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onImageSelected={handleImageSelected}
       />
     </View>
   );
@@ -293,6 +461,123 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 500,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  imageSection: {
+    marginBottom: 20,
+  },
+  selectedImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+    borderStyle: 'dashed',
+    marginBottom: 12,
+  },
+  imagePlaceholderText: {
+    fontSize: 16,
+    color: '#8E8E93',
+    marginTop: 8,
+  },
+  changeImageButton: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  changeImageButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    gap: 12,
+  },
+  cancelModalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  cancelModalButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  saveModalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+  },
+  saveModalButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 

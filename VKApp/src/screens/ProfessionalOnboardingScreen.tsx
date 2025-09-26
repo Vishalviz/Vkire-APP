@@ -7,13 +7,12 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList, UserRole, ProProfile } from '../types';
+import { RootStackParamList, ProProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../components/Logo';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
@@ -72,9 +71,7 @@ const ProfessionalOnboardingScreen = () => {
       // If on first step, go back to the previous screen
       // For professionals, go to Dashboard (MyJobs) instead of Feed
       if (user?.role === 'pro') {
-        navigation.navigate('Main', { 
-          screen: 'MyJobs' // Navigate to MyJobs tab instead of default Feed tab
-        });
+        navigation.navigate('Main');
       } else {
         navigation.goBack();
       }
@@ -89,13 +86,13 @@ const ProfessionalOnboardingScreen = () => {
         bio: formData.bio,
         main_camera: formData.mainCamera,
         secondary_camera: formData.secondaryCamera,
-        equipment: formData.equipment,
-        experience_years: parseInt(formData.experienceYears) || 0,
+        equipment: formData.equipment.join(', '),
+        experience_years: parseInt(formData.experienceYears, 10) || 0,
         photography_style: formData.photographyStyle,
         video_style: formData.videoStyle,
         editing_software: formData.editingSoftware,
         service_areas: formData.serviceAreas,
-        travel_radius_km: parseInt(formData.travelRadius) || 50,
+        travel_radius_km: parseInt(formData.travelRadius, 10) || 50,
       };
 
       // Create professional profile

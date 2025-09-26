@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,9 +25,9 @@ const AuthScreen = () => {
 
   const { signIn, signUp } = useAuth();
 
-  const validateEmail = (email: string) => {
+  const validateEmail = (emailAddress: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(emailAddress);
   };
 
   const handleEmailChange = (text: string) => {
@@ -68,8 +67,9 @@ const AuthScreen = () => {
       } else {
         await signIn(email, password);
       }
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Authentication failed');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
