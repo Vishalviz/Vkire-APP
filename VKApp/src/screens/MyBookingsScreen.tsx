@@ -7,6 +7,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+
+type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 interface Booking {
   id: string;
@@ -20,6 +26,7 @@ interface Booking {
 }
 
 const MyBookingsScreen: React.FC = () => {
+  const navigation = useNavigation<MyBookingsScreenNavigationProp>();
   // Mock data for demo
   const bookings: Booking[] = [
     {
@@ -51,8 +58,18 @@ const MyBookingsScreen: React.FC = () => {
     }
   };
 
+  const handleBookingPress = (booking: Booking) => {
+    navigation.navigate('BookingDetails', { 
+      bookingId: booking.id, 
+      booking: booking 
+    });
+  };
+
   const renderBookingItem = ({ item }: { item: Booking }) => (
-    <TouchableOpacity style={styles.bookingCard}>
+    <TouchableOpacity 
+      style={styles.bookingCard}
+      onPress={() => handleBookingPress(item)}
+    >
       <View style={styles.bookingHeader}>
         <View style={styles.proInfo}>
           <View style={styles.avatarPlaceholder}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Keyboard,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import Logo from '../components/Logo';
@@ -22,12 +25,52 @@ const AuthScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const { signIn, signUp } = useAuth();
+
+  // Input refs for keyboard management
+  const scrollViewRef = useRef<ScrollView>(null);
+  const nameInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+
+  // Keyboard listeners
+  useEffect(() => {
+    const keyboardWillShow = (event: any) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    };
+
+    const keyboardWillHide = () => {
+      setKeyboardHeight(0);
+    };
+
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, keyboardWillShow);
+    const hideSubscription = Keyboard.addListener(hideEvent, keyboardWillHide);
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const validateEmail = (emailAddress: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(emailAddress);
+  };
+
+  const scrollToInput = (inputRef: React.RefObject<TextInput>) => {
+    if (inputRef.current && scrollViewRef.current) {
+      inputRef.current.measure((x, y, width, height, pageX, pageY) => {
+        scrollViewRef.current?.scrollTo({
+          y: pageY - 100,
+          animated: true,
+        });
+      });
+    }
   };
 
   const handleEmailChange = (text: string) => {
@@ -40,6 +83,9 @@ const AuthScreen = () => {
   };
 
   const handleAuth = async () => {
+    // Dismiss keyboard
+    Keyboard.dismiss();
+    
     if (!selectedRole) {
       Alert.alert('Error', 'Please select your role');
       return;
@@ -89,14 +135,24 @@ const AuthScreen = () => {
       </View>
 
       {/* Main Content - Centered with Keyboard Awareness */}
-      <KeyboardAwareScrollView 
+      <KeyboardAvoidingView 
         style={styles.mainContent}
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
-        extraScrollHeight={20}
-        keyboardShouldPersistTaps="handled"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView 
+          ref={scrollViewRef}
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContainer,
+            { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 20 : 20 }
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={true}
+          contentInsetAdjustmentBehavior="automatic"
+          bounces={false}
+        >
           {/* Role Selection */}
           {!selectedRole ? (
             <View style={styles.roleSelectionContainer}>
@@ -150,12 +206,15 @@ const AuthScreen = () => {
                   <View style={styles.inputWrapper}>
                     <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
                     <TextInput
+                      ref={nameInputRef}
                       style={styles.input}
                       placeholder="Enter your full name"
                       value={name}
                       onChangeText={setName}
                       autoCapitalize="words"
                       placeholderTextColor="#999"
+                      onFocus={() => scrollToInput(nameInputRef)}
+                      onSubmitEditing={() => emailInputRef.current?.focus()}
                     />
                   </View>
                 </View>
@@ -166,6 +225,7 @@ const AuthScreen = () => {
                 <View style={[styles.inputWrapper, emailError && styles.inputWrapperError]}>
                   <Ionicons name="mail-outline" size={20} color={emailError ? "#FF3B30" : "#666"} style={styles.inputIcon} />
                   <TextInput
+                    ref={emailInputRef}
                     style={styles.input}
                     placeholder="Enter your email"
                     value={email}
@@ -174,6 +234,8 @@ const AuthScreen = () => {
                     autoCapitalize="none"
                     autoCorrect={false}
                     placeholderTextColor="#999"
+                    onFocus={() => scrollToInput(emailInputRef)}
+                    onSubmitEditing={() => passwordInputRef.current?.focus()}
                   />
                 </View>
                 {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
@@ -184,6 +246,7 @@ const AuthScreen = () => {
                 <View style={styles.inputWrapper}>
                   <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
                   <TextInput
+                    ref={passwordInputRef}
                     style={styles.input}
                     placeholder="Enter your password"
                     value={password}
@@ -191,6 +254,8 @@ const AuthScreen = () => {
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     placeholderTextColor="#999"
+                    onFocus={() => scrollToInput(passwordInputRef)}
+                    onSubmitEditing={handleAuth}
                   />
                   <TouchableOpacity
                     style={styles.passwordToggle}
@@ -222,7 +287,8 @@ const AuthScreen = () => {
               </TouchableOpacity>
             </View>
           )}
-      </KeyboardAwareScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -263,6 +329,9 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   mainContent: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContainer: {

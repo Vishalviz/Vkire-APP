@@ -10,21 +10,21 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, ProProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../components/Logo';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
-// type ProfessionalOnboardingRouteProp = RouteProp<RootStackParamList, 'ProfessionalOnboarding'>; // TODO: Use when route params needed
+type ProfessionalOnboardingRouteProp = RouteProp<RootStackParamList, 'ProfessionalOnboarding'>;
 type ProfessionalOnboardingNavigationProp = StackNavigationProp<RootStackParamList, 'ProfessionalOnboarding'>;
 
 const ProfessionalOnboardingScreen = () => {
   const navigation = useNavigation<ProfessionalOnboardingNavigationProp>();
-  // const route = useRoute<ProfessionalOnboardingRouteProp>(); // TODO: Use route params if needed
+  const route = useRoute<ProfessionalOnboardingRouteProp>();
   const { user, updateProfile, createProfessionalProfile } = useAuth();
-  // const { role } = route.params; // TODO: Use role for conditional logic if needed
+  const { role } = route.params;
 
   const [currentStep, setCurrentStep] = useState(1);
   

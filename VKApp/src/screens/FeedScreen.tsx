@@ -17,6 +17,7 @@ import { PortfolioPost, RootStackParamList } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Animation } from '../constants/designSystem';
 import Logo from '../components/Logo';
 import logger from '../utils/logger';
+import { useProfileViews } from '../contexts/ProfileViewContext';
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -26,6 +27,7 @@ const FeedScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const navigation = useNavigation<FeedScreenNavigationProp>();
+  const { profileViews, decrementProfileViews, hasUnlimitedAccess } = useProfileViews();
   
   // Animation refs for micro-interactions
   const likeAnimations = useRef<{ [key: string]: Animated.Value }>({});
@@ -183,7 +185,21 @@ const FeedScreen = () => {
   };
 
   const handleCreatorPress = (proId: string) => {
-    navigation.navigate('CreatorProfile', { proId });
+    if (hasUnlimitedAccess || profileViews > 0) {
+      if (!hasUnlimitedAccess) {
+        decrementProfileViews();
+      }
+      navigation.navigate('CreatorProfile', { proId });
+    } else {
+      Alert.alert(
+        'Profile View Limit Reached',
+        'You have used all your free profile views. Upgrade to view more profiles.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => navigation.navigate('Profile') }
+        ]
+      );
+    }
   };
 
   // Helper functions

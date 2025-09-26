@@ -14,6 +14,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { PaymentService, PaymentIntent } from '../services/paymentService';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type PaymentScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
@@ -143,7 +144,17 @@ const PaymentScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Payment</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+      
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
       {/* Booking Summary */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryTitle}>Payment Summary</Text>
@@ -235,199 +246,220 @@ const PaymentScreen = () => {
           </>
         )}
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.gray50,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingTop: 60,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray200,
+  },
+  backButton: {
+    padding: Spacing.sm,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: '600',
+    color: Colors.gray900,
+    flex: 2,
+    textAlign: 'center',
+  },
+  headerSpacer: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
   },
   contentContainer: {
-    padding: 20,
+    padding: Spacing.lg,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.gray50,
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+    marginTop: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
   },
   summaryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
   },
   summaryTitle: {
-    fontSize: 18,
+    fontSize: Typography.fontSize.lg,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    color: Colors.gray900,
+    marginBottom: Spacing.md,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
   },
   summaryValue: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray900,
     fontWeight: '500',
   },
   depositRow: {
     borderTopWidth: 1,
-    borderTopColor: '#e1e5e9',
-    paddingTop: 12,
-    marginTop: 8,
+    borderTopColor: Colors.gray200,
+    paddingTop: Spacing.md,
+    marginTop: Spacing.sm,
   },
   depositLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray900,
     fontWeight: '600',
   },
   depositValue: {
-    fontSize: 18,
-    color: '#007AFF',
+    fontSize: Typography.fontSize.lg,
+    color: Colors.primary,
     fontWeight: '700',
   },
   paymentMethodsCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Typography.fontSize.lg,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    marginBottom: Spacing.md,
   },
   paymentMethodCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.md,
     borderWidth: 1,
-    borderColor: '#e1e5e9',
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: '#f9f9f9',
+    borderColor: Colors.gray200,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.sm,
+    backgroundColor: Colors.gray50,
   },
   selectedPaymentMethod: {
-    borderColor: '#007AFF',
-    backgroundColor: '#f0f8ff',
+    borderColor: Colors.primary,
+    backgroundColor: Colors.blue50,
   },
   paymentMethodInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   cardIcon: {
-    marginRight: 12,
+    marginRight: Spacing.sm,
   },
   cardDetails: {
     flex: 1,
   },
   cardBrand: {
-    fontSize: 16,
+    fontSize: Typography.fontSize.base,
     fontWeight: '500',
-    color: '#333',
+    color: Colors.gray900,
   },
   cardExpiry: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
   },
   addPaymentMethodButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: Spacing.md,
     borderWidth: 1,
-    borderColor: '#007AFF',
-    borderRadius: 8,
+    borderColor: Colors.primary,
+    borderRadius: BorderRadius.md,
     borderStyle: 'dashed',
   },
   addPaymentMethodText: {
-    fontSize: 16,
-    color: '#007AFF',
-    marginLeft: 8,
+    fontSize: Typography.fontSize.base,
+    color: Colors.primary,
+    marginLeft: Spacing.sm,
     fontWeight: '500',
   },
   securityCard: {
-    backgroundColor: '#f0f8ff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
+    backgroundColor: Colors.blue50,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   securityHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   securityTitle: {
-    fontSize: 16,
+    fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    color: '#333',
-    marginLeft: 8,
+    color: Colors.gray900,
+    marginLeft: Spacing.sm,
   },
   securityText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
     lineHeight: 20,
   },
   termsCard: {
-    backgroundColor: '#fff3cd',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
+    backgroundColor: Colors.yellow50,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   termsText: {
-    fontSize: 14,
-    color: '#856404',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.yellow700,
     lineHeight: 20,
   },
   paymentButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 20,
+    backgroundColor: Colors.primary,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+    ...Shadows.sm,
   },
   paymentButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: Colors.gray300,
   },
   paymentButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: Colors.white,
+    fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: Spacing.sm,
   },
 });
 
