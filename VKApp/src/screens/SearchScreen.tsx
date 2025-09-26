@@ -18,25 +18,25 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
-import { DatabaseService } from '../services/supabase';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeTab, setActiveTab] = useState<'posts' | 'creators'>('posts');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<any>(null);
   const [creators, setCreators] = useState<any[]>([]);
+  const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<SearchScreenNavigationProp>();
   const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
 
-  // Load creators on component mount
+  // Load data on component mount
   React.useEffect(() => {
     loadCreators();
+    loadSuggestedPosts();
   }, []);
 
   // Search creators when query changes
@@ -51,7 +51,6 @@ const SearchScreen = () => {
   const loadCreators = async () => {
     try {
       setLoading(true);
-      // Use mock data directly to avoid network errors
       setCreators(mockCreators);
     } catch (error) {
       console.error('Error loading creators:', error);
@@ -61,10 +60,18 @@ const SearchScreen = () => {
     }
   };
 
+  const loadSuggestedPosts = async () => {
+    try {
+      setSuggestedPosts(mockSuggestedPosts);
+    } catch (error) {
+      console.error('Error loading suggested posts:', error);
+      setSuggestedPosts(mockSuggestedPosts);
+    }
+  };
+
   const searchCreators = async (query: string) => {
     try {
       setLoading(true);
-      // Use mock data filtering to avoid network errors
       const filteredCreators = mockCreators.filter(creator => 
         creator.name.toLowerCase().includes(query.toLowerCase()) ||
         creator.services.some((service: string) => 
@@ -84,6 +91,63 @@ const SearchScreen = () => {
       ));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
+
+  const handlePostLike = (postId: string) => {
+    setSuggestedPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { 
+            ...post, 
+            isLiked: !post.isLiked,
+            likes: post.isLiked ? post.likes - 1 : post.likes + 1
+          }
+        : post
+    ));
+  };
+
+  const handlePostPress = (post: any) => {
+    navigation.navigate('CreatorProfile', { proId: post.creator.id });
+  };
+
+  const handleCreatorPress = (creator: any) => {
+    if (hasUnlimitedAccess || profileViews > 0) {
+      if (!hasUnlimitedAccess) {
+        decrementProfileViews();
+      }
+      navigation.navigate('CreatorProfile', { proId: creator.id });
+    } else {
+      setSelectedCreator(creator);
+      setShowPaymentModal(true);
+    }
+  };
+
+  const handlePaymentOption = (option: 'single' | 'unlimited') => {
+    setShowPaymentModal(false);
+    if (option === 'unlimited') {
+      activateUnlimitedAccess();
+      Alert.alert(
+        'Unlimited Access Activated!',
+        'You now have unlimited profile views for today.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      decrementProfileViews();
+      Alert.alert(
+        'Profile View Purchased!',
+        'You can now view this profile.',
+        [{ text: 'OK' }]
+      );
+    }
+    if (selectedCreator) {
+      navigation.navigate('CreatorProfile', { proId: selectedCreator.id });
     }
   };
 
@@ -129,8 +193,8 @@ const SearchScreen = () => {
       city: 'Bangalore',
       rating: 4.7,
       reviewCount: 156,
-      services: ['Event Planning', 'Decoration'],
-      priceRange: '₹10,000 - ₹30,000',
+      services: ['Corporate Events', 'Wedding Planning'],
+      priceRange: '₹30,000 - ₹1,00,000',
       availability: 'Busy',
       portfolio: [
         'https://images.unsplash.com/photo-1519741497674-611481863552?w=400',
@@ -158,57 +222,150 @@ const SearchScreen = () => {
     },
   ];
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  };
+  const mockSuggestedPosts = [
+    {
+      id: '1',
+      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400',
+      creator: {
+        id: '1',
+        name: 'John Photography',
+        handle: '@johnphoto',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+      },
+      likes: 1247,
+      comments: 89,
+      caption: 'Beautiful sunset wedding at Taj Palace ✨ #weddingphotography #mumbai',
+      tags: ['wedding', 'photography', 'mumbai', 'sunset'],
+      isLiked: false,
+    },
+    {
+      id: '2',
+      image: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400',
+      creator: {
+        id: '2',
+        name: 'Sarah Videography',
+        handle: '@sarahvideo',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100',
+      },
+      likes: 892,
+      comments: 45,
+      caption: 'Behind the scenes of our latest wedding film 🎬 #videography #wedding',
+      tags: ['videography', 'wedding', 'behindthescenes'],
+      isLiked: true,
+    },
+    {
+      id: '3',
+      image: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400',
+      creator: {
+        id: '3',
+        name: 'Mike Events',
+        handle: '@mikeevents',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+      },
+      likes: 2156,
+      comments: 156,
+      caption: 'Corporate event setup complete! Ready for tomorrow\'s conference 🎉 #events #corporate',
+      tags: ['events', 'corporate', 'setup'],
+      isLiked: false,
+    },
+    {
+      id: '4',
+      image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
+      creator: {
+        id: '4',
+        name: 'Lisa Makeup',
+        handle: '@lisamakeup',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
+      },
+      likes: 3456,
+      comments: 234,
+      caption: 'Bridal makeup transformation complete! ✨ #bridalmakeup #transformation',
+      tags: ['makeup', 'bridal', 'transformation', 'beauty'],
+      isLiked: true,
+    },
+    {
+      id: '5',
+      image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=400',
+      creator: {
+        id: '1',
+        name: 'John Photography',
+        handle: '@johnphoto',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+      },
+      likes: 1876,
+      comments: 98,
+      caption: 'Portrait session in the golden hour 📸 #portrait #goldenhour #photography',
+      tags: ['portrait', 'photography', 'goldenhour'],
+      isLiked: false,
+    },
+    {
+      id: '6',
+      image: 'https://images.unsplash.com/photo-1519167758481-83f1426e3b1a?w=400',
+      creator: {
+        id: '2',
+        name: 'Sarah Videography',
+        handle: '@sarahvideo',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100',
+      },
+      likes: 1234,
+      comments: 67,
+      caption: 'Product launch video shoot 🚀 #productlaunch #videography #corporate',
+      tags: ['videography', 'productlaunch', 'corporate'],
+      isLiked: true,
+    },
+  ];
 
-  const getAvailabilityColor = (availability: string) => {
-    switch (availability) {
-      case 'Available': return '#34C759';
-      case 'Busy': return '#FF9500';
-      case 'Offline': return '#8E8E93';
-      default: return '#8E8E93';
-    }
-  };
+  const renderPost = ({ item }: { item: any }) => (
+    <TouchableOpacity style={styles.postCard} onPress={() => handlePostPress(item)}>
+      <View style={styles.postHeader}>
+        <View style={styles.postCreatorInfo}>
+          <Image source={{ uri: item.creator.avatar }} style={styles.postAvatar} />
+          <View style={styles.postCreatorDetails}>
+            <Text style={styles.postCreatorName}>{item.creator.name}</Text>
+            <Text style={styles.postCreatorHandle}>{item.creator.handle}</Text>
+          </View>
+        </View>
+        <TouchableOpacity>
+          <Ionicons name="ellipsis-horizontal" size={20} color={Colors.gray600} />
+        </TouchableOpacity>
+      </View>
+      
+      <Image source={{ uri: item.image }} style={styles.postImage} />
+      
+      <View style={styles.postActions}>
+        <TouchableOpacity onPress={() => handlePostLike(item.id)}>
+          <Ionicons 
+            name={item.isLiked ? "heart" : "heart-outline"} 
+            size={24} 
+            color={item.isLiked ? Colors.error : Colors.gray900} 
+          />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="chatbubble-outline" size={24} color={Colors.gray900} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="paper-plane-outline" size={24} color={Colors.gray900} />
+        </TouchableOpacity>
+        <View style={styles.postActionsSpacer} />
+        <TouchableOpacity>
+          <Ionicons name="bookmark-outline" size={24} color={Colors.gray900} />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.postContent}>
+        <Text style={styles.postLikes}>{item.likes.toLocaleString()} likes</Text>
+        <Text style={styles.postCaption}>
+          <Text style={styles.postCreatorName}>{item.creator.name}</Text> {item.caption}
+        </Text>
+        <TouchableOpacity>
+          <Text style={styles.postViewComments}>View all {item.comments} comments</Text>
+        </TouchableOpacity>
+        <Text style={styles.postTime}>2 hours ago</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
-  const handleCreatorPress = (creator: any) => {
-    if (hasUnlimitedAccess || profileViews > 0) {
-      if (!hasUnlimitedAccess) {
-        decrementProfileViews();
-      }
-      navigation.navigate('CreatorProfile', { proId: creator.id });
-    } else {
-      setSelectedCreator(creator);
-      setShowPaymentModal(true);
-    }
-  };
-
-  const handlePaymentOption = (option: 'single' | 'unlimited') => {
-    setShowPaymentModal(false);
-    if (option === 'unlimited') {
-      activateUnlimitedAccess();
-      Alert.alert(
-        'Unlimited Access Activated!',
-        'You now have unlimited profile views for today.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      decrementProfileViews();
-      Alert.alert(
-        'Profile View Purchased!',
-        'You can now view this profile.',
-        [{ text: 'OK' }]
-      );
-    }
-    if (selectedCreator) {
-      navigation.navigate('CreatorProfile', { proId: selectedCreator.id });
-    }
-  };
-
-  const renderCreator = ({ item }: { item: typeof mockCreators[0] }) => (
+  const renderCreator = ({ item }: { item: any }) => (
     <TouchableOpacity
       style={styles.creatorCard}
       onPress={() => handleCreatorPress(item)}
@@ -240,49 +397,97 @@ const SearchScreen = () => {
     </TouchableOpacity>
   );
 
+  const getAvailabilityColor = (availability: string) => {
+    switch (availability) {
+      case 'Available': return Colors.success;
+      case 'Busy': return Colors.warning;
+      case 'Offline': return Colors.gray500;
+      default: return Colors.gray500;
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Modern Header */}
+        {/* Instagram-style Header */}
         <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Search</Text>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Search</Text>
+          </View>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={Colors.gray500} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search creators, services, locations..."
+              placeholderTextColor={Colors.gray500}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
         </View>
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={Colors.gray500} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search creators..."
-            placeholderTextColor={Colors.gray400}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchButton} activeOpacity={0.7}>
-              <Ionicons name="close-circle" size={20} color={Colors.gray500} />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
 
-      {/* Creators Grid */}
-      <FlatList
-        data={creators}
-        renderItem={renderCreator}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.creatorsList}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      />
+        {/* Tab Navigation */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
+            onPress={() => setActiveTab('posts')}
+          >
+            <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
+              Posts
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'creators' && styles.activeTab]}
+            onPress={() => setActiveTab('creators')}
+          >
+            <Text style={[styles.tabText, activeTab === 'creators' && styles.activeTabText]}>
+              Creators
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Content */}
+        {activeTab === 'posts' ? (
+          <FlatList
+            data={suggestedPosts}
+            renderItem={renderPost}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.postsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+                colors={[Colors.primary]}
+              />
+            }
+          />
+        ) : (
+          <FlatList
+            data={creators}
+            renderItem={renderCreator}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.creatorsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+                colors={[Colors.primary]}
+              />
+            }
+          />
+        )}
+      </View>
 
       {/* Payment Modal */}
       <Modal
         visible={showPaymentModal}
-        transparent
-        animationType="slide"
+        transparent={true}
+        animationType="fade"
         onRequestClose={() => setShowPaymentModal(false)}
       >
         <View style={styles.modalOverlay}>
@@ -290,11 +495,11 @@ const SearchScreen = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>View Profile</Text>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color={Colors.gray600} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>
-              You've used all your free profile views. Choose an option to continue:
+              You have {profileViews} free profile views remaining. Choose an option to view {selectedCreator?.name}'s profile.
             </Text>
             <View style={styles.paymentOptions}>
               <TouchableOpacity
@@ -324,7 +529,6 @@ const SearchScreen = () => {
           </View>
         </View>
       </Modal>
-      </View>
     </SafeAreaView>
   );
 };
@@ -353,18 +557,14 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.gray900,
-    letterSpacing: 0.3,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray50,
-    borderRadius: BorderRadius['2xl'],
+    backgroundColor: Colors.gray100,
+    borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.gray200,
-    ...Shadows.sm,
+    paddingVertical: Spacing.md,
   },
   searchIcon: {
     marginRight: Spacing.sm,
@@ -374,30 +574,129 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.gray900,
   },
-  clearSearchButton: {
-    marginLeft: Spacing.sm,
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
   },
+  tab: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: Colors.primary,
+  },
+  tabText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.gray600,
+  },
+  activeTabText: {
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.semiBold,
+  },
+  // Post Styles (Instagram-style)
+  postsList: {
+    paddingBottom: Spacing.xl,
+  },
+  postCard: {
+    backgroundColor: Colors.surface,
+    marginBottom: Spacing.lg,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  postCreatorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  postAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    marginRight: Spacing.sm,
+  },
+  postCreatorDetails: {
+    flex: 1,
+  },
+  postCreatorName: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  postCreatorHandle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+  },
+  postImage: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: Colors.gray100,
+  },
+  postActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  postActionsSpacer: {
+    flex: 1,
+  },
+  postContent: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+  },
+  postLikes: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
+  },
+  postCaption: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray900,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    marginBottom: Spacing.xs,
+  },
+  postViewComments: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+  },
+  postTime: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray500,
+  },
+  // Creator Styles
   creatorsList: {
-    padding: Spacing.sm,
+    padding: Spacing.lg,
   },
   creatorCard: {
     flex: 1,
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius['2xl'],
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
     margin: Spacing.sm,
-    ...Shadows.lg,
-    overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    ...Shadows.md,
   },
   portfolioContainer: {
     position: 'relative',
   },
   portfolioImage: {
     width: '100%',
-    height: 140,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
+    height: 150,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray100,
   },
   availabilityBadge: {
     position: 'absolute',
@@ -419,7 +718,7 @@ const styles = StyleSheet.create({
   availabilityText: {
     color: Colors.white,
     fontSize: Typography.fontSize.xs,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.medium,
   },
   highlightedBadge: {
     position: 'absolute',
@@ -435,7 +734,7 @@ const styles = StyleSheet.create({
   highlightedText: {
     color: Colors.gray900,
     fontSize: Typography.fontSize.xs,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     marginLeft: Spacing.xs,
   },
   creatorInfo: {
@@ -443,7 +742,7 @@ const styles = StyleSheet.create({
   },
   creatorName: {
     fontSize: Typography.fontSize.base,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
     marginBottom: Spacing.xs,
   },
@@ -464,7 +763,7 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: Typography.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
     marginLeft: Spacing.xs,
   },
@@ -475,9 +774,10 @@ const styles = StyleSheet.create({
   },
   priceRange: {
     fontSize: Typography.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.primary,
   },
+  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -499,42 +799,43 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
   },
   modalDescription: {
     fontSize: Typography.fontSize.base,
     color: Colors.gray600,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Spacing.lg,
-    textAlign: 'center',
   },
   paymentOptions: {
     gap: Spacing.md,
   },
   paymentOption: {
+    backgroundColor: Colors.gray100,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     borderWidth: 1,
     borderColor: Colors.gray200,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
   },
   recommendedOption: {
-    borderColor: Colors.primary,
     backgroundColor: Colors.primary + '10',
+    borderColor: Colors.primary,
   },
   optionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   optionTitle: {
     fontSize: Typography.fontSize.base,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
     color: Colors.gray900,
   },
   optionPrice: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: '700',
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.primary,
   },
   optionDescription: {
@@ -544,16 +845,16 @@ const styles = StyleSheet.create({
   recommendedBadge: {
     position: 'absolute',
     top: -Spacing.xs,
-    right: Spacing.md,
+    right: Spacing.lg,
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.md,
   },
   recommendedText: {
-    color: Colors.white,
     fontSize: Typography.fontSize.xs,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.white,
   },
 });
 
