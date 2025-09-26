@@ -136,7 +136,7 @@ const InboxScreen = () => {
         />
       </View>
       <View style={styles.notificationContent}>
-        <Text style={[styles.notificationTitle, !item.read && styles.unreadText]}>
+        <Text style={[styles.notificationTitle, !item.read && styles.unreadNotificationText]}>
           {item.title}
         </Text>
         <Text style={styles.notificationMessage}>
@@ -357,8 +357,9 @@ const styles = StyleSheet.create({
     color: Colors.gray900,
     marginBottom: Spacing.xs,
   },
-  unreadText: {
+  unreadNotificationText: {
     fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
   },
   notificationMessage: {
     fontSize: Typography.fontSize.base,
@@ -398,8 +399,8 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -407,17 +408,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: -2,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
+    backgroundColor: Colors.error,
+    borderRadius: BorderRadius.full,
     minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   unreadText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    color: Colors.white,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semiBold,
   },
   conversationContent: {
     flex: 1,
@@ -429,19 +430,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
   },
   timestamp: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
   },
   lastMessage: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    marginBottom: Spacing.sm,
   },
   conversationFooter: {
     flexDirection: 'row',
@@ -449,34 +450,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeTag: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
   },
   typeText: {
-    fontSize: 10,
-    color: '#fff',
-    fontWeight: '500',
+    fontSize: Typography.fontSize.xs,
+    color: Colors.white,
+    fontWeight: Typography.fontWeight.medium,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: Spacing['3xl'],
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
 });
 
