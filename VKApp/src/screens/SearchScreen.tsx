@@ -23,8 +23,8 @@ type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  // const [activeFilter, setActiveFilter] = useState('all'); // TODO: Implement filter functionality
+  // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // TODO: Implement view mode toggle
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<any>(null);
   const navigation = useNavigation<SearchScreenNavigationProp>();
