@@ -34,6 +34,7 @@ import MyJobsScreen from '../screens/MyJobsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import PortfolioManagerScreen from '../screens/PortfolioManagerScreen';
 import ProfessionalOnboardingScreen from '../screens/ProfessionalOnboardingScreen';
+import InboxScreen from '../screens/InboxScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -192,6 +193,11 @@ const AppNavigator = () => {
         {user ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
+            <Stack.Screen 
+              name="Inbox" 
+              component={InboxScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen 
               name="CreatorProfile" 
               component={CreatorProfileScreen}
