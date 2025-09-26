@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Animated,
   Image,
-  Dimensions,
+  // Dimensions, // TODO: Use dimensions for responsive design if needed
 } from 'react-native';
 
 interface SplashScreenProps {
