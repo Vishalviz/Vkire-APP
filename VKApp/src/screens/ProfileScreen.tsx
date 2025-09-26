@@ -10,14 +10,49 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
+
 const ProfileScreen = () => {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { user, signOut } = useAuth();
-  const { profileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
+  const { profileViews, hasUnlimitedAccess, activateUnlimitedAccess, clearAllData } = useProfileViews();
   const [showCreditModal, setShowCreditModal] = useState(false);
+
+  // Profile completion check
+  const getProfileCompletionPercentage = () => {
+    if (!user) return 0;
+    
+    const requiredFields = ['name', 'email', 'city'];
+    const optionalFields = ['phone', 'bio', 'avatar_url', 'website', 'instagram'];
+    
+    let completedFields = 0;
+    let totalFields = requiredFields.length + optionalFields.length;
+    
+    // Check required fields
+    requiredFields.forEach(field => {
+      if (user[field as keyof typeof user] && user[field as keyof typeof user] !== '') {
+        completedFields++;
+      }
+    });
+    
+    // Check optional fields (weighted less)
+    optionalFields.forEach(field => {
+      if (user[field as keyof typeof user] && user[field as keyof typeof user] !== '') {
+        completedFields += 0.5;
+      }
+    });
+    
+    return Math.round((completedFields / totalFields) * 100);
+  };
+
+  const profileCompletion = getProfileCompletionPercentage();
 
   const handleSignOut = () => {
     Alert.alert(
@@ -52,27 +87,27 @@ const ProfileScreen = () => {
     {
       title: 'Edit Profile',
       icon: 'person-outline',
-      onPress: () => console.log('Edit Profile'),
+      onPress: () => navigation.navigate('EditProfile'),
     },
     {
       title: 'Payment Methods',
       icon: 'card-outline',
-      onPress: () => console.log('Payment Methods'),
+      onPress: () => navigation.navigate('PaymentMethods'),
     },
     {
       title: 'Notifications',
       icon: 'notifications-outline',
-      onPress: () => console.log('Notifications'),
+      onPress: () => navigation.navigate('NotificationSettings'),
     },
     {
       title: 'Help & Support',
       icon: 'help-circle-outline',
-      onPress: () => console.log('Help & Support'),
+      onPress: () => navigation.navigate('HelpSupport'),
     },
     {
       title: 'Settings',
       icon: 'settings-outline',
-      onPress: () => console.log('Settings'),
+      onPress: () => navigation.navigate('Settings'),
     },
   ];
 
@@ -120,6 +155,27 @@ const ProfileScreen = () => {
             <Text style={styles.userRole}>
               {user?.role === 'pro' ? 'Professional' : 'Customer'}
             </Text>
+          </View>
+          
+          {/* Profile Completion Indicator */}
+          <View style={styles.profileCompletionContainer}>
+            <View style={styles.profileCompletionHeader}>
+              <Text style={styles.profileCompletionLabel}>Profile Completion</Text>
+              <Text style={styles.profileCompletionPercentage}>{profileCompletion}%</Text>
+            </View>
+            <View style={styles.profileCompletionBar}>
+              <View 
+                style={[
+                  styles.profileCompletionProgress, 
+                  { width: `${profileCompletion}%` }
+                ]} 
+              />
+            </View>
+            {profileCompletion < 100 && (
+              <Text style={styles.profileCompletionHint}>
+                Complete your profile to get more visibility
+              </Text>
+            )}
           </View>
           {user?.city && (
             <View style={styles.locationContainer}>
@@ -178,6 +234,26 @@ const ProfileScreen = () => {
               <Ionicons name="chevron-forward" size={18} color={Colors.gray400} />
             </TouchableOpacity>
           ))}
+        </View>
+
+        {/* Debug Button - Remove in production */}
+        <View style={styles.signOutContainer}>
+          <TouchableOpacity 
+            style={[styles.signOutButton, { backgroundColor: Colors.warning + '20' }]} 
+            onPress={() => {
+              Alert.alert(
+                'Reset Credits',
+                'This will reset all credit data to test fresh install behavior.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Reset', style: 'destructive', onPress: clearAllData },
+                ]
+              );
+            }}
+          >
+            <Ionicons name="refresh-outline" size={20} color={Colors.warning} />
+            <Text style={[styles.signOutText, { color: Colors.warning }]}>Reset Credits (Debug)</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Sign Out Button */}
@@ -331,6 +407,43 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     color: Colors.primary,
     fontWeight: Typography.fontWeight.semiBold,
+  },
+  profileCompletionContainer: {
+    width: '100%',
+    marginTop: Spacing.md,
+  },
+  profileCompletionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  profileCompletionLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray700,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  profileCompletionPercentage: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.bold,
+  },
+  profileCompletionBar: {
+    height: 6,
+    backgroundColor: Colors.gray200,
+    borderRadius: BorderRadius.full,
+    overflow: 'hidden',
+  },
+  profileCompletionProgress: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+  },
+  profileCompletionHint: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.gray500,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
   },
   locationContainer: {
     flexDirection: 'row',

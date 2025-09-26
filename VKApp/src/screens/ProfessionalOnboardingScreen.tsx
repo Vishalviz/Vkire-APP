@@ -23,7 +23,7 @@ type ProfessionalOnboardingNavigationProp = StackNavigationProp<RootStackParamLi
 const ProfessionalOnboardingScreen = () => {
   const navigation = useNavigation<ProfessionalOnboardingNavigationProp>();
   // const route = useRoute<ProfessionalOnboardingRouteProp>();
-  const { user, updateProfile, createProfessionalProfile } = useAuth();
+  const { user, updateProfile, createProfessionalProfile, markProfileCompleted } = useAuth();
   // const { role } = route.params;
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -48,6 +48,7 @@ const ProfessionalOnboardingScreen = () => {
     editingSoftware: [] as string[],
     serviceAreas: [] as string[],
     travelRadius: '',
+    city: '',
   });
 
   const equipmentOptions = ['DSLR Camera', 'Mirrorless Camera', 'Lens Kit', 'Lighting Equipment', 'Tripod', 'Drone', 'Gimbal', 'External Mic'];
@@ -56,7 +57,64 @@ const ProfessionalOnboardingScreen = () => {
   const editingSoftware = ['Adobe Photoshop', 'Adobe Lightroom', 'Adobe Premiere Pro', 'Final Cut Pro', 'DaVinci Resolve', 'Adobe After Effects'];
   const serviceAreas = ['Local (within 50km)', 'Regional (within 200km)', 'National', 'International'];
 
+  const validateCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        if (!formData.businessName.trim()) {
+          Alert.alert('Required Field', 'Please enter your business name');
+          return false;
+        }
+        if (!formData.bio.trim()) {
+          Alert.alert('Required Field', 'Please enter your bio');
+          return false;
+        }
+        if (formData.bio.length < 50) {
+          Alert.alert('Bio Too Short', 'Please write at least 50 characters about yourself');
+          return false;
+        }
+        return true;
+      case 2:
+        if (!formData.mainCamera.trim()) {
+          Alert.alert('Required Field', 'Please enter your main camera');
+          return false;
+        }
+        if (!formData.experienceYears.trim()) {
+          Alert.alert('Required Field', 'Please enter your years of experience');
+          return false;
+        }
+        if (isNaN(parseInt(formData.experienceYears)) || parseInt(formData.experienceYears) < 0) {
+          Alert.alert('Invalid Experience', 'Please enter a valid number of years');
+          return false;
+        }
+        if (formData.photographyStyle.length === 0 && formData.videoStyle.length === 0) {
+          Alert.alert('Required Field', 'Please select at least one photography or video style');
+          return false;
+        }
+        return true;
+      case 3:
+        if (!formData.city.trim()) {
+          Alert.alert('Required Field', 'Please enter your city');
+          return false;
+        }
+        if (!formData.travelRadius.trim()) {
+          Alert.alert('Required Field', 'Please enter your travel radius');
+          return false;
+        }
+        if (isNaN(parseInt(formData.travelRadius)) || parseInt(formData.travelRadius) < 1) {
+          Alert.alert('Invalid Travel Radius', 'Please enter a valid travel radius in kilometers');
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
   const handleNext = () => {
+    if (!validateCurrentStep()) {
+      return;
+    }
+    
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -105,6 +163,9 @@ const ProfessionalOnboardingScreen = () => {
         bio: formData.bio,
         // Add other fields as needed
       });
+
+      // Mark profile as completed
+      await markProfileCompleted();
 
       // Navigate to main app
       navigation.replace('Main');

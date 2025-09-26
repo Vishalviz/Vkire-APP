@@ -9,9 +9,13 @@ export interface User {
   email: string;
   phone?: string;
   city?: string;
+  location?: string;
   bio?: string;
   avatar_url?: string;
+  website?: string;
+  instagram?: string;
   created_at: string;
+  profileCompleted?: boolean;
 }
 
 // Professional Profile Types
@@ -176,6 +180,12 @@ export type RootStackParamList = {
     packageDetails: any;
     proDetails: any;
   };
+  PostDetail: { post: any };
+  EditProfile: undefined;
+  PaymentMethods: undefined;
+  NotificationSettings: undefined;
+  HelpSupport: undefined;
+  Settings: undefined;
   ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
 };
 
@@ -210,9 +220,10 @@ export type MainTabParamList = CustomerTabParamList;
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role: UserRole) => Promise<void>;
+  signIn: (email: string, password: string, name?: string, role?: UserRole) => Promise<void>;
+  signUp: (email: string, password: string, role: UserRole, name?: string, businessName?: string, city?: string, phone?: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  markProfileCompleted: () => Promise<void>;
   createProfessionalProfile?: (profile: Partial<ProProfile>) => Promise<void>;
 }

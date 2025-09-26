@@ -24,6 +24,9 @@ const AuthScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [city, setCity] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -40,6 +43,9 @@ const AuthScreen = () => {
   // Input refs for keyboard management
   const scrollViewRef = useRef<ScrollView>(null);
   const nameInputRef = useRef<TextInput>(null);
+  const businessNameInputRef = useRef<TextInput>(null);
+  const cityInputRef = useRef<TextInput>(null);
+  const phoneInputRef = useRef<TextInput>(null);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
@@ -153,17 +159,27 @@ const AuthScreen = () => {
       return;
     }
 
-    if (selectedRole === 'pro' && !name) {
-      Alert.alert('Error', 'Please enter your name');
-      return;
+    if (selectedRole === 'pro') {
+      if (!name) {
+        Alert.alert('Error', 'Please enter your name');
+        return;
+      }
+      if (!businessName) {
+        Alert.alert('Error', 'Please enter your business name');
+        return;
+      }
+      if (!city) {
+        Alert.alert('Error', 'Please enter your city');
+        return;
+      }
     }
 
     setLoading(true);
     try {
       if (selectedRole === 'pro') {
-        await signUp(email, password, selectedRole);
+        await signUp(email, password, selectedRole, name, businessName, city, phone);
       } else {
-        await signIn(email, password);
+        await signIn(email, password, name, selectedRole);
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
@@ -222,7 +238,7 @@ const AuthScreen = () => {
                     <View style={styles.roleButtonContent}>
                       <Text style={styles.roleButtonTitle}>Find Creatives</Text>
                       <Text style={styles.roleButtonDescription}>
-                        Discover talented photographers, videographers & editors for your projects
+                        Find creative professionals
                       </Text>
                     </View>
                     <View style={styles.roleButtonArrow}>
@@ -243,7 +259,7 @@ const AuthScreen = () => {
                     <View style={styles.roleButtonContent}>
                       <Text style={styles.roleButtonTitle}>Showcase Talent</Text>
                       <Text style={styles.roleButtonDescription}>
-                        Build your portfolio, connect with clients & grow your creative business
+                        Showcase your work
                       </Text>
                     </View>
                     <View style={styles.roleButtonArrow}>
@@ -274,12 +290,12 @@ const AuthScreen = () => {
                 </TouchableOpacity>
                 <View style={styles.formTitleContainer}>
                   <Text style={styles.formTitle}>
-                    {selectedRole === 'pro' ? 'Join as Professional' : 'Sign In as Customer'}
+                    {selectedRole === 'pro' ? 'Join as Professional' : 'Find Creatives'}
                   </Text>
                   <Text style={styles.formSubtitle}>
                     {selectedRole === 'pro' 
-                      ? 'Create your professional profile and start showcasing your talent'
-                      : 'Sign in to discover amazing creatives for your projects'
+                      ? 'Showcase your work'
+                      : 'Find creative professionals'
                     }
                   </Text>
                 </View>
@@ -289,30 +305,88 @@ const AuthScreen = () => {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Full Name</Text>
                   <View style={styles.inputWrapper}>
-                    <Ionicons name="person-outline" size={20} color={Colors.gray500} style={styles.inputIcon} />
+                    <Ionicons name="person-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={nameInputRef}
                       style={styles.input}
                       placeholder="Enter your full name"
-                      placeholderTextColor={Colors.gray400}
+                      placeholderTextColor={Colors.gray500}
                       value={name}
                       onChangeText={setName}
                       autoCapitalize="words"
                       onFocus={() => scrollToInput(nameInputRef)}
-                      onSubmitEditing={() => emailInputRef.current?.focus()}
+                      onSubmitEditing={() => selectedRole === 'pro' ? businessNameInputRef.current?.focus() : emailInputRef.current?.focus()}
                     />
                   </View>
                 </View>
 
+                {selectedRole === 'pro' && (
+                  <>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Business Name</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="business-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                        <TextInput
+                          ref={businessNameInputRef}
+                          style={styles.input}
+                          placeholder="Enter your business name"
+                          placeholderTextColor={Colors.gray500}
+                          value={businessName}
+                          onChangeText={setBusinessName}
+                          autoCapitalize="words"
+                          onFocus={() => scrollToInput(businessNameInputRef)}
+                          onSubmitEditing={() => cityInputRef.current?.focus()}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>City</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="location-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                        <TextInput
+                          ref={cityInputRef}
+                          style={styles.input}
+                          placeholder="Enter your city"
+                          placeholderTextColor={Colors.gray500}
+                          value={city}
+                          onChangeText={setCity}
+                          autoCapitalize="words"
+                          onFocus={() => scrollToInput(cityInputRef)}
+                          onSubmitEditing={() => phoneInputRef.current?.focus()}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Phone (Optional)</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="call-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                        <TextInput
+                          ref={phoneInputRef}
+                          style={styles.input}
+                          placeholder="Enter your phone number"
+                          placeholderTextColor={Colors.gray500}
+                          value={phone}
+                          onChangeText={setPhone}
+                          keyboardType="phone-pad"
+                          onFocus={() => scrollToInput(phoneInputRef)}
+                          onSubmitEditing={() => emailInputRef.current?.focus()}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
+
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Email Address</Text>
                   <View style={[styles.inputWrapper, emailError && styles.inputWrapperError]}>
-                    <Ionicons name="mail-outline" size={20} color={emailError ? Colors.error : Colors.gray500} style={styles.inputIcon} />
+                    <Ionicons name="mail-outline" size={20} color={emailError ? Colors.error : Colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={emailInputRef}
                       style={styles.input}
                       placeholder="Enter your email"
-                      placeholderTextColor={Colors.gray400}
+                      placeholderTextColor={Colors.gray500}
                       value={email}
                       onChangeText={handleEmailChange}
                       keyboardType="email-address"
@@ -328,12 +402,12 @@ const AuthScreen = () => {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Password</Text>
                   <View style={styles.inputWrapper}>
-                    <Ionicons name="lock-closed-outline" size={20} color={Colors.gray500} style={styles.inputIcon} />
+                    <Ionicons name="lock-closed-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={passwordInputRef}
                       style={styles.input}
                       placeholder="Enter your password"
-                      placeholderTextColor={Colors.gray400}
+                      placeholderTextColor={Colors.gray500}
                       value={password}
                       onChangeText={setPassword}
                       secureTextEntry={!showPassword}
@@ -548,21 +622,20 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semiBold,
+    fontWeight: Typography.fontWeight.medium,
     color: Colors.gray700,
     marginBottom: Spacing.sm,
-    letterSpacing: 0.2,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.gray200,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    minHeight: 56,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    minHeight: 48,
     ...Shadows.sm,
   },
   inputWrapperError: {
@@ -577,10 +650,11 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     fontSize: Typography.fontSize.base,
     color: Colors.gray900,
-    fontWeight: Typography.fontWeight.regular,
+    fontWeight: Typography.fontWeight.medium,
   },
   passwordToggle: {
     padding: Spacing.sm,
+    marginLeft: Spacing.sm,
   },
   errorText: {
     fontSize: Typography.fontSize.sm,

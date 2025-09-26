@@ -24,11 +24,12 @@ type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'posts' | 'creators'>('posts');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<any>(null);
   const [creators, setCreators] = useState<any[]>([]);
   const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<SearchScreenNavigationProp>();
   const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
@@ -42,9 +43,11 @@ const SearchScreen = () => {
   // Search creators when query changes
   React.useEffect(() => {
     if (searchQuery.trim()) {
-      searchCreators(searchQuery);
+      performSearch(searchQuery);
+      setShowSearchResults(true);
     } else {
-      loadCreators();
+      setShowSearchResults(false);
+      setSearchResults([]);
     }
   }, [searchQuery]);
 
@@ -69,26 +72,50 @@ const SearchScreen = () => {
     }
   };
 
+  const performSearch = (query: string) => {
+    const searchTerm = query.toLowerCase().trim();
+    
+    // Search through creators
+    const filteredCreators = mockCreators.filter(creator => 
+      creator.name.toLowerCase().includes(searchTerm) ||
+      creator.handle.toLowerCase().includes(searchTerm) ||
+      creator.city.toLowerCase().includes(searchTerm) ||
+      creator.services.some((service: string) => 
+        service.toLowerCase().includes(searchTerm)
+      )
+    );
+
+    // Search through posts for creators
+    const postsWithMatchingCreators = mockSuggestedPosts.filter(post =>
+      post.creator.name.toLowerCase().includes(searchTerm) ||
+      post.creator.handle.toLowerCase().includes(searchTerm) ||
+      post.caption.toLowerCase().includes(searchTerm) ||
+      post.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm))
+    );
+
+    // Combine and deduplicate results
+    const allResults = [...filteredCreators];
+    postsWithMatchingCreators.forEach(post => {
+      if (!allResults.find(creator => creator.id === post.creator.id)) {
+        allResults.push({
+          ...post.creator,
+          // Add some additional info from the post
+          recentPost: post.caption,
+          recentPostLikes: post.likes
+        } as any);
+      }
+    });
+
+    setSearchResults(allResults);
+  };
+
   const searchCreators = async (query: string) => {
     try {
       setLoading(true);
-      const filteredCreators = mockCreators.filter(creator => 
-        creator.name.toLowerCase().includes(query.toLowerCase()) ||
-        creator.services.some((service: string) => 
-          service.toLowerCase().includes(query.toLowerCase())
-        ) ||
-        creator.city.toLowerCase().includes(query.toLowerCase())
-      );
-      setCreators(filteredCreators);
+      performSearch(query);
     } catch (error) {
       console.error('Error searching creators:', error);
-      setCreators(mockCreators.filter(creator => 
-        creator.name.toLowerCase().includes(query.toLowerCase()) ||
-        creator.services.some((service: string) => 
-          service.toLowerCase().includes(query.toLowerCase())
-        ) ||
-        creator.city.toLowerCase().includes(query.toLowerCase())
-      ));
+      performSearch(query);
     } finally {
       setLoading(false);
     }
@@ -114,7 +141,7 @@ const SearchScreen = () => {
   };
 
   const handlePostPress = (post: any) => {
-    navigation.navigate('CreatorProfile', { proId: post.creator.id });
+    navigation.navigate('PostDetail', { post });
   };
 
   const handleCreatorPress = (creator: any) => {
@@ -127,6 +154,18 @@ const SearchScreen = () => {
       setSelectedCreator(creator);
       setShowPaymentModal(true);
     }
+  };
+
+  const handleSearchResultPress = (creator: any) => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+    handleCreatorPress(creator);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+    setSearchResults([]);
   };
 
   const handlePaymentOption = (option: 'single' | 'unlimited') => {
@@ -316,95 +355,45 @@ const SearchScreen = () => {
   ];
 
   const renderPost = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.postCard} onPress={() => handlePostPress(item)}>
-      <View style={styles.postHeader}>
-        <View style={styles.postCreatorInfo}>
-          <Image source={{ uri: item.creator.avatar }} style={styles.postAvatar} />
-          <View style={styles.postCreatorDetails}>
-            <Text style={styles.postCreatorName}>{item.creator.name}</Text>
-            <Text style={styles.postCreatorHandle}>{item.creator.handle}</Text>
+    <TouchableOpacity style={styles.postGridItem} onPress={() => handlePostPress(item)}>
+      <Image source={{ uri: item.image }} style={styles.postGridImage} />
+      <View style={styles.postOverlay}>
+        <View style={styles.postStats}>
+          <View style={styles.postStat}>
+            <Ionicons name="heart" size={16} color={Colors.white} />
+            <Text style={styles.postStatText}>{item.likes}</Text>
+          </View>
+          <View style={styles.postStat}>
+            <Ionicons name="chatbubble" size={16} color={Colors.white} />
+            <Text style={styles.postStatText}>{item.comments}</Text>
           </View>
         </View>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-horizontal" size={20} color={Colors.gray600} />
-        </TouchableOpacity>
-      </View>
-      
-      <Image source={{ uri: item.image }} style={styles.postImage} />
-      
-      <View style={styles.postActions}>
-        <TouchableOpacity onPress={() => handlePostLike(item.id)}>
-          <Ionicons 
-            name={item.isLiked ? "heart" : "heart-outline"} 
-            size={24} 
-            color={item.isLiked ? Colors.error : Colors.gray900} 
-          />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="chatbubble-outline" size={24} color={Colors.gray900} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="paper-plane-outline" size={24} color={Colors.gray900} />
-        </TouchableOpacity>
-        <View style={styles.postActionsSpacer} />
-        <TouchableOpacity>
-          <Ionicons name="bookmark-outline" size={24} color={Colors.gray900} />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.postContent}>
-        <Text style={styles.postLikes}>{item.likes.toLocaleString()} likes</Text>
-        <Text style={styles.postCaption}>
-          <Text style={styles.postCreatorName}>{item.creator.name}</Text> {item.caption}
-        </Text>
-        <TouchableOpacity>
-          <Text style={styles.postViewComments}>View all {item.comments} comments</Text>
-        </TouchableOpacity>
-        <Text style={styles.postTime}>2 hours ago</Text>
       </View>
     </TouchableOpacity>
   );
 
-  const renderCreator = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.creatorCard}
-      onPress={() => handleCreatorPress(item)}
+  const renderSearchResult = ({ item }: { item: any }) => (
+    <TouchableOpacity 
+      style={styles.searchResultItem} 
+      onPress={() => handleSearchResultPress(item)}
     >
-      <View style={styles.portfolioContainer}>
-        <Image source={{ uri: item.portfolio[0] }} style={styles.portfolioImage} />
-        <View style={styles.availabilityBadge}>
-          <View style={[styles.availabilityDot, { backgroundColor: getAvailabilityColor(item.availability) }]} />
-          <Text style={styles.availabilityText}>{item.availability}</Text>
-        </View>
-        {item.isHighlighted && (
-          <View style={styles.highlightedBadge}>
-            <Ionicons name="star" size={12} color="#FFD700" />
-            <Text style={styles.highlightedText}>Featured</Text>
-          </View>
+      <Image source={{ uri: item.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100' }} style={styles.searchResultAvatar} />
+      <View style={styles.searchResultInfo}>
+        <Text style={styles.searchResultName}>{item.name}</Text>
+        <Text style={styles.searchResultHandle}>{item.handle}</Text>
+        <Text style={styles.searchResultLocation}>{item.city}</Text>
+        {item.recentPost && (
+          <Text style={styles.searchResultPost} numberOfLines={1}>
+            Recent: {item.recentPost}
+          </Text>
         )}
       </View>
-      <View style={styles.creatorInfo}>
-        <Text style={styles.creatorName}>{item.name}</Text>
-        <Text style={styles.creatorHandle}>{item.handle}</Text>
-        <Text style={styles.creatorLocation}>{item.city}</Text>
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={14} color="#FFD700" />
-          <Text style={styles.rating}>{item.rating}</Text>
-          <Text style={styles.reviewCount}>({item.reviewCount})</Text>
-        </View>
-        <Text style={styles.priceRange}>{item.priceRange}</Text>
+      <View style={styles.searchResultActions}>
+        <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
       </View>
     </TouchableOpacity>
   );
 
-  const getAvailabilityColor = (availability: string) => {
-    switch (availability) {
-      case 'Available': return Colors.success;
-      case 'Busy': return Colors.warning;
-      case 'Offline': return Colors.gray500;
-      default: return Colors.gray500;
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -423,53 +412,49 @@ const SearchScreen = () => {
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+                <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* Tab Navigation */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
-            onPress={() => setActiveTab('posts')}
-          >
-            <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
-              Posts
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'creators' && styles.activeTab]}
-            onPress={() => setActiveTab('creators')}
-          >
-            <Text style={[styles.tabText, activeTab === 'creators' && styles.activeTabText]}>
-              Creators
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Content */}
-        {activeTab === 'posts' ? (
+        {showSearchResults ? (
+          <View style={styles.searchResultsContainer}>
+            <View style={styles.searchResultsHeader}>
+              <Text style={styles.searchResultsTitle}>
+                {searchResults.length > 0 
+                  ? `${searchResults.length} result${searchResults.length === 1 ? '' : 's'} found`
+                  : 'No results found'
+                }
+              </Text>
+            </View>
+            <FlatList
+              data={searchResults}
+              renderItem={renderSearchResult}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.searchResultsList}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptySearchResults}>
+                  <Ionicons name="search" size={48} color={Colors.gray400} />
+                  <Text style={styles.emptySearchTitle}>No results found</Text>
+                  <Text style={styles.emptySearchSubtitle}>
+                    Try searching for photographer, videographer, editor, or location names
+                  </Text>
+                </View>
+              }
+            />
+          </View>
+        ) : (
           <FlatList
             data={suggestedPosts}
             renderItem={renderPost}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.postsList}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={Colors.primary}
-                colors={[Colors.primary]}
-              />
-            }
-          />
-        ) : (
-          <FlatList
-            data={creators}
-            renderItem={renderCreator}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            contentContainerStyle={styles.creatorsList}
+            numColumns={3}
+            contentContainerStyle={styles.postsGrid}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
@@ -529,6 +514,7 @@ const SearchScreen = () => {
           </View>
         </View>
       </Modal>
+
     </SafeAreaView>
   );
 };
@@ -574,208 +560,48 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.gray900,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+  clearButton: {
+    marginLeft: Spacing.sm,
   },
-  tab: {
+  // Post Grid Styles (Instagram Search Page Style)
+  postsGrid: {
+    padding: 1, // Small padding for grid spacing
+  },
+  postGridItem: {
     flex: 1,
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: Colors.primary,
-  },
-  tabText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
-  },
-  activeTabText: {
-    color: Colors.primary,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  // Post Styles (Instagram-style)
-  postsList: {
-    paddingBottom: Spacing.xl,
-  },
-  postCard: {
-    backgroundColor: Colors.surface,
-    marginBottom: Spacing.lg,
-  },
-  postHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
-  postCreatorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  postAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.full,
-    marginRight: Spacing.sm,
-  },
-  postCreatorDetails: {
-    flex: 1,
-  },
-  postCreatorName: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-  },
-  postCreatorHandle: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-  },
-  postImage: {
-    width: '100%',
     aspectRatio: 1,
-    backgroundColor: Colors.gray100,
-  },
-  postActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
-  postActionsSpacer: {
-    flex: 1,
-  },
-  postContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-  },
-  postLikes: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  postCaption: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-    marginBottom: Spacing.xs,
-  },
-  postViewComments: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginBottom: Spacing.xs,
-  },
-  postTime: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray500,
-  },
-  // Creator Styles
-  creatorsList: {
-    padding: Spacing.lg,
-  },
-  creatorCard: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    margin: Spacing.sm,
-    ...Shadows.md,
-  },
-  portfolioContainer: {
+    margin: 1,
     position: 'relative',
   },
-  portfolioImage: {
+  postGridImage: {
     width: '100%',
-    height: 150,
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
+    height: '100%',
     backgroundColor: Colors.gray100,
   },
-  availabilityBadge: {
+  postOverlay: {
     position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-end',
+    padding: Spacing.sm,
+  },
+  postStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.md,
   },
-  availabilityDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: Spacing.xs,
+  postStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: Spacing.md,
   },
-  availabilityText: {
+  postStatText: {
     color: Colors.white,
-    fontSize: Typography.fontSize.xs,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  highlightedBadge: {
-    position: 'absolute',
-    top: Spacing.sm,
-    left: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.9)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.md,
-  },
-  highlightedText: {
-    color: Colors.gray900,
-    fontSize: Typography.fontSize.xs,
+    fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
     marginLeft: Spacing.xs,
-  },
-  creatorInfo: {
-    padding: Spacing.lg,
-  },
-  creatorName: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  creatorHandle: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginBottom: Spacing.xs,
-  },
-  creatorLocation: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginBottom: Spacing.sm,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  rating: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginLeft: Spacing.xs,
-  },
-  reviewCount: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginLeft: Spacing.xs,
-  },
-  priceRange: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
   },
   // Modal Styles
   modalOverlay: {
@@ -855,6 +681,88 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
     color: Colors.white,
+  },
+  // Search Results Styles
+  searchResultsContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  searchResultsHeader: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+  },
+  searchResultsTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  searchResultsList: {
+    paddingVertical: Spacing.sm,
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray100,
+  },
+  searchResultAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: BorderRadius.full,
+    marginRight: Spacing.md,
+  },
+  searchResultInfo: {
+    flex: 1,
+  },
+  searchResultName: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
+  },
+  searchResultHandle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+  },
+  searchResultLocation: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+  },
+  searchResultPost: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray500,
+    fontStyle: 'italic',
+  },
+  searchResultActions: {
+    paddingLeft: Spacing.sm,
+  },
+  emptySearchResults: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing['4xl'],
+    paddingHorizontal: Spacing.xl,
+  },
+  emptySearchTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  emptySearchSubtitle: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    textAlign: 'center',
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
 });
 
