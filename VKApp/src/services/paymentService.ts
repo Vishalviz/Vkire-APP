@@ -117,4 +117,63 @@ export const PaymentService = {
     // Mock implementation
     return { success: true };
   },
+
+  // Create deposit payment intent (for booking deposits)
+  async createDepositPaymentIntent(
+    _bookingId: string,
+    amount: number,
+    currency: string = 'inr'
+  ): Promise<PaymentIntent> {
+    // Mock implementation
+    return {
+      id: 'pi_deposit_' + Date.now(),
+      client_secret: 'pi_deposit_' + Date.now() + '_secret_mock',
+      amount: amount * 100, // Convert to paise
+      currency,
+      status: 'requires_payment_method',
+      created: Date.now(),
+    };
+  },
+
+  // Process payment
+  async processPayment(
+    _clientSecret: string,
+    _paymentMethodId?: string
+  ): Promise<{ success: boolean; paymentIntentId?: string; error?: string }> {
+    // Mock implementation - simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate success/failure
+    const success = Math.random() > 0.1; // 90% success rate
+    
+    if (success) {
+      return { 
+        success: true, 
+        paymentIntentId: 'pi_processed_' + Date.now() 
+      };
+    } else {
+      return { success: false, error: 'Payment failed. Please try again.' };
+    }
+  },
+
+  // Save payment record
+  async savePaymentRecord(
+    _bookingId: string,
+    _paymentIntentId: string,
+    _amount: number,
+    _type: string
+  ): Promise<{ success: boolean; error?: string }> {
+    // Mock implementation
+    return { success: true };
+  },
+
+  // Format amount for display
+  formatAmount(amount: number, currency: string = 'inr'): string {
+    const symbol = currency === 'inr' ? '₹' : '$';
+    const formattedAmount = (amount / 100).toLocaleString('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+    return `${symbol}${formattedAmount}`;
+  },
 };
