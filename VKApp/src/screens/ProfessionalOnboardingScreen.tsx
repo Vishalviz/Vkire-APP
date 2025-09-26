@@ -22,9 +22,9 @@ type ProfessionalOnboardingNavigationProp = StackNavigationProp<RootStackParamLi
 
 const ProfessionalOnboardingScreen = () => {
   const navigation = useNavigation<ProfessionalOnboardingNavigationProp>();
-  const route = useRoute<ProfessionalOnboardingRouteProp>();
+  // const route = useRoute<ProfessionalOnboardingRouteProp>();
   const { user, updateProfile, createProfessionalProfile } = useAuth();
-  const { role } = route.params;
+  // const { role } = route.params;
 
   const [currentStep, setCurrentStep] = useState(1);
   

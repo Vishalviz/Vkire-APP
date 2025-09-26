@@ -10,7 +10,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
