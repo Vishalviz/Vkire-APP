@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
   RefreshControl,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -240,9 +241,10 @@ const SearchScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Modern Header */}
-      <View style={styles.header}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Modern Header */}
+        <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Search</Text>
         </View>
@@ -322,20 +324,24 @@ const SearchScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
+    backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     paddingHorizontal: Spacing.xl,
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
+    paddingVertical: Spacing.lg,
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
     ...Shadows.sm,
@@ -479,7 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     width: '90%',
