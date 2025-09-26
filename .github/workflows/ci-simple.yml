@@ -37,7 +37,7 @@ jobs:
       # Step 3: Install dependencies
       - name: Install dependencies
         working-directory: ./VKApp
-        run: npm ci
+        run: npm ci --ignore-scripts --ignore-scripts
       
       # Step 4: Run linting
       - name: Run ESLint
@@ -67,7 +67,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./VKApp
-        run: npm ci
+        run: npm ci --ignore-scripts
       
       - name: Run tests
         working-directory: ./VKApp
@@ -92,7 +92,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./VKApp
-        run: npm ci
+        run: npm ci --ignore-scripts
       
       - name: Build web version
         working-directory: ./VKApp
