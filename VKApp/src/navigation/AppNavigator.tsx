@@ -209,7 +209,7 @@ const AppNavigator = () => {
             <Stack.Screen 
               name="BookingDetails" 
               component={BookingDetailsScreen}
-              options={{ headerShown: true, title: 'Booking Details' }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen 
               name="Inquiry" 
@@ -224,12 +224,12 @@ const AppNavigator = () => {
             <Stack.Screen 
               name="Payment" 
               component={PaymentScreen}
-              options={{ headerShown: true, title: 'Payment' }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen 
               name="ProfessionalOnboarding" 
               component={ProfessionalOnboardingScreen}
-              options={{ headerShown: false }}
+              options={{ headerShown: false, gestureEnabled: false }}
             />
           </>
         ) : (

@@ -31,11 +31,6 @@ const ProfileScreen = () => {
       onPress: () => console.log('Edit Profile'),
     },
     {
-      title: 'My Bookings',
-      icon: 'calendar-outline',
-      onPress: () => console.log('My Bookings'),
-    },
-    {
       title: 'Payment Methods',
       icon: 'card-outline',
       onPress: () => console.log('Payment Methods'),
