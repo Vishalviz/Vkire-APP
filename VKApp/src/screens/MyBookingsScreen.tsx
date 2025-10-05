@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { useLocation } from '../contexts/LocationContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import PaymentService from '../services/paymentService';
 
@@ -24,6 +25,8 @@ interface Booking {
   service: string;
   date: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   status: 'confirmed' | 'completed' | 'cancelled';
   amount: number;
   proAvatar?: string;
@@ -36,6 +39,9 @@ interface Inquiry {
   proName: string;
   service: string;
   date: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
   status: 'pending' | 'accepted' | 'declined';
   amount: number;
   proAvatar?: string;
@@ -45,6 +51,7 @@ interface Inquiry {
 
 const MyBookingsScreen: React.FC = () => {
   const navigation = useNavigation<MyBookingsScreenNavigationProp>();
+  const { currentLocation, manualLocation, isLocationEnabled } = useLocation();
   
   // Enhanced mock data for comprehensive testing
   const [bookings, setBookings] = useState<Booking[]>([
@@ -54,6 +61,8 @@ const MyBookingsScreen: React.FC = () => {
       service: 'Wedding Photography',
       date: '2024-12-15',
       location: 'Mumbai, Maharashtra',
+      latitude: 19.0760,
+      longitude: 72.8777,
       status: 'confirmed',
       amount: 25000,
       type: 'booking',
@@ -64,6 +73,8 @@ const MyBookingsScreen: React.FC = () => {
       service: 'Corporate Event',
       date: '2024-11-20',
       location: 'Delhi, NCR',
+      latitude: 28.6139,
+      longitude: 77.2090,
       status: 'completed',
       amount: 15000,
       type: 'booking',
@@ -97,6 +108,9 @@ const MyBookingsScreen: React.FC = () => {
       proName: 'Creative Lens',
       service: 'Event Photography',
       date: '2024-11-10',
+      location: 'Bangalore, Karnataka',
+      latitude: 12.9716,
+      longitude: 77.5946,
       status: 'pending',
       amount: 499,
       type: 'inquiry',
@@ -108,6 +122,9 @@ const MyBookingsScreen: React.FC = () => {
       proName: 'Photo Magic',
       service: 'Corporate Shoot',
       date: '2024-12-05',
+      location: 'Delhi, NCR',
+      latitude: 28.7041,
+      longitude: 77.1025,
       status: 'accepted',
       amount: 499,
       type: 'inquiry',
@@ -119,6 +136,9 @@ const MyBookingsScreen: React.FC = () => {
       proName: 'Studio Pro',
       service: 'Fashion Photography',
       date: '2024-11-25',
+      location: 'Mumbai, Maharashtra',
+      latitude: 19.0176,
+      longitude: 72.8562,
       status: 'declined',
       amount: 499,
       type: 'inquiry',
@@ -152,6 +172,19 @@ const MyBookingsScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'bookings' | 'inquiries'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Helper function to calculate distance
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.round(distance * 100) / 100;
+  };
   const [loading, setLoading] = useState(false);
 
   // Filter and search functionality
@@ -300,12 +333,26 @@ const MyBookingsScreen: React.FC = () => {
           <Ionicons name="calendar-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>{item.date}</Text>
         </View>
-        {item.type === 'booking' && 'location' in item && (
+        {(item.type === 'booking' && 'location' in item) || (item.type === 'inquiry' && item.location) ? (
           <View style={styles.detailRow}>
             <Ionicons name="location-outline" size={16} color="#8E8E93" />
-            <Text style={styles.detailText}>{item.location}</Text>
+            <View style={styles.locationInfo}>
+              <Text style={styles.detailText}>
+                {item.type === 'booking' ? item.location : item.location}
+              </Text>
+              {isLocationEnabled && currentLocation && item.latitude && item.longitude && (
+                <Text style={styles.distanceText}>
+                  {calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    item.latitude,
+                    item.longitude
+                  )}km away
+                </Text>
+              )}
+            </View>
           </View>
-        )}
+        ) : null}
         <View style={styles.detailRow}>
           <Ionicons name="card-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
@@ -600,6 +647,16 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     color: Colors.gray600,
     fontWeight: Typography.fontWeight.medium,
+  },
+  locationInfo: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+  },
+  distanceText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.medium,
+    marginTop: 2,
   },
   emptyState: {
     alignItems: 'center',

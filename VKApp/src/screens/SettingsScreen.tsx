@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from '../contexts/LocationContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
@@ -32,6 +33,14 @@ interface SettingItem {
 const SettingsScreen = () => {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const { user, signOut } = useAuth();
+  const { 
+    isLocationEnabled, 
+    currentLocation, 
+    manualLocation, 
+    requestLocationPermission, 
+    clearLocation,
+    setManualLocation 
+  } = useLocation();
   const [settings, setSettings] = useState({
     darkMode: false,
     autoSave: true,
@@ -40,12 +49,32 @@ const SettingsScreen = () => {
     crashReports: true,
     marketingEmails: false,
   });
+  const [showLocationOptions, setShowLocationOptions] = useState(false);
 
   const handleToggleSetting = (key: string) => {
     setSettings(prev => ({
       ...prev,
       [key]: !prev[key as keyof typeof prev]
     }));
+  };
+
+  const handleLocationPreferenceChange = async (preference: 'gps' | 'manual' | 'none') => {
+    switch (preference) {
+      case 'gps':
+        await requestLocationPermission();
+        break;
+      case 'manual':
+        setShowLocationOptions(true);
+        break;
+      case 'none':
+        await clearLocation();
+        break;
+    }
+  };
+
+  const handleManualLocationSet = (location: string) => {
+    setManualLocation(location);
+    setShowLocationOptions(false);
   };
 
   const handleSignOut = () => {
@@ -111,11 +140,13 @@ const SettingsScreen = () => {
     {
       id: 'locationServices',
       title: 'Location Services',
-      description: 'Allow location access for better recommendations',
-      type: 'toggle',
-      value: settings.locationServices,
+      description: isLocationEnabled 
+        ? (manualLocation || currentLocation?.city || 'GPS Location Active')
+        : 'Manage location preferences',
+      type: 'navigate',
       icon: 'location',
-      color: Colors.warning,
+      color: isLocationEnabled ? Colors.success : Colors.warning,
+      onPress: () => setShowLocationOptions(true),
     },
   ];
 
@@ -271,6 +302,83 @@ const SettingsScreen = () => {
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         </ScrollView>
+
+        {/* Location Options Modal */}
+        {showLocationOptions && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Location Preferences</Text>
+                <TouchableOpacity onPress={() => setShowLocationOptions(false)}>
+                  <Ionicons name="close" size={24} color={Colors.gray600} />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.locationOptions}>
+                <TouchableOpacity 
+                  style={styles.locationOption}
+                  onPress={() => handleLocationPreferenceChange('gps')}
+                >
+                  <View style={styles.locationOptionIcon}>
+                    <Ionicons name="location" size={24} color={Colors.primary} />
+                  </View>
+                  <View style={styles.locationOptionContent}>
+                    <Text style={styles.locationOptionTitle}>Use GPS Location</Text>
+                    <Text style={styles.locationOptionDescription}>
+                      Automatically detect your current location
+                    </Text>
+                  </View>
+                  {!manualLocation && isLocationEnabled && (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.locationOption}
+                  onPress={() => handleLocationPreferenceChange('manual')}
+                >
+                  <View style={styles.locationOptionIcon}>
+                    <Ionicons name="map" size={24} color={Colors.warning} />
+                  </View>
+                  <View style={styles.locationOptionContent}>
+                    <Text style={styles.locationOptionTitle}>Manual Location</Text>
+                    <Text style={styles.locationOptionDescription}>
+                      Set your location manually
+                    </Text>
+                  </View>
+                  {manualLocation && (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.locationOption}
+                  onPress={() => handleLocationPreferenceChange('none')}
+                >
+                  <View style={styles.locationOptionIcon}>
+                    <Ionicons name="location-off" size={24} color={Colors.error} />
+                  </View>
+                  <View style={styles.locationOptionContent}>
+                    <Text style={styles.locationOptionTitle}>Disable Location</Text>
+                    <Text style={styles.locationOptionDescription}>
+                      Don't use location services
+                    </Text>
+                  </View>
+                  {!isLocationEnabled && (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {manualLocation && (
+                <View style={styles.currentLocation}>
+                  <Text style={styles.currentLocationLabel}>Current Location:</Text>
+                  <Text style={styles.currentLocationText}>{manualLocation}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -447,6 +555,87 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
     color: Colors.error,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius['2xl'],
+    margin: Spacing.xl,
+    maxWidth: 400,
+    width: '90%',
+    ...Shadows.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.xl,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray200,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+  },
+  locationOptions: {
+    padding: Spacing.lg,
+  },
+  locationOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray50,
+    marginBottom: Spacing.sm,
+  },
+  locationOptionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+    ...Shadows.sm,
+  },
+  locationOptionContent: {
+    flex: 1,
+  },
+  locationOptionTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: 2,
+  },
+  locationOptionDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+  },
+  currentLocation: {
+    padding: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray200,
+  },
+  currentLocationLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+  },
+  currentLocationText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.gray900,
   },
 });
 

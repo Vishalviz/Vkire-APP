@@ -19,6 +19,8 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows, Animation } from '.
 import Logo from '../components/Logo';
 import logger from '../utils/logger';
 import { useProfileViews } from '../contexts/ProfileViewContext';
+import { useLocation } from '../contexts/LocationContext';
+import LocationService from '../services/locationService';
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -33,6 +35,13 @@ const FeedScreen = () => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const navigation = useNavigation<FeedScreenNavigationProp>();
   const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
+  const { 
+    isLocationEnabled, 
+    isLoading: locationLoading, 
+    showLocationPrompt, 
+    currentLocation, 
+    manualLocation 
+  } = useLocation();
   
   // Animation refs for micro-interactions
   const likeAnimations = useRef<{ [key: string]: Animated.Value }>({});
@@ -41,11 +50,28 @@ const FeedScreen = () => {
 
   useEffect(() => {
     loadPosts();
+    checkLocationPermission();
   }, []);
+
+  const checkLocationPermission = async () => {
+    if (!isLocationEnabled) {
+      // Show location prompt on first app launch
+      await showLocationPrompt();
+    }
+  };
 
   const loadPosts = async () => {
     try {
-      // Mock data with more realistic content
+      // Mock professionals data with location coordinates
+      const mockProfessionals = [
+        { id: 'pro1', name: 'Sarah Johnson', city: 'Delhi', latitude: 28.6139, longitude: 77.2090 },
+        { id: 'pro2', name: 'Mike Chen', city: 'Mumbai', latitude: 19.0760, longitude: 72.8777 },
+        { id: 'pro3', name: 'Emma Davis', city: 'Bangalore', latitude: 12.9716, longitude: 77.5946 },
+        { id: 'pro4', name: 'Alex Kumar', city: 'Delhi', latitude: 28.7041, longitude: 77.1025 },
+        { id: 'pro5', name: 'Lisa Wang', city: 'Mumbai', latitude: 19.0176, longitude: 72.8562 },
+      ];
+
+      // Mock data with location coordinates for proximity sorting
       const mockPosts: PortfolioPost[] = [
         {
           id: '1',
@@ -57,6 +83,7 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
           likes_count: 24,
           comments_count: 5,
+          professional: mockProfessionals[0], // Add professional data
         },
         {
           id: '2',
@@ -68,6 +95,7 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
           likes_count: 18,
           comments_count: 3,
+          professional: mockProfessionals[1], // Add professional data
         },
         {
           id: '3',
@@ -79,9 +107,48 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
           likes_count: 42,
           comments_count: 8,
+          professional: mockProfessionals[2], // Add professional data
         },
       ];
-      setPosts(mockPosts);
+
+      // Sort posts by proximity if location is enabled
+      let sortedPosts = mockPosts;
+      if (isLocationEnabled && (currentLocation || manualLocation)) {
+        if (currentLocation) {
+          // Sort by GPS distance
+          sortedPosts = mockPosts
+            .map(post => ({
+              ...post,
+              distance: post.professional 
+                ? LocationService.calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    post.professional.latitude,
+                    post.professional.longitude
+                  )
+                : undefined
+            }))
+            .sort((a, b) => {
+              if (a.distance === undefined && b.distance === undefined) return 0;
+              if (a.distance === undefined) return 1;
+              if (b.distance === undefined) return -1;
+              return a.distance - b.distance;
+            });
+        } else if (manualLocation) {
+          // Sort by city match first, then by other criteria
+          sortedPosts = mockPosts.sort((a, b) => {
+            const aCityMatch = a.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
+            const bCityMatch = b.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
+            
+            if (aCityMatch !== bCityMatch) return aCityMatch - bCityMatch;
+            
+            // If both match or both don't match, sort by likes
+            return (b.likes_count || 0) - (a.likes_count || 0);
+          });
+        }
+      }
+
+      setPosts(sortedPosts);
       
       // Initialize animation values for each post
       mockPosts.forEach(post => {
@@ -285,7 +352,9 @@ const FeedScreen = () => {
   };
 
   const renderPost = ({ item }: { item: PortfolioPost }) => {
-    const creator = getCreatorName(item.pro_id);
+    const creator = item.professional 
+      ? { name: item.professional.name, handle: `@${item.professional.name.toLowerCase().replace(' ', '_')}` }
+      : getCreatorName(item.pro_id);
     const isLiked = likedPosts.has(item.id);
     const isSaved = savedPosts.has(item.id);
     const likeAnimation = likeAnimations.current[item.id];
@@ -307,7 +376,13 @@ const FeedScreen = () => {
             </View>
             <View style={styles.creatorDetails}>
               <Text style={styles.creatorName}>{creator.name}</Text>
-              <Text style={styles.creatorHandle}>@{creator.handle}</Text>
+              <View style={styles.creatorLocationContainer}>
+                <Ionicons name="location" size={12} color={Colors.gray500} />
+                <Text style={styles.creatorLocation}>
+                  {item.professional?.city || 'Unknown Location'}
+                  {item.distance && ` • ${item.distance}km away`}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
           
@@ -421,7 +496,17 @@ const FeedScreen = () => {
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <Logo size="small" />
-            <Text style={styles.headerTitle}>Feed</Text>
+            <View>
+              <Text style={styles.headerTitle}>Feed</Text>
+              {isLocationEnabled && (
+                <View style={styles.locationContainer}>
+                  <Ionicons name="location" size={12} color={Colors.primary} />
+                  <Text style={styles.locationText}>
+                    {manualLocation || currentLocation?.city || 'Location enabled'}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
           <TouchableOpacity 
             style={styles.headerButton} 
@@ -547,6 +632,18 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.md,
     letterSpacing: 0.3,
   },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.md,
+    marginTop: 2,
+  },
+  locationText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.medium,
+    marginLeft: 4,
+  },
   headerButton: {
     padding: Spacing.sm,
     borderRadius: BorderRadius.lg,
@@ -658,6 +755,17 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.regular,
     color: Colors.gray500,
+  },
+  creatorLocationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  creatorLocation: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.gray500,
+    fontWeight: Typography.fontWeight.medium,
+    marginLeft: 4,
   },
   headerActions: {
     flexDirection: 'row',

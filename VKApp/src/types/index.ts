@@ -67,6 +67,14 @@ export interface PortfolioPost {
   created_at: string;
   likes_count?: number;
   comments_count?: number;
+  professional?: {
+    id: string;
+    name: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  distance?: number;
 }
 
 export interface PostReaction {
@@ -162,7 +170,16 @@ export type RootStackParamList = {
     professionalId?: string; 
     professionalName?: string; 
     packageId?: string; 
-    transactionId?: string; 
+    transactionId?: string;
+    locationContext?: {
+      userLocation: {
+        city: string;
+        latitude?: number;
+        longitude?: number;
+      };
+      professionalLocation: string;
+      distance: number | null;
+    };
   };
   BookingDetails: { bookingId: string; booking?: any };
   Inquiry: { packageId: string };

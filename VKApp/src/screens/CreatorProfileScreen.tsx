@@ -16,6 +16,7 @@ import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from '../contexts/LocationContext';
 import PaymentService from '../services/paymentService';
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/designSystem';
 
@@ -26,6 +27,7 @@ const CreatorProfileScreen = () => {
   const route = useRoute<CreatorProfileScreenRouteProp>();
   const navigation = useNavigation<CreatorProfileScreenNavigationProp>();
   const { user } = useAuth();
+  const { currentLocation, manualLocation } = useLocation();
   const { proId } = route.params;
   
   // Check if current user is the profile owner
@@ -38,6 +40,8 @@ const CreatorProfileScreen = () => {
     name: 'John Photography',
     handle: '@johnphoto',
     city: 'Mumbai',
+    latitude: 19.0760,
+    longitude: 72.8777,
     bio: 'Professional photographer specializing in weddings, portraits, and events. 5+ years of experience.',
     rating: 4.8,
     reviewCount: 24,
@@ -165,16 +169,25 @@ const CreatorProfileScreen = () => {
           transactionId: 'existing_access'
         });
       } else {
-        // User needs to purchase access
+        // User needs to purchase access - include location context
+        const locationContext = {
+          userLocation: currentLocation || { city: manualLocation || 'Unknown' },
+          professionalLocation: mockCreator.city || 'Unknown',
+          distance: currentLocation && mockCreator.latitude && mockCreator.longitude 
+            ? calculateDistance(currentLocation.latitude, currentLocation.longitude, mockCreator.latitude, mockCreator.longitude)
+            : null
+        };
+
         PaymentService.showInquiryPaymentModal(
           mockCreator.id,
           (transactionId) => {
-            // Payment successful, navigate directly to chat
+            // Payment successful, navigate directly to chat with location context
             navigation.navigate('Chat', { 
               professionalId: mockCreator.id,
               professionalName: mockCreator.name,
               packageId: packageId,
-              transactionId: transactionId
+              transactionId: transactionId,
+              locationContext: locationContext
             });
           },
           () => {
@@ -187,6 +200,19 @@ const CreatorProfileScreen = () => {
       // Owner can directly navigate to inquiry
       navigation.navigate('Inquiry', { packageId });
     }
+  };
+
+  // Helper function to calculate distance
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.round(distance * 100) / 100;
   };
 
   const handleBook = (packageItem: any) => {

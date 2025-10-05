@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { useLocation } from '../contexts/LocationContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 
@@ -27,6 +28,7 @@ const BookingScreen: React.FC = () => {
   const navigation = useNavigation<BookingScreenNavigationProp>();
   const route = useRoute<BookingScreenRouteProp>();
   const { packageDetails, proDetails } = route.params || {};
+  const { currentLocation, manualLocation } = useLocation();
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | undefined>();
@@ -38,6 +40,19 @@ const BookingScreen: React.FC = () => {
 
   const handleTimeSelect = (timeSlot: TimeSlot) => {
     setSelectedTimeSlot(timeSlot);
+  };
+
+  // Helper function to calculate distance
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.round(distance * 100) / 100;
   };
 
   const handleContinue = () => {
@@ -112,6 +127,49 @@ const BookingScreen: React.FC = () => {
             </View>
           </View>
         </View>
+
+        {/* Location Context */}
+        {(currentLocation || manualLocation) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Location Information</Text>
+            <View style={styles.locationCard}>
+              <View style={styles.locationRow}>
+                <Ionicons name="location" size={20} color={Colors.primary} />
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationLabel}>Your Location</Text>
+                  <Text style={styles.locationValue}>
+                    {currentLocation?.city || manualLocation || 'Unknown'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.locationRow}>
+                <Ionicons name="business" size={20} color={Colors.warning} />
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationLabel}>Professional Location</Text>
+                  <Text style={styles.locationValue}>
+                    {proDetails?.city || proDetails?.location || 'Unknown'}
+                  </Text>
+                </View>
+              </View>
+              {currentLocation && proDetails?.latitude && proDetails?.longitude && (
+                <View style={styles.locationRow}>
+                  <Ionicons name="navigate" size={20} color={Colors.success} />
+                  <View style={styles.locationInfo}>
+                    <Text style={styles.locationLabel}>Distance</Text>
+                    <Text style={styles.locationValue}>
+                      {calculateDistance(
+                        currentLocation.latitude,
+                        currentLocation.longitude,
+                        proDetails.latitude,
+                        proDetails.longitude
+                      )}km away
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* Availability Calendar */}
         <View style={styles.section}>
@@ -365,6 +423,34 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
     marginRight: Spacing.sm,
+  },
+  locationCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.gray200,
+    ...Shadows.sm,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  locationInfo: {
+    marginLeft: Spacing.md,
+    flex: 1,
+  },
+  locationLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  locationValue: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray900,
+    fontWeight: Typography.fontWeight.semiBold,
+    marginTop: 2,
   },
 });
 

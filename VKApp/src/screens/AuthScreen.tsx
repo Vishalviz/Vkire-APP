@@ -24,7 +24,6 @@ const AuthScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [businessName, setBusinessName] = useState('');
   const [city, setCity] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +42,6 @@ const AuthScreen = () => {
   // Input refs for keyboard management
   const scrollViewRef = useRef<ScrollView>(null);
   const nameInputRef = useRef<TextInput>(null);
-  const businessNameInputRef = useRef<TextInput>(null);
   const cityInputRef = useRef<TextInput>(null);
   const phoneInputRef = useRef<TextInput>(null);
   const emailInputRef = useRef<TextInput>(null);
@@ -164,10 +162,6 @@ const AuthScreen = () => {
         Alert.alert('Error', 'Please enter your name');
         return;
       }
-      if (!businessName) {
-        Alert.alert('Error', 'Please enter your business name');
-        return;
-      }
       if (!city) {
         Alert.alert('Error', 'Please enter your city');
         return;
@@ -177,7 +171,7 @@ const AuthScreen = () => {
     setLoading(true);
     try {
       if (selectedRole === 'pro') {
-        await signUp(email, password, selectedRole, name, businessName, city, phone);
+        await signUp(email, password, selectedRole, name, undefined, city, phone);
       } else {
         await signIn(email, password, name, selectedRole);
       }
@@ -315,31 +309,13 @@ const AuthScreen = () => {
                       onChangeText={setName}
                       autoCapitalize="words"
                       onFocus={() => scrollToInput(nameInputRef)}
-                      onSubmitEditing={() => selectedRole === 'pro' ? businessNameInputRef.current?.focus() : emailInputRef.current?.focus()}
+                      onSubmitEditing={() => selectedRole === 'pro' ? cityInputRef.current?.focus() : emailInputRef.current?.focus()}
                     />
                   </View>
                 </View>
 
                 {selectedRole === 'pro' && (
                   <>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Business Name</Text>
-                      <View style={styles.inputWrapper}>
-                        <Ionicons name="business-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
-                        <TextInput
-                          ref={businessNameInputRef}
-                          style={styles.input}
-                          placeholder="Enter your business name"
-                          placeholderTextColor={Colors.gray500}
-                          value={businessName}
-                          onChangeText={setBusinessName}
-                          autoCapitalize="words"
-                          onFocus={() => scrollToInput(businessNameInputRef)}
-                          onSubmitEditing={() => cityInputRef.current?.focus()}
-                        />
-                      </View>
-                    </View>
-
                     <View style={styles.inputGroup}>
                       <Text style={styles.inputLabel}>City</Text>
                       <View style={styles.inputWrapper}>
@@ -359,7 +335,7 @@ const AuthScreen = () => {
                     </View>
 
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Phone (Optional)</Text>
+                      <Text style={styles.inputLabel}>Phone</Text>
                       <View style={styles.inputWrapper}>
                         <Ionicons name="call-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
                         <TextInput

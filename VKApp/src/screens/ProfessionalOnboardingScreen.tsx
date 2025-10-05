@@ -48,7 +48,7 @@ const ProfessionalOnboardingScreen = () => {
     editingSoftware: [] as string[],
     serviceAreas: [] as string[],
     travelRadius: '',
-    city: '',
+    city: user?.city || '', // Pre-fill city from user data
   });
 
   const equipmentOptions = ['DSLR Camera', 'Mirrorless Camera', 'Lens Kit', 'Lighting Equipment', 'Tripod', 'Drone', 'Gimbal', 'External Mic'];
@@ -66,10 +66,6 @@ const ProfessionalOnboardingScreen = () => {
         }
         if (!formData.bio.trim()) {
           Alert.alert('Required Field', 'Please enter your bio');
-          return false;
-        }
-        if (formData.bio.length < 50) {
-          Alert.alert('Bio Too Short', 'Please write at least 50 characters about yourself');
           return false;
         }
         return true;
@@ -92,10 +88,6 @@ const ProfessionalOnboardingScreen = () => {
         }
         return true;
       case 3:
-        if (!formData.city.trim()) {
-          Alert.alert('Required Field', 'Please enter your city');
-          return false;
-        }
         if (!formData.travelRadius.trim()) {
           Alert.alert('Required Field', 'Please enter your travel radius');
           return false;
