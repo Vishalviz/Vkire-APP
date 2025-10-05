@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 interface Job {
   id: string;
@@ -20,8 +24,7 @@ interface Job {
 }
 
 const MyJobsScreen: React.FC = () => {
-  // Mock data for demo
-  const jobs: Job[] = [
+  const [jobs, setJobs] = useState<Job[]>([
     {
       id: '1',
       customerName: 'Priya Sharma',
@@ -49,7 +52,91 @@ const MyJobsScreen: React.FC = () => {
       status: 'pending',
       amount: 12000,
     },
-  ];
+  ]);
+
+  const handleAcceptJob = async (jobId: string) => {
+    try {
+      // Update job status to confirmed
+      setJobs(prevJobs => 
+        prevJobs.map(job => 
+          job.id === jobId 
+            ? { ...job, status: 'confirmed' as const }
+            : job
+        )
+      );
+      
+      Alert.alert(
+        'Job Accepted!', 
+        'You have successfully accepted this booking. The customer will be notified.',
+        [{ text: 'OK' }]
+      );
+      
+      // Update job status in database
+      await DatabaseService.updateJobStatus(jobId, 'confirmed');
+      
+      // Send notification to customer
+      const job = jobs.find(j => j.id === jobId);
+      if (job) {
+        await NotificationService.notifyJobAccepted(job.customerName, job.service);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to accept the job. Please try again.');
+    }
+  };
+
+  const handleDeclineJob = async (jobId: string) => {
+    Alert.alert(
+      'Decline Job',
+      'Are you sure you want to decline this booking? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Decline',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Update job status to cancelled
+              setJobs(prevJobs => 
+                prevJobs.map(job => 
+                  job.id === jobId 
+                    ? { ...job, status: 'cancelled' as const }
+                    : job
+                )
+              );
+              
+              Alert.alert(
+                'Job Declined', 
+                'The booking has been declined and the customer will be notified.',
+                [{ text: 'OK' }]
+              );
+              
+              // Update job status in database
+              await DatabaseService.updateJobStatus(jobId, 'cancelled');
+              
+              // Send notification to customer
+              const job = jobs.find(j => j.id === jobId);
+              if (job) {
+                await NotificationService.notifyJobDeclined(job.customerName, job.service);
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to decline the job. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewDetails = (job: Job) => {
+    Alert.alert(
+      'Job Details',
+      `Customer: ${job.customerName}\nService: ${job.service}\nDate: ${job.date}\nLocation: ${job.location}\nAmount: ₹${job.amount.toLocaleString()}\nStatus: ${job.status}`,
+      [{ text: 'OK' }]
+    );
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,7 +149,10 @@ const MyJobsScreen: React.FC = () => {
   };
 
   const renderJobItem = ({ item }: { item: Job }) => (
-    <TouchableOpacity style={styles.jobCard}>
+    <TouchableOpacity 
+      style={styles.jobCard}
+      onPress={() => handleViewDetails(item)}
+    >
       <View style={styles.jobHeader}>
         <View style={styles.customerInfo}>
           <View style={styles.avatarPlaceholder}>
@@ -95,10 +185,16 @@ const MyJobsScreen: React.FC = () => {
 
       {item.status === 'pending' && (
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={[styles.actionButton, styles.acceptButton]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.acceptButton]}
+            onPress={() => handleAcceptJob(item.id)}
+          >
             <Text style={styles.acceptButtonText}>Accept</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.declineButton]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.declineButton]}
+            onPress={() => handleDeclineJob(item.id)}
+          >
             <Text style={styles.declineButtonText}>Decline</Text>
           </TouchableOpacity>
         </View>
@@ -136,44 +232,40 @@ const MyJobsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.gray50,
   },
   header: {
-    padding: 20,
+    padding: Spacing.lg,
     paddingTop: 60,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    borderBottomColor: Colors.gray200,
   },
   title: {
-    fontSize: 28,
+    fontSize: Typography.fontSize['2xl'],
     fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+    color: Colors.primary,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
   },
   listContainer: {
-    padding: 16,
+    padding: Spacing.md,
   },
   jobCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+    ...Shadows.md,
   },
   jobHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.sm,
   },
   customerInfo: {
     flexDirection: 'row',
@@ -184,7 +276,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -195,12 +287,12 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: Colors.gray900,
     marginBottom: 2,
   },
   service: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: Colors.gray600,
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -214,7 +306,7 @@ const styles = StyleSheet.create({
   },
   jobDetails: {
     gap: 8,
-    marginBottom: 12,
+    marginBottom: Spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
@@ -223,7 +315,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: Colors.gray600,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -236,10 +328,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   acceptButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.primary,
   },
   declineButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: Colors.gray100,
   },
   acceptButtonText: {
     color: '#fff',
@@ -247,7 +339,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   declineButtonText: {
-    color: '#8E8E93',
+    color: Colors.gray600,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -259,13 +351,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: Colors.gray600,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: Colors.gray600,
     textAlign: 'center',
     lineHeight: 22,
   },

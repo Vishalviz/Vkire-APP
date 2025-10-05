@@ -9,14 +9,28 @@ export interface User {
   email: string;
   phone?: string;
   city?: string;
+  location?: string;
   bio?: string;
   avatar_url?: string;
+  website?: string;
+  instagram?: string;
   created_at: string;
+  profileCompleted?: boolean;
 }
 
 // Professional Profile Types
 export interface ProProfile {
   user_id: string;
+  business_name?: string;
+  bio?: string;
+  main_camera?: string;
+  secondary_camera?: string;
+  equipment?: string;
+  experience_years?: number;
+  photography_style?: string[];
+  video_style?: string[];
+  editing_software?: string[];
+  service_areas?: string[];
   primary_gear?: string;
   services: ServiceType[];
   travel_radius_km?: number;
@@ -53,6 +67,14 @@ export interface PortfolioPost {
   created_at: string;
   likes_count?: number;
   comments_count?: number;
+  professional?: {
+    id: string;
+    name: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  distance?: number;
 }
 
 export interface PostReaction {
@@ -139,14 +161,49 @@ export type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   Main: undefined;
+  Inbox: undefined;
   Profile: { userId: string };
   CreatorProfile: { proId: string };
   PackageDetails: { packageId: string };
-  Chat: { bookingId: string };
-  BookingDetails: { bookingId: string };
+  Chat: { 
+    bookingId?: string; 
+    professionalId?: string; 
+    professionalName?: string; 
+    packageId?: string; 
+    transactionId?: string;
+    locationContext?: {
+      userLocation: {
+        city: string;
+        latitude?: number;
+        longitude?: number;
+      };
+      professionalLocation: string;
+      distance: number | null;
+    };
+  };
+  BookingDetails: { bookingId: string; booking?: any };
   Inquiry: { packageId: string };
   Review: { bookingId: string };
-  Payment: { bookingId: string };
+  Payment: { 
+    amount: number; 
+    bookingDetails: {
+      date: Date;
+      time: string;
+      location: string;
+    };
+    packageDetails: any;
+  };
+  Booking: {
+    packageDetails: any;
+    proDetails: any;
+  };
+  PostDetail: { post: any };
+  EditProfile: undefined;
+  PaymentMethods: undefined;
+  NotificationSettings: undefined;
+  HelpSupport: undefined;
+  Settings: undefined;
+  ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
 };
 
 // Shared tabs for all users
@@ -180,8 +237,10 @@ export type MainTabParamList = CustomerTabParamList;
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role: UserRole) => Promise<void>;
+  signIn: (email: string, password: string, name?: string, role?: UserRole) => Promise<void>;
+  signUp: (email: string, password: string, role: UserRole, name?: string, businessName?: string, city?: string, phone?: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  markProfileCompleted: () => Promise<void>;
+  createProfessionalProfile?: (profile: Partial<ProProfile>) => Promise<void>;
 }

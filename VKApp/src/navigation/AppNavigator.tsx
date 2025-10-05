@@ -26,12 +26,21 @@ import BookingDetailsScreen from '../screens/BookingDetailsScreen';
 import InquiryScreen from '../screens/InquiryScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import PaymentScreen from '../screens/PaymentScreen';
+import BookingScreen from '../screens/BookingScreen';
 
 // New role-specific screens
 import MyBookingsScreen from '../screens/MyBookingsScreen';
 import MyJobsScreen from '../screens/MyJobsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import PortfolioManagerScreen from '../screens/PortfolioManagerScreen';
+import ProfessionalOnboardingScreen from '../screens/ProfessionalOnboardingScreen';
+import InboxScreen from '../screens/InboxScreen';
+import PostDetailScreen from '../screens/PostDetailScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import PaymentMethodsScreen from '../screens/PaymentMethodsScreen';
+import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
+import HelpSupportScreen from '../screens/HelpSupportScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -171,6 +180,19 @@ const AppNavigator = () => {
   const MainNavigator = () => {
     if (!user) return null;
     
+    // Check if professional needs onboarding
+    if (user.role === 'pro' && !user.profileCompleted) {
+      return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen 
+            name="ProfessionalOnboarding" 
+            component={ProfessionalOnboardingScreen}
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
+        </Stack.Navigator>
+      );
+    }
+    
     switch (user.role) {
       case 'customer':
         return <CustomerTabNavigator />;
@@ -190,6 +212,41 @@ const AppNavigator = () => {
         {user ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
+        <Stack.Screen 
+          name="Inbox" 
+          component={InboxScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="PostDetail" 
+          component={PostDetailScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="EditProfile" 
+          component={EditProfileScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="PaymentMethods" 
+          component={PaymentMethodsScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="NotificationSettings" 
+          component={NotificationSettingsScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="HelpSupport" 
+          component={HelpSupportScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="Settings" 
+          component={SettingsScreen} 
+          options={{ headerShown: false }} 
+        />
             <Stack.Screen 
               name="CreatorProfile" 
               component={CreatorProfileScreen}
@@ -208,7 +265,7 @@ const AppNavigator = () => {
             <Stack.Screen 
               name="BookingDetails" 
               component={BookingDetailsScreen}
-              options={{ headerShown: true, title: 'Booking Details' }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen 
               name="Inquiry" 
@@ -223,7 +280,17 @@ const AppNavigator = () => {
             <Stack.Screen 
               name="Payment" 
               component={PaymentScreen}
-              options={{ headerShown: true, title: 'Payment' }}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="Booking" 
+              component={BookingScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="ProfessionalOnboarding" 
+              component={ProfessionalOnboardingScreen}
+              options={{ headerShown: false, gestureEnabled: false }}
             />
           </>
         ) : (

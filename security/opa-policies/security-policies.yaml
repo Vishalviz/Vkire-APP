@@ -1,0 +1,266 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        properties:
+          labels:
+            type: array
+            items:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+        
+        violation[{"msg": msg}] {
+          required := input.parameters.labels
+          provided := input.review.object.metadata.labels
+          missing := required[_]
+          not provided[missing]
+          msg := sprintf("Missing required label: %v", [missing])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredannotations
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredAnnotations
+      validation:
+        properties:
+          annotations:
+            type: array
+            items:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredannotations
+        
+        violation[{"msg": msg}] {
+          required := input.parameters.annotations
+          provided := input.review.object.metadata.annotations
+          missing := required[_]
+          not provided[missing]
+          msg := sprintf("Missing required annotation: %v", [missing])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8scontainerlimits
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sContainerLimits
+      validation:
+        properties:
+          cpu:
+            type: string
+          memory:
+            type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8scontainerlimits
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := sprintf("Container %v is missing CPU limits", [container.name])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := sprintf("Container %v is missing memory limits", [container.name])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.cpu
+          msg := sprintf("Container %v is missing CPU requests", [container.name])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.memory
+          msg := sprintf("Container %v is missing memory requests", [container.name])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spsrunasnonroot
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSRunAsNonRoot
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spsrunasnonroot
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.runAsNonRoot
+          msg := sprintf("Container %v must run as non-root", [container.name])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.runAsNonRoot == false
+          msg := sprintf("Container %v must run as non-root", [container.name])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spsreadonlyrootfilesystem
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSReadOnlyRootFilesystem
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spsreadonlyrootfilesystem
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem
+          msg := sprintf("Container %v must have read-only root filesystem", [container.name])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.readOnlyRootFilesystem == false
+          msg := sprintf("Container %v must have read-only root filesystem", [container.name])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spsprivileged
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPrivileged
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spsprivileged
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.privileged
+          msg := sprintf("Container %v must not run in privileged mode", [container.name])
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spshostnetwork
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSHostNetwork
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spshostnetwork
+        
+        violation[{"msg": msg}] {
+          input.review.object.spec.hostNetwork
+          msg := "Host network is not allowed"
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spshostpid
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSHostPID
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spshostpid
+        
+        violation[{"msg": msg}] {
+          input.review.object.spec.hostPID
+          msg := "Host PID is not allowed"
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spshostipc
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSHostIPC
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spshostipc
+        
+        violation[{"msg": msg}] {
+          input.review.object.spec.hostIPC
+          msg := "Host IPC is not allowed"
+        }
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spsallowedusers
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSAllowedUsers
+      validation:
+        properties:
+          runAsUser:
+            type: array
+            items:
+              type: integer
+          runAsGroup:
+            type: array
+            items:
+              type: integer
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spsallowedusers
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          user := container.securityContext.runAsUser
+          not user in input.parameters.runAsUser
+          msg := sprintf("Container %v must run as one of the allowed users: %v", [container.name, input.parameters.runAsUser])
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          group := container.securityContext.runAsGroup
+          not group in input.parameters.runAsGroup
+          msg := sprintf("Container %v must run as one of the allowed groups: %v", [container.name, input.parameters.runAsGroup])
+        }

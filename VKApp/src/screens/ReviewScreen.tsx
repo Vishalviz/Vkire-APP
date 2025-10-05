@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 type ReviewScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type ReviewScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
@@ -57,15 +58,27 @@ const ReviewScreen = () => {
 
     setLoading(true);
     try {
-      // In a real app, you would save the review to the database
-      // const reviewData = {
-      //   booking_id: bookingId,
-      //   reviewer_id: user.id,
-      //   reviewee_id: mockBooking.pro_id,
-      //   rating,
-      //   comment: comment.trim() || null,
-      // };
-      // await DatabaseService.createReview(reviewData);
+      // Create review data
+      const reviewData = {
+        booking_id: bookingId,
+        reviewer_id: user.id,
+        reviewee_id: mockBooking.pro_id,
+        reviewer_name: user.name || 'Anonymous',
+        rating,
+        comment: comment.trim() || null,
+        created_at: new Date().toISOString(),
+      };
+
+      // Save the review to the database
+      await DatabaseService.createReview(reviewData);
+      
+      // Send notification to the professional
+      await NotificationService.notifyReviewReceived(user.name || 'A customer', rating);
+      
+      // For now, we'll simulate the API call with a timeout
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Review submitted:', reviewData);
 
       Alert.alert(
         'Review Submitted!',

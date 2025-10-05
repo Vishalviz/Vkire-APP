@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import { User, AuthContextType, UserRole } from '../types';
+import logger from '../utils/logger';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -56,22 +57,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       setUser(data);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      logger.error('Error fetching user profile:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, name?: string, role?: UserRole) => {
     setLoading(true);
     try {
       // For demo purposes, create a mock user
+      const userRole = role || 'customer';
       const mockUser: User = {
         id: 'demo-user-1',
-        role: 'customer',
-        name: email.split('@')[0],
+        role: userRole,
+        name: name || email.split('@')[0],
         email,
         created_at: new Date().toISOString(),
+        profileCompleted: userRole === 'customer', // Customers don't need onboarding
       };
       
       setUser(mockUser);
@@ -82,17 +85,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, role: UserRole) => {
+  const signUp = async (email: string, password: string, role: UserRole, name?: string, businessName?: string, city?: string, phone?: string) => {
     setLoading(true);
     try {
       // For demo purposes, create a mock user
       const mockUser: User = {
         id: `demo-user-${Date.now()}`,
         role,
-        name: email.split('@')[0],
+        name: name || email.split('@')[0],
         email,
-        city: 'Delhi', // Default city for demo
+        city: city || 'Delhi', // Use provided city or default
+        phone: phone,
         created_at: new Date().toISOString(),
+        profileCompleted: role === 'customer', // Customers don't need onboarding
       };
       
       setUser(mockUser);
@@ -119,16 +124,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) throw new Error('No user logged in');
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      setUser(data);
+      // For demo purposes, update the user state directly
+      const updatedUser = { ...user, ...updates };
+      setUser(updatedUser);
+      
+      // In a real app, you would make the database call here:
+      // const { data, error } = await supabase
+      //   .from('users')
+      //   .update(updates)
+      //   .eq('id', user.id)
+      //   .select()
+      //   .single();
+      // if (error) throw error;
+      // setUser(data);
+      
+      console.log('Profile updated successfully:', updatedUser);
     } catch (error) {
+      console.error('Auth error:', error);
+      throw error;
+    }
+  };
+
+  const markProfileCompleted = async () => {
+    if (!user) throw new Error('No user logged in');
+    
+    try {
+      const updatedUser = { ...user, profileCompleted: true };
+      setUser(updatedUser);
+      console.log('Profile marked as completed');
+    } catch (error) {
+      console.error('Error marking profile as completed:', error);
       throw error;
     }
   };
@@ -140,6 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUp,
     signOut,
     updateProfile,
+    markProfileCompleted,
   };
 
   return (

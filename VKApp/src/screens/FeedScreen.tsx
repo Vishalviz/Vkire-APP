@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Alert,
   Animated,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +17,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { PortfolioPost, RootStackParamList } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, Animation } from '../constants/designSystem';
 import Logo from '../components/Logo';
+import logger from '../utils/logger';
+import { useProfileViews } from '../contexts/ProfileViewContext';
+import { useLocation } from '../contexts/LocationContext';
+import LocationService from '../services/locationService';
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -24,7 +29,19 @@ const FeedScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [lastTap, setLastTap] = useState<number>(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const navigation = useNavigation<FeedScreenNavigationProp>();
+  const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
+  const { 
+    isLocationEnabled, 
+    isLoading: locationLoading, 
+    showLocationPrompt, 
+    currentLocation, 
+    manualLocation 
+  } = useLocation();
   
   // Animation refs for micro-interactions
   const likeAnimations = useRef<{ [key: string]: Animated.Value }>({});
@@ -33,11 +50,28 @@ const FeedScreen = () => {
 
   useEffect(() => {
     loadPosts();
+    checkLocationPermission();
   }, []);
+
+  const checkLocationPermission = async () => {
+    if (!isLocationEnabled) {
+      // Show location prompt on first app launch
+      await showLocationPrompt();
+    }
+  };
 
   const loadPosts = async () => {
     try {
-      // Mock data with more realistic content
+      // Mock professionals data with location coordinates
+      const mockProfessionals = [
+        { id: 'pro1', name: 'Sarah Johnson', city: 'Delhi', latitude: 28.6139, longitude: 77.2090 },
+        { id: 'pro2', name: 'Mike Chen', city: 'Mumbai', latitude: 19.0760, longitude: 72.8777 },
+        { id: 'pro3', name: 'Emma Davis', city: 'Bangalore', latitude: 12.9716, longitude: 77.5946 },
+        { id: 'pro4', name: 'Alex Kumar', city: 'Delhi', latitude: 28.7041, longitude: 77.1025 },
+        { id: 'pro5', name: 'Lisa Wang', city: 'Mumbai', latitude: 19.0176, longitude: 72.8562 },
+      ];
+
+      // Mock data with location coordinates for proximity sorting
       const mockPosts: PortfolioPost[] = [
         {
           id: '1',
@@ -49,6 +83,7 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
           likes_count: 24,
           comments_count: 5,
+          professional: mockProfessionals[0], // Add professional data
         },
         {
           id: '2',
@@ -60,6 +95,7 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
           likes_count: 18,
           comments_count: 3,
+          professional: mockProfessionals[1], // Add professional data
         },
         {
           id: '3',
@@ -71,9 +107,48 @@ const FeedScreen = () => {
           created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
           likes_count: 42,
           comments_count: 8,
+          professional: mockProfessionals[2], // Add professional data
         },
       ];
-      setPosts(mockPosts);
+
+      // Sort posts by proximity if location is enabled
+      let sortedPosts = mockPosts;
+      if (isLocationEnabled && (currentLocation || manualLocation)) {
+        if (currentLocation) {
+          // Sort by GPS distance
+          sortedPosts = mockPosts
+            .map(post => ({
+              ...post,
+              distance: post.professional 
+                ? LocationService.calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    post.professional.latitude,
+                    post.professional.longitude
+                  )
+                : undefined
+            }))
+            .sort((a, b) => {
+              if (a.distance === undefined && b.distance === undefined) return 0;
+              if (a.distance === undefined) return 1;
+              if (b.distance === undefined) return -1;
+              return a.distance - b.distance;
+            });
+        } else if (manualLocation) {
+          // Sort by city match first, then by other criteria
+          sortedPosts = mockPosts.sort((a, b) => {
+            const aCityMatch = a.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
+            const bCityMatch = b.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
+            
+            if (aCityMatch !== bCityMatch) return aCityMatch - bCityMatch;
+            
+            // If both match or both don't match, sort by likes
+            return (b.likes_count || 0) - (a.likes_count || 0);
+          });
+        }
+      }
+
+      setPosts(sortedPosts);
       
       // Initialize animation values for each post
       mockPosts.forEach(post => {
@@ -82,7 +157,7 @@ const FeedScreen = () => {
         shareAnimations.current[post.id] = new Animated.Value(1);
       });
     } catch (error) {
-      console.error('Error loading posts:', error);
+      logger.error('Error loading posts:', error);
       Alert.alert('Error', 'Failed to load posts');
     } finally {
       setLoading(false);
@@ -131,7 +206,7 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Like post:', postId, isLiked ? 'unliked' : 'liked');
+    logger.debug('Like post:', postId, isLiked ? 'unliked' : 'liked');
   };
 
   const handleComment = (postId: string) => {
@@ -152,7 +227,9 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Comment on post:', postId);
+    // TODO: Navigate to comment screen or show comment modal
+    Alert.alert('Comments', 'Comment functionality will be implemented soon!');
+    logger.debug('Comment on post:', postId);
   };
 
   const handleShare = (postId: string) => {
@@ -178,11 +255,74 @@ const FeedScreen = () => {
       ]).start();
     }
     
-    console.log('Share post:', postId);
+    // TODO: Implement proper sharing functionality
+    Alert.alert('Share', 'Share functionality will be implemented soon!');
+    logger.debug('Share post:', postId);
+  };
+
+  const handleSave = (postId: string) => {
+    const isSaved = savedPosts.has(postId);
+    
+    // Toggle save state
+    if (isSaved) {
+      setSavedPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+      Alert.alert('Removed', 'Post removed from saved items');
+    } else {
+      setSavedPosts(prev => new Set(prev).add(postId));
+      Alert.alert('Saved', 'Post saved to your collection');
+    }
+    
+    logger.debug('Save post:', postId, isSaved ? 'unsaved' : 'saved');
+  };
+
+  const handleDoubleTap = (postId: string) => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    
+    if (lastTap && (now - lastTap) < DOUBLE_PRESS_DELAY) {
+      // Double tap detected
+      handleLike(postId);
+      setLastTap(0);
+    } else {
+      setLastTap(now);
+    }
   };
 
   const handleCreatorPress = (proId: string) => {
-    navigation.navigate('CreatorProfile', { proId });
+    if (hasUnlimitedAccess || profileViews > 0) {
+      if (!hasUnlimitedAccess) {
+        decrementProfileViews();
+      }
+      navigation.navigate('CreatorProfile', { proId });
+    } else {
+      setSelectedCreatorId(proId);
+      setShowPaymentModal(true);
+    }
+  };
+
+  const handlePaymentOption = (option: 'single' | 'unlimited') => {
+    setShowPaymentModal(false);
+    if (option === 'unlimited') {
+      activateUnlimitedAccess();
+      Alert.alert(
+        'Unlimited Access Activated!',
+        'You now have unlimited profile views for 24 hours.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert(
+        'Profile View Purchased!',
+        'You can now view this profile.',
+        [{ text: 'OK' }]
+      );
+    }
+    if (selectedCreatorId) {
+      navigation.navigate('CreatorProfile', { proId: selectedCreatorId });
+    }
   };
 
   // Helper functions
@@ -212,8 +352,11 @@ const FeedScreen = () => {
   };
 
   const renderPost = ({ item }: { item: PortfolioPost }) => {
-    const creator = getCreatorName(item.pro_id);
+    const creator = item.professional 
+      ? { name: item.professional.name, handle: `@${item.professional.name.toLowerCase().replace(' ', '_')}` }
+      : getCreatorName(item.pro_id);
     const isLiked = likedPosts.has(item.id);
+    const isSaved = savedPosts.has(item.id);
     const likeAnimation = likeAnimations.current[item.id];
     const commentAnimation = commentAnimations.current[item.id];
     const shareAnimation = shareAnimations.current[item.id];
@@ -233,7 +376,13 @@ const FeedScreen = () => {
             </View>
             <View style={styles.creatorDetails}>
               <Text style={styles.creatorName}>{creator.name}</Text>
-              <Text style={styles.creatorHandle}>@{creator.handle}</Text>
+              <View style={styles.creatorLocationContainer}>
+                <Ionicons name="location" size={12} color={Colors.gray500} />
+                <Text style={styles.creatorLocation}>
+                  {item.professional?.city || 'Unknown Location'}
+                  {item.distance && ` • ${item.distance}km away`}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
           
@@ -246,9 +395,13 @@ const FeedScreen = () => {
         </View>
 
         {/* Media Content */}
-        <View style={styles.mediaContainer}>
+        <TouchableOpacity 
+          style={styles.mediaContainer}
+          onPress={() => handleDoubleTap(item.id)}
+          activeOpacity={1}
+        >
           <Image source={{ uri: item.media_url }} style={styles.media} />
-        </View>
+        </TouchableOpacity>
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
@@ -285,8 +438,15 @@ const FeedScreen = () => {
             </Animated.View>
           </View>
           
-          <TouchableOpacity style={styles.bookmarkButton}>
-            <Ionicons name="bookmark-outline" size={24} color={Colors.gray500} />
+          <TouchableOpacity 
+            style={styles.bookmarkButton}
+            onPress={() => handleSave(item.id)}
+          >
+            <Ionicons 
+              name={isSaved ? "bookmark" : "bookmark-outline"} 
+              size={24} 
+              color={isSaved ? Colors.primary : Colors.gray500} 
+            />
           </TouchableOpacity>
         </View>
 
@@ -331,18 +491,36 @@ const FeedScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Enhanced Header */}
+      {/* Modern Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoWrapper}>
-              <Logo size="medium" />
+          <View style={styles.headerLeft}>
+            <Logo size="small" />
+            <View>
+              <Text style={styles.headerTitle}>Feed</Text>
+              {isLocationEnabled && (
+                <View style={styles.locationContainer}>
+                  <Ionicons name="location" size={12} color={Colors.primary} />
+                  <Text style={styles.locationText}>
+                    {manualLocation || currentLocation?.city || 'Location enabled'}
+                  </Text>
+                </View>
+              )}
             </View>
-            <Text style={styles.appTitle}>Vkire</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color={Colors.gray700} />
-            <View style={styles.notificationBadge} />
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            activeOpacity={0.7}
+            onPress={() => {
+              // Navigate to notifications/chat screen
+              navigation.navigate('Inbox');
+            }}
+          >
+            <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
+            {/* Unread notification badge */}
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>3</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -371,6 +549,53 @@ const FeedScreen = () => {
           </View>
         }
       />
+
+      {/* Payment Modal */}
+      <Modal
+        visible={showPaymentModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPaymentModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>View Profile</Text>
+              <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+                <Ionicons name="close" size={24} color={Colors.gray600} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>
+              You've used all your free profile views. Choose an option to continue:
+            </Text>
+            <View style={styles.paymentOptions}>
+              <TouchableOpacity
+                style={styles.paymentOption}
+                onPress={() => handlePaymentOption('single')}
+              >
+                <View style={styles.optionHeader}>
+                  <Text style={styles.optionTitle}>View This Profile</Text>
+                  <Text style={styles.optionPrice}>₹59</Text>
+                </View>
+                <Text style={styles.optionDescription}>One-time access to this profile</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.paymentOption, styles.recommendedOption]}
+                onPress={() => handlePaymentOption('unlimited')}
+              >
+                <View style={styles.optionHeader}>
+                  <Text style={styles.optionTitle}>Unlimited Today</Text>
+                  <Text style={styles.optionPrice}>₹299</Text>
+                </View>
+                <Text style={styles.optionDescription}>Unlimited profile views for 24 hours</Text>
+                <View style={styles.recommendedBadge}>
+                  <Text style={styles.recommendedText}>Most Value</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -381,13 +606,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   
-  // Header Styles
+  // Modern Header Styles
   header: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray200,
     ...Shadows.sm,
   },
@@ -396,31 +621,53 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  logoContainer: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoWrapper: {
-    marginRight: Spacing.sm,
-  },
-  appTitle: {
+  headerTitle: {
     fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.extraBold,
-    color: Colors.primary,
-    letterSpacing: 0.5,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+    marginLeft: Spacing.md,
+    letterSpacing: 0.3,
   },
-  notificationButton: {
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.md,
+    marginTop: 2,
+  },
+  locationText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.medium,
+    marginLeft: 4,
+  },
+  headerButton: {
     padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.gray50,
     position: 'relative',
   },
   notificationBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: -2,
+    right: -2,
     backgroundColor: Colors.error,
+    borderRadius: BorderRadius.full,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  notificationBadgeText: {
+    color: Colors.white,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
   },
   
   // Loading States
@@ -459,12 +706,14 @@ const styles = StyleSheet.create({
   
   // Post Card Styles
   postCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius['2xl'],
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.sm,
-    ...Shadows.md,
+    ...Shadows.lg,
     overflow: 'hidden',
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   
   // Post Header
@@ -506,6 +755,17 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.regular,
     color: Colors.gray500,
+  },
+  creatorLocationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  creatorLocation: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.gray500,
+    fontWeight: Typography.fontWeight.medium,
+    marginLeft: 4,
   },
   headerActions: {
     flexDirection: 'row',
@@ -613,6 +873,86 @@ const styles = StyleSheet.create({
     color: Colors.gray500,
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+  },
+  
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  modalDescription: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  paymentOptions: {
+    gap: Spacing.md,
+  },
+  paymentOption: {
+    borderWidth: 1,
+    borderColor: Colors.gray200,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    position: 'relative',
+  },
+  recommendedOption: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + '08',
+  },
+  optionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  optionTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  optionPrice: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.primary,
+  },
+  optionDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+  },
+  recommendedBadge: {
+    position: 'absolute',
+    top: -Spacing.xs,
+    right: Spacing.lg,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+  },
+  recommendedText: {
+    color: Colors.white,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
   },
 });
 

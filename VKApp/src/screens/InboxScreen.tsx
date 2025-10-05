@@ -1,22 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
+import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/designSystem';
 
 type InboxScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const InboxScreen = () => {
   const navigation = useNavigation<InboxScreenNavigationProp>();
-
-  const mockConversations = [
+  const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
+  const [refreshing, setRefreshing] = useState(false);
+  const [conversations, setConversations] = useState([
     {
       id: '1',
       bookingId: 'booking1',
@@ -41,11 +45,110 @@ const InboxScreen = () => {
       unreadCount: 0,
       type: 'booking',
     },
-  ];
+  ]);
+
+  const [notifications, setNotifications] = useState([
+    {
+      id: '1',
+      type: 'inquiry_response',
+      title: 'New Response to Your Inquiry',
+      message: 'John Photography responded to your wedding photography inquiry',
+      timestamp: '5 minutes ago',
+      read: false,
+      professionalId: 'pro1',
+      professionalName: 'John Photography',
+    },
+    {
+      id: '2',
+      type: 'booking_confirmed',
+      title: 'Booking Confirmed',
+      message: 'Your portrait session with Sarah Studios has been confirmed',
+      timestamp: '1 hour ago',
+      read: false,
+      bookingId: 'booking2',
+    },
+    {
+      id: '3',
+      type: 'message',
+      title: 'New Message',
+      message: 'You have a new message from Creative Lens',
+      timestamp: '2 hours ago',
+      read: true,
+      professionalId: 'pro3',
+      professionalName: 'Creative Lens',
+    },
+  ]);
 
   const handleConversationPress = (bookingId: string) => {
+    // Mark conversation as read when opened
+    setConversations(prev => prev.map(conv => 
+      conv.bookingId === bookingId 
+        ? { ...conv, unreadCount: 0 }
+        : conv
+    ));
     navigation.navigate('Chat', { bookingId });
   };
+
+  const handleNotificationPress = (notification: any) => {
+    // Mark notification as read when opened
+    setNotifications(prev => prev.map(notif => 
+      notif.id === notification.id 
+        ? { ...notif, read: true }
+        : notif
+    ));
+
+    if (notification.type === 'inquiry_response' || notification.type === 'message') {
+      // Navigate to chat with professional
+      navigation.navigate('Chat', { 
+        professionalId: notification.professionalId,
+        professionalName: notification.professionalName,
+        transactionId: 'existing_access'
+      });
+    } else if (notification.type === 'booking_confirmed') {
+      // Navigate to booking details
+      navigation.navigate('BookingDetails', { 
+        bookingId: notification.bookingId 
+      });
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
+
+  const renderNotification = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      style={[styles.notificationItem, !item.read && styles.unreadNotification]}
+      onPress={() => handleNotificationPress(item)}
+    >
+      <View style={styles.notificationIcon}>
+        <Ionicons 
+          name={
+            item.type === 'inquiry_response' ? 'chatbubble-outline' :
+            item.type === 'booking_confirmed' ? 'checkmark-circle-outline' :
+            'notifications-outline'
+          } 
+          size={24} 
+          color={item.read ? Colors.gray500 : Colors.primary} 
+        />
+      </View>
+      <View style={styles.notificationContent}>
+        <Text style={[styles.notificationTitle, !item.read && styles.unreadNotificationText]}>
+          {item.title}
+        </Text>
+        <Text style={styles.notificationMessage}>
+          {item.message}
+        </Text>
+        <Text style={styles.notificationTimestamp}>
+          {item.timestamp}
+        </Text>
+      </View>
+      {!item.read && <View style={styles.unreadDot} />}
+    </TouchableOpacity>
+  );
 
   const renderConversation = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -83,68 +186,211 @@ const InboxScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity>
-          <Ionicons name="create-outline" size={24} color="#007AFF" />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Inbox</Text>
+          <TouchableOpacity>
+            <Ionicons name="create-outline" size={24} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
+
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'chats' && styles.activeTab]}
+          onPress={() => setActiveTab('chats')}
+        >
+          <Text style={[styles.tabText, activeTab === 'chats' && styles.activeTabText]}>
+            Chats ({conversations.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'notifications' && styles.activeTab]}
+          onPress={() => setActiveTab('notifications')}
+        >
+          <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>
+            Notifications ({notifications.filter(n => !n.read).length})
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {mockConversations.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>No messages yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Start a conversation by sending an inquiry to a creator
-          </Text>
-        </View>
+      {/* Content */}
+      {activeTab === 'chats' ? (
+        conversations.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>No messages yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Start a conversation by sending an inquiry to a creator
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={conversations}
+            renderItem={renderConversation}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.conversationsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#007AFF"
+                colors={['#007AFF']}
+              />
+            }
+          />
+        )
       ) : (
-        <FlatList
-          data={mockConversations}
-          renderItem={renderConversation}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.conversationsList}
-          showsVerticalScrollIndicator={false}
-        />
+        notifications.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="notifications-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>No notifications</Text>
+            <Text style={styles.emptySubtitle}>
+              You'll see updates about your bookings and inquiries here
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={notifications}
+            renderItem={renderNotification}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.notificationsList}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#007AFF"
+                colors={['#007AFF']}
+              />
+            }
+          />
+        )
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: Spacing.lg,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
+    borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+  },
+  // Tab Navigation Styles
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray200,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    marginHorizontal: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.gray100,
+    alignItems: 'center',
+  },
+  activeTab: {
+    backgroundColor: Colors.primary,
+  },
+  tabText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.gray600,
+  },
+  activeTabText: {
+    color: Colors.white,
+  },
+  // Notification Styles
+  notificationItem: {
+    flexDirection: 'row',
+    padding: Spacing.lg,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray200,
+    alignItems: 'flex-start',
+  },
+  unreadNotification: {
+    backgroundColor: Colors.gray50,
+  },
+  notificationIcon: {
+    marginRight: Spacing.md,
+    marginTop: Spacing.xs,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notificationContent: {
+    flex: 1,
+    paddingTop: Spacing.xs,
+  },
+  notificationTitle: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
+  },
+  unreadNotificationText: {
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+  },
+  notificationMessage: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    marginBottom: Spacing.xs,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+  },
+  notificationTimestamp: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray500,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary,
+    marginTop: Spacing.sm,
+  },
+  notificationsList: {
+    paddingBottom: 20,
   },
   conversationsList: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   conversationItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.md,
   },
   avatarContainer: {
     position: 'relative',
@@ -153,8 +399,8 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -162,17 +408,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: -2,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
+    backgroundColor: Colors.error,
+    borderRadius: BorderRadius.full,
     minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   unreadText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    color: Colors.white,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semiBold,
   },
   conversationContent: {
     flex: 1,
@@ -184,19 +430,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
   },
   timestamp: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
   },
   lastMessage: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    marginBottom: Spacing.sm,
   },
   conversationFooter: {
     flexDirection: 'row',
@@ -204,34 +450,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeTag: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
   },
   typeText: {
-    fontSize: 10,
-    color: '#fff',
-    fontWeight: '500',
+    fontSize: Typography.fontSize.xs,
+    color: Colors.white,
+    fontWeight: Typography.fontWeight.medium,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: Spacing['3xl'],
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
 });
 

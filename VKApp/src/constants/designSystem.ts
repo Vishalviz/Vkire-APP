@@ -96,11 +96,12 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
-  sm: 6,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  '2xl': 20,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  '2xl': 24,
+  '3xl': 28,
   full: 9999,
 };
 
@@ -146,7 +147,7 @@ export const ComponentStyles = {
   // Post Card Styles
   postCard: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.sm,
     ...Shadows.md,
@@ -156,17 +157,23 @@ export const ComponentStyles = {
   button: {
     primary: {
       backgroundColor: Colors.primary,
-      borderRadius: BorderRadius.md,
-      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      paddingVertical: Spacing.lg,
       paddingHorizontal: Spacing.xl,
     },
     secondary: {
       backgroundColor: Colors.surface,
       borderWidth: 1,
       borderColor: Colors.gray300,
-      borderRadius: BorderRadius.md,
-      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      paddingVertical: Spacing.lg,
       paddingHorizontal: Spacing.xl,
+    },
+    rounded: {
+      backgroundColor: Colors.primary,
+      borderRadius: BorderRadius.full,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.lg,
     },
   },
   

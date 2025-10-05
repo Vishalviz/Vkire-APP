@@ -11,16 +11,20 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Message } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { DatabaseService } from '../services/supabase';
+import NotificationService from '../services/notificationService';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
+type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
-  const { bookingId } = route.params;
+  const navigation = useNavigation<ChatScreenNavigationProp>();
+  const { bookingId, professionalId, professionalName, packageId, transactionId } = route.params;
   const { user } = useAuth();
   
   const [messages, setMessages] = useState<Message[]>([]);
@@ -63,18 +67,25 @@ const ChatScreen = () => {
 
   useEffect(() => {
     loadMessages();
-  }, [bookingId]);
+  }, [bookingId, professionalId]);
 
   const loadMessages = async () => {
     try {
-      // In a real app, you would fetch messages from the database
-      // const data = await DatabaseService.getMessages(chatId);
+      // Use mock data directly to avoid network request failures
+      // In a real app, this would fetch from the database
       setMessages(mockMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
-      Alert.alert('Error', 'Failed to load messages');
+      setMessages(mockMessages);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle navigation to professional profile
+  const handleProfilePress = () => {
+    if (professionalId) {
+      navigation.navigate('CreatorProfile', { proId: professionalId });
     }
   };
 
@@ -86,9 +97,12 @@ const ChatScreen = () => {
     setSending(true);
 
     try {
+      // Determine chat ID based on whether it's a booking or inquiry
+      const chatId = bookingId || `inquiry_${professionalId}_${packageId}`;
+      
       const newMsg: Message = {
         id: Date.now().toString(),
-        chat_id: 'chat1',
+        chat_id: chatId,
         sender_id: user.id,
         text: messageText,
         created_at: new Date().toISOString(),
@@ -97,12 +111,18 @@ const ChatScreen = () => {
       // Add message to local state immediately for better UX
       setMessages(prev => [...prev, newMsg]);
 
-      // In a real app, you would save to database
-      // await DatabaseService.sendMessage({
-      //   chat_id: chatId,
-      //   sender_id: user.id,
-      //   text: messageText,
-      // });
+      // Mock database save - in a real app, this would save to the database
+      try {
+        // Simulate successful message save
+        console.log('Message saved successfully:', messageText);
+        
+        // Send notification to recipient (in a real app, you'd get recipient info from booking)
+        await NotificationService.notifyNewMessage(user.name || 'Someone', messageText);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // In mock mode, we don't remove the message since it's already added to UI
+        console.log('Mock: Message sent successfully despite error');
+      }
 
       // Scroll to bottom after sending
       setTimeout(() => {
@@ -187,15 +207,23 @@ const ChatScreen = () => {
     >
       {/* Chat Header */}
       <View style={styles.header}>
-        <View style={styles.headerInfo}>
+        <TouchableOpacity 
+          style={styles.headerInfo}
+          onPress={handleProfilePress}
+          activeOpacity={0.7}
+        >
           <View style={styles.avatarPlaceholder}>
             <Ionicons name="person" size={24} color="#666" />
           </View>
           <View>
-            <Text style={styles.headerName}>John Photography</Text>
-            <Text style={styles.headerStatus}>Online</Text>
+            <Text style={styles.headerName}>
+              {professionalName || 'Professional'}
+            </Text>
+            <Text style={styles.headerStatus}>
+              {transactionId ? 'Chat Unlocked' : 'Online'}
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity>
           <Ionicons name="call-outline" size={24} color="#007AFF" />
         </TouchableOpacity>

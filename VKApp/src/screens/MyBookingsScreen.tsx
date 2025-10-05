@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
+  Alert,
+  RefreshControl,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
+import { useLocation } from '../contexts/LocationContext';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import PaymentService from '../services/paymentService';
+
+type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 interface Booking {
   id: string;
@@ -15,45 +25,287 @@ interface Booking {
   service: string;
   date: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   status: 'confirmed' | 'completed' | 'cancelled';
   amount: number;
   proAvatar?: string;
+  type: 'booking';
+}
+
+interface Inquiry {
+  id: string;
+  proId: string;
+  proName: string;
+  service: string;
+  date: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  status: 'pending' | 'accepted' | 'declined';
+  amount: number;
+  proAvatar?: string;
+  type: 'inquiry';
+  chatUnlocked: boolean;
 }
 
 const MyBookingsScreen: React.FC = () => {
-  // Mock data for demo
-  const bookings: Booking[] = [
+  const navigation = useNavigation<MyBookingsScreenNavigationProp>();
+  const { currentLocation, manualLocation, isLocationEnabled } = useLocation();
+  
+  // Enhanced mock data for comprehensive testing
+  const [bookings, setBookings] = useState<Booking[]>([
     {
       id: '1',
       proName: 'Raj Photography',
       service: 'Wedding Photography',
-      date: '2024-10-15',
-      location: 'Delhi',
+      date: '2024-12-15',
+      location: 'Mumbai, Maharashtra',
+      latitude: 19.0760,
+      longitude: 72.8777,
       status: 'confirmed',
       amount: 25000,
+      type: 'booking',
     },
     {
       id: '2',
-      proName: 'Mumbai Studios',
-      service: 'Portfolio Shoot',
-      date: '2024-09-20',
-      location: 'Mumbai',
+      proName: 'Creative Studio',
+      service: 'Corporate Event',
+      date: '2024-11-20',
+      location: 'Delhi, NCR',
+      latitude: 28.6139,
+      longitude: 77.2090,
       status: 'completed',
       amount: 15000,
+      type: 'booking',
     },
-  ];
+    {
+      id: '6',
+      proName: 'Lens Master',
+      service: 'Portrait Session',
+      date: '2024-12-20',
+      location: 'Bangalore, Karnataka',
+      status: 'confirmed',
+      amount: 8000,
+      type: 'booking',
+    },
+    {
+      id: '7',
+      proName: 'Event Captures',
+      service: 'Birthday Party',
+      date: '2024-11-05',
+      location: 'Pune, Maharashtra',
+      status: 'cancelled',
+      amount: 5000,
+      type: 'booking',
+    },
+  ]);
+
+  const [inquiries, setInquiries] = useState<Inquiry[]>([
+    {
+      id: '3',
+      proId: 'pro1',
+      proName: 'Creative Lens',
+      service: 'Event Photography',
+      date: '2024-11-10',
+      location: 'Bangalore, Karnataka',
+      latitude: 12.9716,
+      longitude: 77.5946,
+      status: 'pending',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+    {
+      id: '4',
+      proId: 'pro2',
+      proName: 'Photo Magic',
+      service: 'Corporate Shoot',
+      date: '2024-12-05',
+      location: 'Delhi, NCR',
+      latitude: 28.7041,
+      longitude: 77.1025,
+      status: 'accepted',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+    {
+      id: '5',
+      proId: 'pro3',
+      proName: 'Studio Pro',
+      service: 'Fashion Photography',
+      date: '2024-11-25',
+      location: 'Mumbai, Maharashtra',
+      latitude: 19.0176,
+      longitude: 72.8562,
+      status: 'declined',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: false,
+    },
+    {
+      id: '8',
+      proId: 'pro4',
+      proName: 'Wedding Dreams',
+      service: 'Pre-Wedding Shoot',
+      date: '2024-12-10',
+      status: 'pending',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: false,
+    },
+    {
+      id: '9',
+      proId: 'pro5',
+      proName: 'Nature Clicks',
+      service: 'Outdoor Photography',
+      date: '2024-11-30',
+      status: 'accepted',
+      amount: 499,
+      type: 'inquiry',
+      chatUnlocked: true,
+    },
+  ]);
+
+  // State management for filtering and search
+  const [activeFilter, setActiveFilter] = useState<'all' | 'bookings' | 'inquiries'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Helper function to calculate distance
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.round(distance * 100) / 100;
+  };
+  const [loading, setLoading] = useState(false);
+
+  // Filter and search functionality
+  const [filteredItems, setFilteredItems] = useState<(Booking | Inquiry)[]>([]);
+
+  useEffect(() => {
+    let items: (Booking | Inquiry)[] = [];
+    
+    // Apply type filter
+    switch (activeFilter) {
+      case 'bookings':
+        items = bookings;
+        break;
+      case 'inquiries':
+        items = inquiries;
+        break;
+      default:
+        items = [...bookings, ...inquiries];
+    }
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      console.log('Searching for:', query);
+      console.log('Items before search:', items.length);
+      
+      items = items.filter(item => {
+        const matchesName = item.proName.toLowerCase().includes(query);
+        const matchesService = item.service.toLowerCase().includes(query);
+        const matchesLocation = item.type === 'booking' && 'location' in item && item.location?.toLowerCase().includes(query);
+        
+        console.log(`Item: ${item.proName}, matchesName: ${matchesName}, matchesService: ${matchesService}, matchesLocation: ${matchesLocation}`);
+        
+        return matchesName || matchesService || matchesLocation;
+      });
+      
+      console.log('Items after search:', items.length);
+    }
+    
+    // Sort by date (newest first)
+    const sortedItems = items.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    setFilteredItems(sortedItems);
+    
+    // Debug logging
+    console.log('Current searchQuery:', searchQuery);
+    console.log('Current activeFilter:', activeFilter);
+    console.log('Filtered items count:', sortedItems.length);
+    console.log('Filtered items:', sortedItems.map(item => ({ id: item.id, proName: item.proName, service: item.service })));
+  }, [bookings, inquiries, activeFilter, searchQuery]);
+
+  // Pull to refresh functionality
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Simulate API call delay
+    setTimeout(() => {
+      setRefreshing(false);
+      // In a real app, you would refetch data here
+      console.log('Data refreshed');
+    }, 1000);
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return '#007AFF';
-      case 'completed': return '#34C759';
-      case 'cancelled': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'confirmed': return Colors.primary;
+      case 'completed': return Colors.success;
+      case 'cancelled': return Colors.error;
+      case 'pending': return Colors.warning;
+      case 'accepted': return Colors.success;
+      case 'declined': return Colors.error;
+      default: return Colors.gray500;
     }
   };
 
-  const renderBookingItem = ({ item }: { item: Booking }) => (
-    <TouchableOpacity style={styles.bookingCard}>
+  const handleItemPress = (item: Booking | Inquiry) => {
+    if (item.type === 'booking') {
+      navigation.navigate('BookingDetails', { 
+        bookingId: item.id, 
+        booking: item 
+      });
+    } else if (item.type === 'inquiry') {
+      // Check if user has purchased chat access for this professional
+      PaymentService.hasPurchasedChatAccess(item.proId).then(hasAccess => {
+        if (hasAccess) {
+          // User has access, navigate to chat
+          navigation.navigate('Chat', { 
+            professionalId: item.proId,
+            professionalName: item.proName,
+            packageId: item.service,
+            transactionId: 'existing_access'
+          });
+        } else {
+          // Show payment modal to unlock chat
+          PaymentService.showInquiryPaymentModal(
+            item.proId,
+            (transactionId) => {
+              // Payment successful, navigate to chat
+              navigation.navigate('Chat', { 
+                professionalId: item.proId,
+                professionalName: item.proName,
+                packageId: item.service,
+                transactionId: transactionId
+              });
+            },
+            () => {
+              // Payment cancelled
+              console.log('Payment cancelled');
+            }
+          );
+        }
+      });
+    }
+  };
+
+  const renderItem = ({ item }: { item: Booking | Inquiry }) => (
+    <TouchableOpacity 
+      style={styles.bookingCard}
+      onPress={() => handleItemPress(item)}
+    >
       <View style={styles.bookingHeader}>
         <View style={styles.proInfo}>
           <View style={styles.avatarPlaceholder}>
@@ -64,8 +316,15 @@ const MyBookingsScreen: React.FC = () => {
             <Text style={styles.service}>{item.service}</Text>
           </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+            <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+          </View>
+          {item.type === 'inquiry' && (
+            <View style={styles.typeBadge}>
+              <Text style={styles.typeText}>INQUIRY</Text>
+            </View>
+          )}
         </View>
       </View>
       
@@ -74,38 +333,144 @@ const MyBookingsScreen: React.FC = () => {
           <Ionicons name="calendar-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>{item.date}</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Ionicons name="location-outline" size={16} color="#8E8E93" />
-          <Text style={styles.detailText}>{item.location}</Text>
-        </View>
+        {(item.type === 'booking' && 'location' in item) || (item.type === 'inquiry' && item.location) ? (
+          <View style={styles.detailRow}>
+            <Ionicons name="location-outline" size={16} color="#8E8E93" />
+            <View style={styles.locationInfo}>
+              <Text style={styles.detailText}>
+                {item.type === 'booking' ? item.location : item.location}
+              </Text>
+              {isLocationEnabled && currentLocation && item.latitude && item.longitude && (
+                <Text style={styles.distanceText}>
+                  {calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    item.latitude,
+                    item.longitude
+                  )}km away
+                </Text>
+              )}
+            </View>
+          </View>
+        ) : null}
         <View style={styles.detailRow}>
           <Ionicons name="card-outline" size={16} color="#8E8E93" />
           <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
         </View>
+        {item.type === 'inquiry' && (
+          <View style={styles.detailRow}>
+            <Ionicons 
+              name={item.chatUnlocked ? "chatbubble-outline" : "lock-closed-outline"} 
+              size={16} 
+              color={item.chatUnlocked ? Colors.success : Colors.gray500} 
+            />
+            <Text style={[styles.detailText, { color: item.chatUnlocked ? Colors.success : Colors.gray500 }]}>
+              {item.chatUnlocked ? 'Chat Available' : 'Chat Locked'}
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
+      {/* Modern Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>My Bookings</Text>
-        <Text style={styles.subtitle}>Track your photography bookings</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>My Bookings</Text>
+          <Text style={styles.headerSubtitle}>Track your bookings and inquiries</Text>
+        </View>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={20} color={Colors.gray500} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search bookings, professionals, services..."
+            placeholderTextColor={Colors.gray500}
+            value={searchQuery}
+            onChangeText={(text) => {
+              console.log('Search input changed:', text);
+              setSearchQuery(text);
+            }}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Filter Tabs */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'all' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('all')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'all' && styles.activeFilterTabText]}>
+            All ({bookings.length + inquiries.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'bookings' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('bookings')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'bookings' && styles.activeFilterTabText]}>
+            Bookings ({bookings.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, activeFilter === 'inquiries' && styles.activeFilterTab]}
+          onPress={() => setActiveFilter('inquiries')}
+        >
+          <Text style={[styles.filterTabText, activeFilter === 'inquiries' && styles.activeFilterTabText]}>
+            Inquiries ({inquiries.length})
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
-        data={bookings}
-        renderItem={renderBookingItem}
+        data={filteredItems}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={64} color="#8E8E93" />
-            <Text style={styles.emptyTitle}>No bookings yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Browse the feed and book your first photography session
+            <Ionicons 
+              name={searchQuery ? "search-outline" : "calendar-outline"} 
+              size={64} 
+              color={Colors.gray400} 
+            />
+            <Text style={styles.emptyTitle}>
+              {searchQuery ? "No results found" : "No bookings yet"}
             </Text>
+            <Text style={styles.emptySubtitle}>
+              {searchQuery 
+                ? `No bookings match "${searchQuery}"`
+                : "Browse the feed and book your first photography session"
+              }
+            </Text>
+            {searchQuery && (
+              <TouchableOpacity 
+                style={styles.clearSearchButton}
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={styles.clearSearchText}>Clear Search</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
@@ -116,44 +481,101 @@ const MyBookingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.gray50,
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    backgroundColor: Colors.white,
+    paddingTop: 50,
+    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+    ...Shadows.sm,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+  headerContent: {
+    alignItems: 'center',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+  headerTitle: {
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.gray900,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.regular,
+    textAlign: 'center',
+  },
+  // Search Bar Styles
+  searchContainer: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray100,
+    borderRadius: BorderRadius.xl,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray900,
+  },
+  // Filter Tabs Styles
+  filterContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.gray200,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginHorizontal: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.gray100,
+    alignItems: 'center',
+  },
+  activeFilterTab: {
+    backgroundColor: Colors.primary,
+  },
+  filterTabText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.gray600,
+  },
+  activeFilterTabText: {
+    color: Colors.white,
   },
   listContainer: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   bookingCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius['2xl'],
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.lg,
+    borderWidth: 0.5,
+    borderColor: Colors.gray100,
   },
   bookingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   proInfo: {
     flexDirection: 'row',
@@ -161,66 +583,113 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
+    borderWidth: 2,
+    borderColor: Colors.gray200,
   },
   proDetails: {
     flex: 1,
   },
   proName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 2,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray900,
+    marginBottom: Spacing.xs,
   },
   service: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    alignItems: 'center',
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.white,
+  },
+  typeBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary + '20',
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  typeText: {
+    color: Colors.primary,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
   },
   bookingDetails: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.gray600,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  locationInfo: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+  },
+  distanceText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.primary,
+    fontWeight: Typography.fontWeight.medium,
+    marginTop: 2,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Spacing['6xl'],
+    paddingHorizontal: Spacing.xl,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: Colors.gray600,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: Colors.gray500,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.regular,
+  },
+  clearSearchButton: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+  },
+  clearSearchText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.white,
+    textAlign: 'center',
   },
 });
 

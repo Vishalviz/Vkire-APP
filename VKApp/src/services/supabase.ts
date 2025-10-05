@@ -159,6 +159,41 @@ export class DatabaseService {
     return data;
   }
 
+  // Get all creators/professionals
+  static async getCreators() {
+    const { data, error } = await supabase
+      .from('users')
+      .select(`
+        *,
+        pro_profiles!inner(*),
+        packages(*)
+      `)
+      .eq('role', 'pro')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
+
+  // Search creators by query
+  static async searchCreators(query: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select(`
+        *,
+        pro_profiles!inner(*),
+        packages(*)
+      `)
+      .eq('role', 'pro')
+      .eq('is_active', true)
+      .or(`name.ilike.%${query}%,city.ilike.%${query}%,pro_profiles.services.cs.{${query}}`)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
+
   // Inquiry operations
   static async createInquiry(inquiryData: any) {
     const { data, error } = await supabase
@@ -216,6 +251,73 @@ export class DatabaseService {
     const { data, error } = await supabase
       .from('messages')
       .insert([messageData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Job/Booking operations
+  static async updateJobStatus(jobId: string, status: string) {
+    const { data, error } = await supabase
+      .from('inquiries')
+      .update({ status })
+      .eq('id', jobId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getJobsByPro(proId: string) {
+    const { data, error } = await supabase
+      .from('inquiries')
+      .select(`
+        *,
+        customer:users!inquiries_customer_id_fkey(*),
+        package:packages(*)
+      `)
+      .eq('pro_id', proId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Review operations
+  static async createReview(reviewData: any) {
+    const { data, error } = await supabase
+      .from('reviews')
+      .insert([reviewData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getReviewsByPro(proId: string) {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select(`
+        *,
+        reviewer:users!reviews_reviewer_id_fkey(*)
+      `)
+      .eq('reviewee_id', proId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Package operations (additional)
+  static async deletePackage(packageId: string) {
+    const { data, error } = await supabase
+      .from('packages')
+      .update({ is_active: false })
+      .eq('id', packageId)
       .select()
       .single();
     

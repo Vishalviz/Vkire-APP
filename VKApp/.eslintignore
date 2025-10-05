@@ -1,0 +1,11 @@
+dist/
+node_modules/
+.expo/
+android/
+ios/
+web-build/
+*.js.map
+*.d.ts
+App.tsx
+index.ts
+jest.setup.js
