@@ -110,9 +110,9 @@ class LocationService {
         latitude,
         longitude,
         address: this.formatAddress(address),
-        city: address?.city || address?.subregion,
-        region: address?.region,
-        country: address?.country,
+        city: (address?.city || address?.subregion) ?? undefined,
+        region: address?.region ?? undefined,
+        country: address?.country ?? undefined,
       };
 
       return this.currentLocation;
