@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import { DatabaseService } from '../services/supabase';
 import NotificationService from '../services/notificationService';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface Job {
   id: string;
@@ -24,6 +25,7 @@ interface Job {
 }
 
 const MyJobsScreen: React.FC = () => {
+  const { colors } = useTheme();
   const [jobs, setJobs] = useState<Job[]>([
     {
       id: '1',
@@ -140,11 +142,11 @@ const MyJobsScreen: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return '#FF9500';
-      case 'confirmed': return '#007AFF';
-      case 'completed': return '#34C759';
-      case 'cancelled': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'pending': return colors.warning;
+      case 'confirmed': return colors.primary;
+      case 'completed': return colors.success;
+      case 'cancelled': return colors.error;
+      default: return colors.textSecondary;
     }
   };
 
@@ -156,7 +158,7 @@ const MyJobsScreen: React.FC = () => {
       <View style={styles.jobHeader}>
         <View style={styles.customerInfo}>
           <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color="#8E8E93" />
+            <Ionicons name="person" size={24} color={colors.textSecondary} />
           </View>
           <View style={styles.customerDetails}>
             <Text style={styles.customerName}>{item.customerName}</Text>
@@ -170,15 +172,15 @@ const MyJobsScreen: React.FC = () => {
       
       <View style={styles.jobDetails}>
         <View style={styles.detailRow}>
-          <Ionicons name="calendar-outline" size={16} color="#8E8E93" />
+          <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
           <Text style={styles.detailText}>{item.date}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Ionicons name="location-outline" size={16} color="#8E8E93" />
+          <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
           <Text style={styles.detailText}>{item.location}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Ionicons name="card-outline" size={16} color="#8E8E93" />
+          <Ionicons name="card-outline" size={16} color={colors.textSecondary} />
           <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
         </View>
       </View>
@@ -217,7 +219,7 @@ const MyJobsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="briefcase-outline" size={64} color="#8E8E93" />
+            <Ionicons name="briefcase-outline" size={64} color={colors.textSecondary} />
             <Text style={styles.emptyTitle}>No jobs yet</Text>
             <Text style={styles.emptySubtitle}>
               Start posting your work to get discovered by customers

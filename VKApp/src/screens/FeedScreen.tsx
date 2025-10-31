@@ -15,9 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { PortfolioPost, RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, Animation } from '../constants/designSystem';
-import Logo from '../components/Logo';
-import logger from '../utils/logger';
+import { useTheme } from '../contexts/ThemeContext';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { useLocation } from '../contexts/LocationContext';
 import LocationService from '../services/locationService';
@@ -25,6 +23,7 @@ import LocationService from '../services/locationService';
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const FeedScreen = () => {
+  const { colors, theme } = useTheme();
   const [posts, setPosts] = useState<PortfolioPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -371,13 +370,13 @@ const FeedScreen = () => {
           >
             <View style={styles.avatarContainer}>
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={20} color={Colors.gray500} />
+                <Ionicons name="person" size={20} color={colors.gray500} />
               </View>
             </View>
             <View style={styles.creatorDetails}>
               <Text style={styles.creatorName}>{creator.name}</Text>
               <View style={styles.creatorLocationContainer}>
-                <Ionicons name="location" size={12} color={Colors.gray500} />
+                <Ionicons name="location" size={12} color={colors.gray500} />
                 <Text style={styles.creatorLocation}>
                   {item.professional?.city || 'Unknown Location'}
                   {item.distance && ` • ${item.distance}km away`}
@@ -389,7 +388,7 @@ const FeedScreen = () => {
           <View style={styles.headerActions}>
             <Text style={styles.timestamp}>{formatTimestamp(item.created_at)}</Text>
             <TouchableOpacity style={styles.moreButton}>
-              <Ionicons name="ellipsis-horizontal" size={20} color={Colors.gray500} />
+              <Ionicons name="ellipsis-horizontal" size={20} color={colors.gray500} />
             </TouchableOpacity>
           </View>
         </View>
@@ -414,7 +413,7 @@ const FeedScreen = () => {
                 <Ionicons 
                   name={isLiked ? "heart" : "heart-outline"} 
                   size={24} 
-                  color={isLiked ? Colors.likeActive : Colors.gray500} 
+                  color={isLiked ? colors.likeActive : colors.gray500} 
                 />
               </TouchableOpacity>
             </Animated.View>
@@ -424,7 +423,7 @@ const FeedScreen = () => {
                 style={styles.actionButton}
                 onPress={() => handleComment(item.id)}
               >
-                <Ionicons name="chatbubble-outline" size={24} color={Colors.gray500} />
+                <Ionicons name="chatbubble-outline" size={24} color={colors.gray500} />
               </TouchableOpacity>
             </Animated.View>
             
@@ -433,7 +432,7 @@ const FeedScreen = () => {
                 style={styles.actionButton}
                 onPress={() => handleShare(item.id)}
               >
-                <Ionicons name="share-outline" size={24} color={Colors.gray500} />
+                <Ionicons name="share-outline" size={24} color={colors.gray500} />
               </TouchableOpacity>
             </Animated.View>
           </View>
@@ -445,7 +444,7 @@ const FeedScreen = () => {
             <Ionicons 
               name={isSaved ? "bookmark" : "bookmark-outline"} 
               size={24} 
-              color={isSaved ? Colors.primary : Colors.gray500} 
+              color={isSaved ? colors.primary : colors.gray500} 
             />
           </TouchableOpacity>
         </View>
@@ -490,9 +489,9 @@ const FeedScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Modern Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <Logo size="small" />
@@ -500,7 +499,7 @@ const FeedScreen = () => {
               <Text style={styles.headerTitle}>Feed</Text>
               {isLocationEnabled && (
                 <View style={styles.locationContainer}>
-                  <Ionicons name="location" size={12} color={Colors.primary} />
+                  <Ionicons name="location" size={12} color={colors.primary} />
                   <Text style={styles.locationText}>
                     {manualLocation || currentLocation?.city || 'Location enabled'}
                   </Text>
@@ -516,7 +515,7 @@ const FeedScreen = () => {
               navigation.navigate('Inbox');
             }}
           >
-            <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
+            <Ionicons name="notifications-outline" size={24} color={colors.primary} />
             {/* Unread notification badge */}
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>3</Text>
@@ -533,15 +532,15 @@ const FeedScreen = () => {
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={64} color={Colors.gray400} />
+            <Ionicons name="images-outline" size={64} color={colors.gray400} />
             <Text style={styles.emptyTitle}>No posts yet</Text>
             <Text style={styles.emptySubtitle}>
               Be the first to share your photography work
@@ -557,12 +556,12 @@ const FeedScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowPaymentModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.black + '66' }]}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>View Profile</Text>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.gray600} />
+                <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>

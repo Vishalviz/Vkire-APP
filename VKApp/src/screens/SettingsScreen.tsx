@@ -15,6 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation } from '../contexts/LocationContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
@@ -33,16 +34,12 @@ interface SettingItem {
 const SettingsScreen = () => {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const { user, signOut } = useAuth();
-  const { 
-    isLocationEnabled, 
-    currentLocation, 
-    manualLocation, 
-    requestLocationPermission, 
-    clearLocation,
-    setManualLocation 
+  const {
+    isLocationEnabled, currentLocation, manualLocation, requestLocationPermission, clearLocation, setManualLocation
   } = useLocation();
+  const { theme, colors, toggleTheme } = useTheme();
+  // Note: settings state for darkMode is now from theme context, rest is local
   const [settings, setSettings] = useState({
-    darkMode: false,
     autoSave: true,
     locationServices: true,
     analytics: false,
@@ -52,10 +49,11 @@ const SettingsScreen = () => {
   const [showLocationOptions, setShowLocationOptions] = useState(false);
 
   const handleToggleSetting = (key: string) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }));
+    if (key === 'darkMode') {
+      toggleTheme();
+    } else {
+      setSettings(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
+    }
   };
 
   const handleLocationPreferenceChange = async (preference: 'gps' | 'manual' | 'none') => {
@@ -94,13 +92,7 @@ const SettingsScreen = () => {
       'This action cannot be undone. All your data will be permanently deleted.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Account Deletion', 'Account deletion feature will be implemented in a future update.');
-          }
-        },
+        { text: 'Delete', style: 'destructive', onPress: async () => { await signOut(); /* More real deletion logic here if you later integrate a backend. */ } },
       ]
     );
   };
@@ -124,9 +116,9 @@ const SettingsScreen = () => {
       title: 'Dark Mode',
       description: 'Switch to dark theme',
       type: 'toggle',
-      value: settings.darkMode,
+      value: theme === 'dark',
       icon: 'moon',
-      color: Colors.primary,
+      color: colors.primary,
     },
     {
       id: 'autoSave',
@@ -135,17 +127,17 @@ const SettingsScreen = () => {
       type: 'toggle',
       value: settings.autoSave,
       icon: 'save',
-      color: Colors.success,
+      color: colors.success,
     },
     {
       id: 'locationServices',
       title: 'Location Services',
-      description: isLocationEnabled 
+      description: isLocationEnabled
         ? (manualLocation || currentLocation?.city || 'GPS Location Active')
         : 'Manage location preferences',
       type: 'navigate',
       icon: 'location',
-      color: isLocationEnabled ? Colors.success : Colors.warning,
+      color: isLocationEnabled ? colors.success : colors.warning,
       onPress: () => setShowLocationOptions(true),
     },
   ];
@@ -158,7 +150,7 @@ const SettingsScreen = () => {
       type: 'toggle',
       value: settings.analytics,
       icon: 'analytics',
-      color: Colors.primary,
+      color: colors.primary,
     },
     {
       id: 'crashReports',
@@ -167,7 +159,7 @@ const SettingsScreen = () => {
       type: 'toggle',
       value: settings.crashReports,
       icon: 'bug',
-      color: Colors.error,
+      color: colors.error,
     },
     {
       id: 'marketingEmails',
@@ -176,7 +168,7 @@ const SettingsScreen = () => {
       type: 'toggle',
       value: settings.marketingEmails,
       icon: 'mail',
-      color: Colors.warning,
+      color: colors.warning,
     },
   ];
 
@@ -187,7 +179,7 @@ const SettingsScreen = () => {
       description: 'Download a copy of your data',
       type: 'action',
       icon: 'download',
-      color: Colors.primary,
+      color: colors.primary,
       onPress: handleExportData,
     },
     {
@@ -196,38 +188,36 @@ const SettingsScreen = () => {
       description: 'Permanently delete your account',
       type: 'action',
       icon: 'trash',
-      color: Colors.error,
+      color: colors.error,
       onPress: handleDeleteAccount,
     },
   ];
 
   const renderSettingItem = (item: SettingItem) => {
     return (
-      <View key={item.id} style={styles.settingItem}>
+      <View key={item.id} style={[styles.settingItem, { backgroundColor: colors.surface }]}> // Use themed color
         <View style={styles.settingInfo}>
-          <View style={[styles.settingIcon, { backgroundColor: (item.color || Colors.primary) + '20' }]}>
-            <Ionicons name={item.icon as any} size={20} color={item.color || Colors.primary} />
+          <View style={[styles.settingIcon, { backgroundColor: (item.color || colors.primary) + '20' }]}> //
+            <Ionicons name={item.icon as any} size={20} color={item.color || colors.primary} />
           </View>
           <View style={styles.settingDetails}>
-            <Text style={styles.settingTitle}>{item.title}</Text>
+            <Text style={[styles.settingTitle, { color: colors.gray900 }]}>{item.title}</Text>
             {item.description && (
-              <Text style={styles.settingDescription}>{item.description}</Text>
+              <Text style={[styles.settingDescription, { color: colors.gray600 }]}>{item.description}</Text>
             )}
           </View>
         </View>
-        
         {item.type === 'toggle' && (
           <Switch
             value={item.value}
             onValueChange={() => handleToggleSetting(item.id)}
-            trackColor={{ false: Colors.gray300, true: (item.color || Colors.primary) + '50' }}
-            thumbColor={item.value ? (item.color || Colors.primary) : Colors.gray500}
+            trackColor={{ false: colors.gray300, true: (item.color || colors.primary) + '50' }}
+            thumbColor={item.value ? (item.color || colors.primary) : colors.gray500}
           />
         )}
-        
         {item.type === 'action' && (
           <TouchableOpacity onPress={item.onPress}>
-            <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
+            <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
           </TouchableOpacity>
         )}
       </View>
@@ -235,14 +225,14 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.surface }]}> // themed
+      <View style={[styles.container, { backgroundColor: colors.background }]}> // themed
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}> // themed
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={[styles.headerTitle, { color: colors.gray900 }]}>{'Settings'}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -251,7 +241,7 @@ const SettingsScreen = () => {
           <View style={styles.userSection}>
             <View style={styles.userInfo}>
               <View style={styles.avatarContainer}>
-                <Ionicons name="person" size={24} color={Colors.gray400} />
+                <Ionicons name="person" size={24} color={colors.gray400} />
               </View>
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{user?.name || 'User'}</Text>
@@ -263,7 +253,7 @@ const SettingsScreen = () => {
 
           {/* General Settings */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>General</Text>
+            <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>General</Text>
           </View>
           <View style={styles.settingsGroup}>
             {generalSettings.map(renderSettingItem)}
@@ -271,7 +261,7 @@ const SettingsScreen = () => {
 
           {/* Privacy Settings */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Privacy & Data</Text>
+            <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>Privacy & Data</Text>
           </View>
           <View style={styles.settingsGroup}>
             {privacySettings.map(renderSettingItem)}
@@ -279,7 +269,7 @@ const SettingsScreen = () => {
 
           {/* Account Settings */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Account</Text>
+            <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>Account</Text>
           </View>
           <View style={styles.settingsGroup}>
             {accountSettings.map(renderSettingItem)}
@@ -287,19 +277,19 @@ const SettingsScreen = () => {
 
           {/* App Info */}
           <View style={styles.appInfo}>
-            <Text style={styles.appInfoTitle}>Vkire v2.0.0</Text>
-            <Text style={styles.appInfoText}>
+            <Text style={[styles.appInfoTitle, { color: colors.primary }]}>Vkire v2.0.0</Text>
+            <Text style={[styles.appInfoText, { color: colors.gray700 }]}>
               Built with ❤️ for creators and customers
             </Text>
-            <Text style={styles.appInfoSubtext}>
+            <Text style={[styles.appInfoSubtext, { color: colors.gray600 }]}>
               Last updated: {new Date().toLocaleDateString()}
             </Text>
           </View>
 
           {/* Sign Out Button */}
-          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <Ionicons name="log-out-outline" size={20} color={Colors.error} />
-            <Text style={styles.signOutText}>Sign Out</Text>
+          <TouchableOpacity style={styles.signOutButton}>
+            <Ionicons name="log-out-outline" size={20} color={colors.error} />
+            <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -308,72 +298,72 @@ const SettingsScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Location Preferences</Text>
+                <Text style={[styles.modalTitle, { color: colors.gray900 }]}>Location Preferences</Text>
                 <TouchableOpacity onPress={() => setShowLocationOptions(false)}>
-                  <Ionicons name="close" size={24} color={Colors.gray600} />
+                  <Ionicons name="close" size={24} color={colors.gray600} />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.locationOptions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.locationOption}
                   onPress={() => handleLocationPreferenceChange('gps')}
                 >
                   <View style={styles.locationOptionIcon}>
-                    <Ionicons name="location" size={24} color={Colors.primary} />
+                    <Ionicons name="location" size={24} color={colors.primary} />
                   </View>
                   <View style={styles.locationOptionContent}>
-                    <Text style={styles.locationOptionTitle}>Use GPS Location</Text>
-                    <Text style={styles.locationOptionDescription}>
+                    <Text style={[styles.locationOptionTitle, { color: colors.gray900 }]}>Use GPS Location</Text>
+                    <Text style={[styles.locationOptionDescription, { color: colors.gray600 }]}>
                       Automatically detect your current location
                     </Text>
                   </View>
                   {!manualLocation && isLocationEnabled && (
-                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                    <Ionicons name="checkmark-circle" size={20} color={colors.success} />
                   )}
                 </TouchableOpacity>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.locationOption}
                   onPress={() => handleLocationPreferenceChange('manual')}
                 >
                   <View style={styles.locationOptionIcon}>
-                    <Ionicons name="map" size={24} color={Colors.warning} />
+                    <Ionicons name="map" size={24} color={colors.warning} />
                   </View>
                   <View style={styles.locationOptionContent}>
-                    <Text style={styles.locationOptionTitle}>Manual Location</Text>
-                    <Text style={styles.locationOptionDescription}>
+                    <Text style={[styles.locationOptionTitle, { color: colors.gray900 }]}>Manual Location</Text>
+                    <Text style={[styles.locationOptionDescription, { color: colors.gray600 }]}>
                       Set your location manually
                     </Text>
                   </View>
                   {manualLocation && (
-                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                    <Ionicons name="checkmark-circle" size={20} color={colors.success} />
                   )}
                 </TouchableOpacity>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.locationOption}
                   onPress={() => handleLocationPreferenceChange('none')}
                 >
                   <View style={styles.locationOptionIcon}>
-                    <Ionicons name="location-off" size={24} color={Colors.error} />
+                    <Ionicons name="location" size={24} color={colors.error} />
                   </View>
                   <View style={styles.locationOptionContent}>
-                    <Text style={styles.locationOptionTitle}>Disable Location</Text>
-                    <Text style={styles.locationOptionDescription}>
+                    <Text style={[styles.locationOptionTitle, { color: colors.gray900 }]}>Disable Location</Text>
+                    <Text style={[styles.locationOptionDescription, { color: colors.gray600 }]}>
                       Don't use location services
                     </Text>
                   </View>
                   {!isLocationEnabled && (
-                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                    <Ionicons name="checkmark-circle" size={20} color={colors.success} />
                   )}
                 </TouchableOpacity>
               </View>
 
               {manualLocation && (
                 <View style={styles.currentLocation}>
-                  <Text style={styles.currentLocationLabel}>Current Location:</Text>
-                  <Text style={styles.currentLocationText}>{manualLocation}</Text>
+                  <Text style={[styles.currentLocationLabel, { color: colors.gray600 }]}>Current Location:</Text>
+                  <Text style={[styles.currentLocationText, { color: colors.gray900 }]}>{manualLocation}</Text>
                 </View>
               )}
             </View>

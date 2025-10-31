@@ -13,6 +13,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 // import * as ImagePicker from 'expo-image-picker'; // Not used directly, handled by ImagePickerModal
 import ImagePickerModal from '../components/ImagePickerModal';
+import { useTheme } from '../contexts/ThemeContext';
+import { Typography, Spacing, BorderRadius, Shadows } from '../designSystem';
 
 interface PortfolioPost {
   id: string;
@@ -25,6 +27,7 @@ interface PortfolioPost {
 }
 
 const PortfolioManagerScreen: React.FC = () => {
+  const { colors } = useTheme();
   const [portfolioPosts, setPortfolioPosts] = useState<PortfolioPost[]>([
     {
       id: '1',
@@ -148,11 +151,11 @@ const PortfolioManagerScreen: React.FC = () => {
         
         <View style={styles.engagementRow}>
           <View style={styles.engagementItem}>
-            <Ionicons name="heart" size={16} color="#FF3B30" />
+            <Ionicons name="heart" size={16} color={colors.primary} />
             <Text style={styles.engagementText}>{item.likes}</Text>
           </View>
           <View style={styles.engagementItem}>
-            <Ionicons name="chatbubble" size={16} color="#8E8E93" />
+            <Ionicons name="chatbubble" size={16} color={colors.textSecondary} />
             <Text style={styles.engagementText}>{item.comments}</Text>
           </View>
           <Text style={styles.dateText}>{item.createdAt}</Text>
@@ -160,7 +163,7 @@ const PortfolioManagerScreen: React.FC = () => {
       </View>
       
       <TouchableOpacity style={styles.moreButton}>
-        <Ionicons name="ellipsis-horizontal" size={20} color="#8E8E93" />
+        <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -174,12 +177,12 @@ const PortfolioManagerScreen: React.FC = () => {
 
       <View style={styles.actionBar}>
         <TouchableOpacity style={styles.addButton} onPress={handleAddPost}>
-          <Ionicons name="add" size={20} color="#fff" />
+          <Ionicons name="add" size={20} color={colors.onPrimary} />
           <Text style={styles.addButtonText}>Add Post</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.filterButton}>
-          <Ionicons name="filter" size={20} color="#007AFF" />
+          <Ionicons name="filter" size={20} color={colors.primary} />
           <Text style={styles.filterButtonText}>Filter</Text>
         </TouchableOpacity>
       </View>
@@ -194,7 +197,7 @@ const PortfolioManagerScreen: React.FC = () => {
         columnWrapperStyle={styles.row}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={64} color="#8E8E93" />
+            <Ionicons name="images-outline" size={64} color={colors.textSecondary} />
             <Text style={styles.emptyTitle}>No portfolio posts yet</Text>
             <Text style={styles.emptySubtitle}>
               Start building your portfolio by adding your best work
@@ -218,7 +221,7 @@ const PortfolioManagerScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Portfolio Post</Text>
               <TouchableOpacity onPress={() => setShowAddPostModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -232,7 +235,7 @@ const PortfolioManagerScreen: React.FC = () => {
                     style={styles.imagePlaceholder}
                     onPress={() => setShowImagePicker(true)}
                   >
-                    <Ionicons name="camera" size={32} color="#8E8E93" />
+                    <Ionicons name="camera" size={32} color={colors.textSecondary} />
                     <Text style={styles.imagePlaceholderText}>Select Image</Text>
                   </TouchableOpacity>
                 )}

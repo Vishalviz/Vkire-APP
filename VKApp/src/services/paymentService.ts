@@ -21,7 +21,7 @@ export class PaymentService {
     try {
       if (!this.isInitialized) {
         // Mock initialization - in a real app, this would connect to payment provider
-        console.log('Payment service initialized (mock)');
+        console.log('[PaymentService.initialize] Payment service initialized (mock)');
         this.isInitialized = true;
       }
       return true;
@@ -96,7 +96,7 @@ export class PaymentService {
       await this.initialize();
       
       // Mock restore - in a real app, this would check with the payment provider
-      console.log('Mock: Restoring purchases');
+      console.log('[PaymentService.restorePurchases] Mock: Restoring purchases');
       
       return {
         success: true,
@@ -162,7 +162,7 @@ export class PaymentService {
       if (!purchasedList.includes(professionalId)) {
         purchasedList.push(professionalId);
         await AsyncStorage.setItem('purchased_chat_access', JSON.stringify(purchasedList));
-        console.log('Chat access purchase recorded for professional:', professionalId);
+        console.log('[PaymentService.recordPurchase] Chat access purchase recorded for professional:', professionalId);
       }
     } catch (error) {
       console.error('Error recording chat access purchase:', error);
@@ -255,7 +255,7 @@ export class PaymentService {
     try {
       if (this.isInitialized) {
         // Mock disconnect - in a real app, this would disconnect from payment provider
-        console.log('Payment service disconnected (mock)');
+        console.log('[PaymentService.disconnect] Payment service disconnected (mock)');
         this.isInitialized = false;
       }
     } catch (error) {

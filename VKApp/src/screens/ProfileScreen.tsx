@@ -16,6 +16,7 @@ import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/ThemeContext';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -24,6 +25,7 @@ const ProfileScreen = () => {
   const { user, signOut } = useAuth();
   const { profileViews, hasUnlimitedAccess, activateUnlimitedAccess, clearAllData } = useProfileViews();
   const [showCreditModal, setShowCreditModal] = useState(false);
+  const { theme, colors } = useTheme();
 
   // Profile completion check
   const getProfileCompletionPercentage = () => {
@@ -130,7 +132,7 @@ const ProfileScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Modern Header */}
         <View style={styles.header}>
@@ -143,10 +145,10 @@ const ProfileScreen = () => {
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={50} color={Colors.gray500} />
+              <Ionicons name="person" size={50} color={colors.textSecondary} />
             </View>
             <TouchableOpacity style={styles.editAvatarButton}>
-              <Ionicons name="camera" size={16} color={Colors.white} />
+              <Ionicons name="camera" size={16} color={colors.white} />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>{user?.name || 'User'}</Text>
@@ -179,7 +181,7 @@ const ProfileScreen = () => {
           </View>
           {user?.city && (
             <View style={styles.locationContainer}>
-              <Ionicons name="location-outline" size={16} color={Colors.gray600} />
+              <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
               <Text style={styles.userLocation}>{user.city}</Text>
             </View>
           )}
@@ -189,7 +191,7 @@ const ProfileScreen = () => {
         <View style={styles.creditsCard}>
           <View style={styles.creditsHeader}>
             <View style={styles.creditsIcon}>
-              <Ionicons name="eye" size={24} color={Colors.primary} />
+              <Ionicons name="eye" size={24} color={colors.primary} />
             </View>
             <View style={styles.creditsInfo}>
               <Text style={styles.creditsTitle}>Profile Views</Text>
@@ -227,11 +229,11 @@ const ProfileScreen = () => {
             >
               <View style={styles.optionLeft}>
                 <View style={styles.optionIconContainer}>
-                  <Ionicons name={option.icon as any} size={20} color={Colors.primary} />
+                  <Ionicons name={option.icon as any} size={20} color={colors.primary} />
                 </View>
                 <Text style={styles.optionText}>{option.title}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={Colors.gray400} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           ))}
         </View>
@@ -239,7 +241,7 @@ const ProfileScreen = () => {
         {/* Debug Button - Remove in production */}
         <View style={styles.signOutContainer}>
           <TouchableOpacity 
-            style={[styles.signOutButton, { backgroundColor: Colors.warning + '20' }]} 
+            style={[styles.signOutButton, { backgroundColor: colors.warning + '20' }]} 
             onPress={() => {
               Alert.alert(
                 'Reset Credits',
@@ -251,15 +253,15 @@ const ProfileScreen = () => {
               );
             }}
           >
-            <Ionicons name="refresh-outline" size={20} color={Colors.warning} />
-            <Text style={[styles.signOutText, { color: Colors.warning }]}>Reset Credits (Debug)</Text>
+            <Ionicons name="refresh-outline" size={20} color={colors.warning} />
+            <Text style={[styles.signOutText, { color: colors.warning }]}>Reset Credits (Debug)</Text>
           </TouchableOpacity>
         </View>
 
         {/* Sign Out Button */}
         <View style={styles.signOutContainer}>
           <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <Ionicons name="log-out-outline" size={20} color={Colors.error} />
+            <Ionicons name="log-out-outline" size={20} color={colors.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         </View>
@@ -285,7 +287,7 @@ const ProfileScreen = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Buy Profile Views</Text>
               <TouchableOpacity onPress={() => setShowCreditModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.gray600} />
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>

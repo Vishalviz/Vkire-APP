@@ -1,11 +1,12 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { 
   RootStackParamList, 
   CustomerTabParamList, 
@@ -41,6 +42,7 @@ import PaymentMethodsScreen from '../screens/PaymentMethodsScreen';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import PriceListEditorScreen from '../screens/PriceListEditorScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -102,53 +104,48 @@ const CustomerTabNavigator = () => {
 
 // Professional Tab Navigator
 const ProfessionalTabNavigator = () => {
+  const { colors } = useTheme();
   return (
     <ProfessionalTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap;
-
-          if (route.name === 'Feed') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Search') {
-            iconName = focused ? 'search' : 'search-outline';
-          } else if (route.name === 'Dashboard') {
-            iconName = focused ? 'analytics' : 'analytics-outline';
-          } else if (route.name === 'MyJobs') {
-            iconName = focused ? 'briefcase' : 'briefcase-outline';
-          } else if (route.name === 'PortfolioManager') {
-            iconName = focused ? 'images' : 'images-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else {
-            iconName = 'help-outline';
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarLabel: ({ focused, color }) => {
-          let label = '';
-          if (route.name === 'Feed') label = 'Feed';
-          else if (route.name === 'Search') label = 'Search';
-          else if (route.name === 'Dashboard') label = 'Dashboard';
-          else if (route.name === 'MyJobs') label = 'My Jobs';
-          else if (route.name === 'PortfolioManager') label = 'Portfolio';
-          else if (route.name === 'Profile') label = 'Profile';
-          
+          let iconName;
+          if (route.name === 'Feed') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Search') iconName = focused ? 'search' : 'search-outline';
+          else if (route.name === 'Dashboard') iconName = focused ? 'analytics' : 'analytics-outline';
+          else if (route.name === 'MyJobs') iconName = focused ? 'briefcase' : 'briefcase-outline';
+          else if (route.name === 'PortfolioManager') iconName = focused ? 'images' : 'images-outline';
+          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
+          else iconName = 'help-outline';
+          // minimalist: highlight selected icon
           return (
-            <Text style={{
-              fontSize: Typography.fontSize.xs,
-              fontWeight: focused ? Typography.fontWeight.semiBold : Typography.fontWeight.medium,
-              color,
-              marginTop: Spacing.xs,
+            <View style={{
+              backgroundColor: focused ? colors.primary + '1A' : 'transparent',
+              borderRadius: 18,
+              padding: 5,
             }}>
-              {label}
-            </Text>
+              <Ionicons name={iconName} size={22} color={focused ? colors.primary : colors.gray500} />
+            </View>
           );
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.gray500,
-        tabBarStyle: ComponentStyles.tabBar,
+        // minimalist: hide labels or show very subtle labels
+        tabBarShowLabel: false,
+        tabBarStyle: [
+          ComponentStyles.tabBar,
+          {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.gray200,
+            borderRadius: 28,
+            marginHorizontal: 12,
+            marginBottom: 12,
+            height: 64,
+            shadowColor: colors.black,
+            shadowOpacity: 0.07,
+            shadowOffset: { width: 0, height: 2 },
+            shadowRadius: 6,
+            elevation: 8,
+          },
+        ],
         headerShown: false,
       })}
     >
@@ -291,6 +288,11 @@ const AppNavigator = () => {
               name="ProfessionalOnboarding" 
               component={ProfessionalOnboardingScreen}
               options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen 
+              name="PriceListEditor" 
+              component={PriceListEditorScreen}
+              options={{ headerShown: false }} 
             />
           </>
         ) : (

@@ -17,11 +17,13 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useProfileViews } from '../contexts/ProfileViewContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const SearchScreen = () => {
+  const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -360,11 +362,11 @@ const SearchScreen = () => {
       <View style={styles.postOverlay}>
         <View style={styles.postStats}>
           <View style={styles.postStat}>
-            <Ionicons name="heart" size={16} color={Colors.white} />
+            <Ionicons name="heart" size={16} color={colors.white} />
             <Text style={styles.postStatText}>{item.likes}</Text>
           </View>
           <View style={styles.postStat}>
-            <Ionicons name="chatbubble" size={16} color={Colors.white} />
+            <Ionicons name="chatbubble" size={16} color={colors.white} />
             <Text style={styles.postStatText}>{item.comments}</Text>
           </View>
         </View>
@@ -389,7 +391,7 @@ const SearchScreen = () => {
         )}
       </View>
       <View style={styles.searchResultActions}>
-        <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
+        <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
       </View>
     </TouchableOpacity>
   );
@@ -404,17 +406,17 @@ const SearchScreen = () => {
             <Text style={styles.headerTitle}>Search</Text>
           </View>
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color={Colors.gray500} style={styles.searchIcon} />
+            <Ionicons name="search" size={20} color={colors.gray500} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search creators, services, locations..."
-              placeholderTextColor={Colors.gray500}
+              placeholderTextColor={colors.gray500}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-                <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+                <Ionicons name="close-circle" size={20} color={colors.gray500} />
               </TouchableOpacity>
             )}
           </View>
@@ -439,7 +441,7 @@ const SearchScreen = () => {
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
                 <View style={styles.emptySearchResults}>
-                  <Ionicons name="search" size={48} color={Colors.gray400} />
+                  <Ionicons name="search" size={48} color={colors.gray400} />
                   <Text style={styles.emptySearchTitle}>No results found</Text>
                   <Text style={styles.emptySearchSubtitle}>
                     Try searching for photographer, videographer, editor, or location names
@@ -460,8 +462,8 @@ const SearchScreen = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor={Colors.primary}
-                colors={[Colors.primary]}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
               />
             }
           />
@@ -480,7 +482,7 @@ const SearchScreen = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>View Profile</Text>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                <Ionicons name="close" size={24} color={Colors.gray600} />
+                <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>
