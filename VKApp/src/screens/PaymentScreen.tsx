@@ -11,8 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import PaymentService from '../services/paymentService';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type PaymentScreenRouteProp = RouteProp<RootStackParamList, 'Payment'>;
 type PaymentScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Payment'>;
@@ -86,17 +87,19 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
     }
   };
 
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.white, borderBottomColor: colors.gray200 }]}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[styles.backButton, { backgroundColor: colors.gray50 }]}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Payment</Text>
+        <Text style={[styles.headerTitle, { color: colors.gray900 }]}>Payment</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -104,7 +107,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
         {/* Booking Summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Booking Summary</Text>
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.white, borderColor: colors.gray100 }]}>
             {packageDetails?.title && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Package</Text>
@@ -152,11 +155,11 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
                 onPress={() => setSelectedPaymentMethod(method.id)}
               >
                 <View style={styles.paymentMethodContent}>
-                  <View style={styles.paymentMethodIcon}>
+                  <View style={[styles.paymentMethodIcon, { backgroundColor: colors.gray50 }]}>
                     <Ionicons
                       name={method.icon as any}
                       size={24}
-                      color={selectedPaymentMethod === method.id ? Colors.primary : Colors.gray600}
+                      color={selectedPaymentMethod === method.id ? colors.primary : colors.gray600}
                     />
                   </View>
                   <View style={styles.paymentMethodInfo}>
@@ -198,7 +201,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
       </ScrollView>
 
       {/* Payment Button */}
-      <View style={styles.paymentFooter}>
+      <View style={[styles.paymentFooter, { backgroundColor: colors.white, borderTopColor: colors.gray200 }]}>
         <TouchableOpacity
           style={[styles.payButton, loading && styles.payButtonDisabled]}
           onPress={handlePayment}
@@ -207,7 +210,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
           <Text style={styles.payButtonText}>
             {loading ? 'Processing...' : `Pay ₹${amount.toLocaleString()}`}
           </Text>
-          <Ionicons name="card" size={20} color={Colors.white} />
+          <Ionicons name="card" size={20} color={colors.white} />
         </TouchableOpacity>
       </View>
     </View>
@@ -215,185 +218,46 @@ const PaymentScreen: React.FC<PaymentScreenProps> = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
+  container: { flex: 1 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    ...Shadows.sm,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.xl, paddingTop: 50, paddingBottom: Spacing.lg,
   },
   backButton: {
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
+    padding: Spacing.sm, borderRadius: BorderRadius.lg,
   },
   headerTitle: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
-    letterSpacing: 0.3,
+    fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.bold, letterSpacing: 0.3,
   },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: Spacing.xl,
-  },
-  section: {
-    marginTop: Spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.md,
-  },
+  placeholder: { width: 40 },
+  content: { flex: 1, paddingHorizontal: Spacing.xl },
+  section: { marginTop: Spacing.xl },
+  sectionTitle: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semiBold, marginBottom: Spacing.md, },
   summaryCard: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderRadius: BorderRadius['2xl'], padding: Spacing.lg, ...Shadows.lg, borderWidth: 0.5,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-  },
-  summaryLabel: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-  },
-  summaryValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
-    marginTop: Spacing.sm,
-    paddingTop: Spacing.md,
-  },
-  totalLabel: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-  },
-  totalValue: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
-  },
-  paymentMethods: {
-    gap: Spacing.md,
-  },
-  paymentMethod: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: Colors.gray100,
-  },
-  selectedPaymentMethod: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-  },
-  paymentMethodContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  paymentMethodIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  paymentMethodInfo: {
-    flex: 1,
-  },
-  paymentMethodTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: 2,
-  },
-  selectedPaymentMethodText: {
-    color: Colors.primary,
-  },
-  paymentMethodDescription: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-  },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.gray300,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedRadioButton: {
-    borderColor: Colors.primary,
-  },
-  radioButtonInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.primary,
-  },
-  termsText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-    textAlign: 'center',
-  },
-  paymentFooter: {
-    padding: Spacing.xl,
-    backgroundColor: Colors.white,
-    borderTopWidth: 0.5,
-    borderTopColor: Colors.gray200,
-    ...Shadows.lg,
-  },
-  payButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.lg,
-  },
-  payButtonDisabled: {
-    backgroundColor: Colors.gray400,
-  },
-  payButtonText: {
-    color: Colors.white,
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    marginRight: Spacing.sm,
-  },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.sm },
+  totalRow: { borderTopWidth: 1, marginTop: Spacing.sm, paddingTop: Spacing.md },
+  summaryLabel: { fontSize: Typography.fontSize.base },
+  summaryValue: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.medium },
+  totalLabel: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semiBold },
+  totalValue: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.bold },
+  paymentMethods: { gap: Spacing.md },
+  paymentMethod: { borderRadius: BorderRadius['2xl'], padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', ...Shadows.lg, borderWidth: 0.5 },
+  selectedPaymentMethod: { borderWidth: 2 },
+  paymentMethodContent: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  paymentMethodIcon: { width: 48, height: 48, borderRadius: BorderRadius.lg, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.md },
+  paymentMethodInfo: { flex: 1 },
+  paymentMethodTitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, marginBottom: 2 },
+  selectedPaymentMethodText: {},
+  paymentMethodDescription: { fontSize: Typography.fontSize.sm },
+  radioButton: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, justifyContent: 'center', alignItems: 'center' },
+  selectedRadioButton: {},
+  radioButtonInner: { width: 10, height: 10, borderRadius: 5 },
+  termsText: { fontSize: Typography.fontSize.sm, lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm, textAlign: 'center', },
+  paymentFooter: { padding: Spacing.xl, borderTopWidth: 0.5, ...Shadows.lg, },
+  payButton: { borderRadius: BorderRadius.xl, padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', ...Shadows.lg },
+  payButtonDisabled: {},
+  payButtonText: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semiBold, marginRight: Spacing.sm },
 });
 
 export default PaymentScreen;

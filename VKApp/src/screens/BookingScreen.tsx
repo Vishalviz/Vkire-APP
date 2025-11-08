@@ -12,8 +12,9 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useLocation } from '../contexts/LocationContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type BookingScreenRouteProp = RouteProp<RootStackParamList, 'Booking'>;
 type BookingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Booking'>;
@@ -29,6 +30,7 @@ const BookingScreen: React.FC = () => {
   const route = useRoute<BookingScreenRouteProp>();
   const { packageDetails, proDetails } = route.params || {};
   const { currentLocation, manualLocation } = useLocation();
+  const { colors } = useTheme();
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | undefined>();
@@ -81,7 +83,7 @@ const BookingScreen: React.FC = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Book Service</Text>
         <View style={styles.placeholder} />
@@ -96,11 +98,11 @@ const BookingScreen: React.FC = () => {
             <Text style={styles.packageDescription}>{packageDetails?.description || 'No description available'}</Text>
             <View style={styles.packageInfo}>
               <View style={styles.packageInfoRow}>
-                <Ionicons name="time-outline" size={16} color={Colors.gray600} />
+                <Ionicons name="time-outline" size={16} color={colors.gray600} />
                 <Text style={styles.packageInfoText}>{packageDetails?.duration || 0} hours</Text>
               </View>
               <View style={styles.packageInfoRow}>
-                <Ionicons name="cash-outline" size={16} color={Colors.gray600} />
+                <Ionicons name="cash-outline" size={16} color={colors.gray600} />
                 <Text style={styles.packageInfoText}>₹{(packageDetails?.price || 0).toLocaleString()}</Text>
               </View>
             </View>
@@ -113,7 +115,7 @@ const BookingScreen: React.FC = () => {
           <View style={styles.proCard}>
             <View style={styles.proInfo}>
               <View style={styles.proAvatar}>
-                <Ionicons name="person" size={24} color={Colors.gray500} />
+                <Ionicons name="person" size={24} color={colors.gray500} />
               </View>
               <View style={styles.proDetails}>
                 <Text style={styles.proName}>{proDetails?.name || 'Professional'}</Text>
@@ -134,7 +136,7 @@ const BookingScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Location Information</Text>
             <View style={styles.locationCard}>
               <View style={styles.locationRow}>
-                <Ionicons name="location" size={20} color={Colors.primary} />
+                <Ionicons name="location" size={20} color={colors.primary} />
                 <View style={styles.locationInfo}>
                   <Text style={styles.locationLabel}>Your Location</Text>
                   <Text style={styles.locationValue}>
@@ -143,7 +145,7 @@ const BookingScreen: React.FC = () => {
                 </View>
               </View>
               <View style={styles.locationRow}>
-                <Ionicons name="business" size={20} color={Colors.warning} />
+                <Ionicons name="business" size={20} color={colors.warning} />
                 <View style={styles.locationInfo}>
                   <Text style={styles.locationLabel}>Professional Location</Text>
                   <Text style={styles.locationValue}>
@@ -153,7 +155,7 @@ const BookingScreen: React.FC = () => {
               </View>
               {currentLocation && proDetails?.latitude && proDetails?.longitude && (
                 <View style={styles.locationRow}>
-                  <Ionicons name="navigate" size={20} color={Colors.success} />
+                  <Ionicons name="navigate" size={20} color={colors.success} />
                   <View style={styles.locationInfo}>
                     <Text style={styles.locationLabel}>Distance</Text>
                     <Text style={styles.locationValue}>
@@ -227,7 +229,7 @@ const BookingScreen: React.FC = () => {
           <Text style={styles.continueButtonText}>
             Continue to Payment
           </Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.white} />
+          <Ionicons name="arrow-forward" size={20} color={colors.white} />
         </TouchableOpacity>
       </View>
     </View>
@@ -237,7 +239,7 @@ const BookingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -246,20 +248,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: colors.gray200,
     ...Shadows.sm,
   },
   backButton: {
     padding: Spacing.sm,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
+    backgroundColor: colors.gray50,
   },
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
+    color: colors.gray900,
     letterSpacing: 0.3,
   },
   placeholder: {
@@ -275,26 +277,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.md,
   },
   packageCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
     ...Shadows.lg,
     borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderColor: colors.gray100,
   },
   packageTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.sm,
   },
   packageDescription: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: colors.gray600,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Spacing.md,
   },
@@ -309,15 +311,15 @@ const styles = StyleSheet.create({
   },
   packageInfoText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   proCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
     ...Shadows.lg,
     borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderColor: colors.gray100,
   },
   proInfo: {
     flexDirection: 'row',
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.gray100,
+    backgroundColor: colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
@@ -338,12 +340,12 @@ const styles = StyleSheet.create({
   proName: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: 2,
   },
   proLocation: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     marginBottom: Spacing.xs,
   },
   proRating: {
@@ -354,19 +356,19 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   reviewCount: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   summaryCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
     ...Shadows.lg,
     borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderColor: colors.gray100,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -376,38 +378,38 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   summaryValue: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    borderTopColor: colors.gray200,
     marginTop: Spacing.sm,
     paddingTop: Spacing.md,
   },
   totalLabel: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   totalValue: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
+    color: colors.primary,
   },
   footer: {
     padding: Spacing.xl,
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderTopWidth: 0.5,
-    borderTopColor: Colors.gray200,
+    borderTopColor: colors.gray200,
     ...Shadows.lg,
   },
   continueButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     flexDirection: 'row',
@@ -416,20 +418,20 @@ const styles = StyleSheet.create({
     ...Shadows.lg,
   },
   continueButtonDisabled: {
-    backgroundColor: Colors.gray400,
+    backgroundColor: colors.gray400,
   },
   continueButtonText: {
-    color: Colors.white,
+    color: colors.white,
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
     marginRight: Spacing.sm,
   },
   locationCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     ...Shadows.sm,
   },
   locationRow: {
@@ -443,12 +445,12 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     fontWeight: Typography.fontWeight.medium,
   },
   locationValue: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: colors.gray900,
     fontWeight: Typography.fontWeight.semiBold,
     marginTop: 2,
   },

@@ -204,6 +204,7 @@ export type RootStackParamList = {
   HelpSupport: undefined;
   Settings: undefined;
   ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
+  PriceListEditor: undefined;
 };
 
 // Shared tabs for all users

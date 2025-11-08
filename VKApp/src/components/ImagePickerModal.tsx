@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 // Optional DocumentPicker import with fallback
 let DocumentPicker: any = null;
@@ -31,6 +32,8 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
   onClose,
   onImageSelected,
 }) => {
+  const { colors } = useTheme();
+
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -125,7 +128,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
           <View style={styles.optionsContainer}>
             <TouchableOpacity style={styles.option} onPress={pickImageFromCamera}>
               <View style={styles.optionIcon}>
-                <Ionicons name="camera" size={24} color={Colors.primary} />
+                <Ionicons name="camera" size={24} color={colors.primary} />
               </View>
               <Text style={styles.optionText}>Take Photo</Text>
               <Text style={styles.optionSubtext}>Use camera to take a new photo</Text>
@@ -133,7 +136,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
 
             <TouchableOpacity style={styles.option} onPress={pickImageFromGallery}>
               <View style={styles.optionIcon}>
-                <Ionicons name="images" size={24} color={Colors.primary} />
+                <Ionicons name="images" size={24} color={colors.primary} />
               </View>
               <Text style={styles.optionText}>Choose from Gallery</Text>
               <Text style={styles.optionSubtext}>Select from your photo library</Text>
@@ -142,7 +145,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             {DocumentPicker && (
               <TouchableOpacity style={styles.option} onPress={pickImageFromFiles}>
                 <View style={styles.optionIcon}>
-                  <Ionicons name="document" size={24} color={Colors.primary} />
+                  <Ionicons name="document" size={24} color={colors.primary} />
                 </View>
                 <Text style={styles.optionText}>Choose from Files</Text>
                 <Text style={styles.optionSubtext}>Select from your device files</Text>
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white background
     borderTopLeftRadius: BorderRadius['2xl'],
     borderTopRightRadius: BorderRadius['2xl'],
     paddingTop: Spacing.md,
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
   dragIndicator: {
     width: 40,
     height: 4,
-    backgroundColor: Colors.gray300,
+    backgroundColor: '#C7C7CC', // Static gray300 background
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: Spacing.lg,
@@ -190,12 +193,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
+    color: '#1A1A1A', // Static black color
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#636366', // Static gray600 color
     textAlign: 'center',
   },
   optionsContainer: {
@@ -207,14 +210,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
+    backgroundColor: '#F8F9FA', // Static gray50 background
     marginBottom: Spacing.md,
   },
   optionIcon: {
     width: 48,
     height: 48,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: '#4DA6FF', // Static primaryLight background
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -222,15 +225,15 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     marginBottom: Spacing.xs,
   },
   optionSubtext: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   cancelButton: {
-    backgroundColor: Colors.gray200,
+    backgroundColor: '#D1D1D6', // Static gray200 background
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     alignItems: 'center',
@@ -238,7 +241,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray700,
+    color: '#4B5563', // Static gray700 color
   },
 });
 

@@ -14,7 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type HelpSupportScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HelpSupport'>;
 
@@ -39,6 +40,7 @@ const HelpSupportScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
   const [contactMessage, setContactMessage] = useState('');
+  const { colors } = useTheme();
 
   const faqData: FAQItem[] = [
     {
@@ -97,7 +99,7 @@ const HelpSupportScreen = () => {
       title: 'Email Support',
       description: 'Get help via email within 24 hours',
       icon: 'mail',
-      color: Colors.primary,
+      color: colors.primary,
       action: () => {
         Linking.openURL('mailto:support@vkire.com?subject=Support Request');
       },
@@ -107,7 +109,7 @@ const HelpSupportScreen = () => {
       title: 'Phone Support',
       description: 'Call us for immediate assistance',
       icon: 'call',
-      color: Colors.success,
+      color: colors.success,
       action: () => {
         Linking.openURL('tel:+1234567890');
       },
@@ -117,7 +119,7 @@ const HelpSupportScreen = () => {
       title: 'Live Chat',
       description: 'Chat with our support team',
       icon: 'chatbubble',
-      color: Colors.warning,
+      color: colors.warning,
       action: () => {
         Alert.alert('Live Chat', 'Live chat feature will be available soon!');
       },
@@ -127,7 +129,7 @@ const HelpSupportScreen = () => {
       title: 'WhatsApp',
       description: 'Message us on WhatsApp',
       icon: 'logo-whatsapp',
-      color: Colors.success,
+      color: colors.success,
       action: () => {
         Linking.openURL('https://wa.me/1234567890');
       },
@@ -158,11 +160,11 @@ const HelpSupportScreen = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'general': return Colors.primary;
-      case 'booking': return Colors.success;
-      case 'payment': return Colors.warning;
-      case 'account': return Colors.error;
-      default: return Colors.primary;
+      case 'general': return colors.primary;
+      case 'booking': return colors.success;
+      case 'payment': return colors.warning;
+      case 'account': return colors.error;
+      default: return colors.primary;
     }
   };
 
@@ -182,7 +184,7 @@ const HelpSupportScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Help & Support</Text>
           <View style={styles.headerSpacer} />
@@ -192,17 +194,17 @@ const HelpSupportScreen = () => {
           {/* Search Section */}
           <View style={styles.searchSection}>
             <View style={styles.searchContainer}>
-              <Ionicons name="search" size={20} color={Colors.gray500} style={styles.searchIcon} />
+              <Ionicons name="search" size={20} color={colors.gray500} style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search for help..."
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+                  <Ionicons name="close-circle" size={20} color={colors.gray500} />
                 </TouchableOpacity>
               )}
             </View>
@@ -254,7 +256,7 @@ const HelpSupportScreen = () => {
                   <Ionicons 
                     name={expandedFAQ === faq.id ? "chevron-up" : "chevron-down"} 
                     size={20} 
-                    color={Colors.gray500} 
+                    color={colors.gray500} 
                   />
                 </TouchableOpacity>
                 
@@ -277,7 +279,7 @@ const HelpSupportScreen = () => {
             <TextInput
               style={styles.messageInput}
               placeholder="Describe your issue or question..."
-              placeholderTextColor={Colors.gray500}
+              placeholderTextColor={colors.gray500}
               value={contactMessage}
               onChangeText={setContactMessage}
               multiline
@@ -285,7 +287,7 @@ const HelpSupportScreen = () => {
               textAlignVertical="top"
             />
             <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-              <Ionicons name="send" size={20} color={Colors.white} />
+              <Ionicons name="send" size={20} color={colors.white} />
               <Text style={styles.sendButtonText}>Send Message</Text>
             </TouchableOpacity>
           </View>
@@ -306,11 +308,11 @@ const HelpSupportScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -319,13 +321,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
+    borderBottomColor: colors.gray200,
+    backgroundColor: colors.surface,
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   headerSpacer: {
     width: 24,
@@ -340,11 +342,11 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     ...Shadows.sm,
   },
   searchIcon: {
@@ -354,7 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: Spacing.md,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   sectionHeader: {
     marginBottom: Spacing.lg,
@@ -362,12 +364,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
   },
   sectionSubtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   contactGrid: {
     flexDirection: 'row',
@@ -377,12 +379,12 @@ const styles = StyleSheet.create({
   },
   contactCard: {
     width: '48%',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     ...Shadows.sm,
   },
   contactIcon: {
@@ -396,13 +398,13 @@ const styles = StyleSheet.create({
   contactTitle: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
     textAlign: 'center',
   },
   contactDescription: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray600,
+    color: colors.gray600,
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
   },
@@ -410,11 +412,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   faqItem: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     overflow: 'hidden',
     ...Shadows.sm,
   },
@@ -440,37 +442,37 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
+    color: colors.gray900,
     flex: 1,
   },
   faqAnswer: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    borderTopColor: colors.gray200,
   },
   faqAnswerText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
+    color: colors.gray700,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
   contactForm: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.xl,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     ...Shadows.sm,
   },
   messageInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: colors.gray900,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     marginBottom: Spacing.lg,
     minHeight: 100,
   },
@@ -478,7 +480,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.full,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
@@ -487,25 +489,25 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
+    color: colors.white,
   },
   appInfo: {
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: colors.primary + '10',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.primary + '30',
+    borderColor: colors.primary + '30',
     alignItems: 'center',
   },
   appInfoTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: Spacing.sm,
   },
   appInfoText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
+    color: colors.gray700,
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },

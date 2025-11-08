@@ -15,8 +15,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation } from '../contexts/LocationContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
 
@@ -238,15 +238,15 @@ const SettingsScreen = () => {
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* User Info */}
-          <View style={styles.userSection}>
+          <View style={[styles.userSection, { backgroundColor: colors.surface, borderColor: colors.gray200 }]}>
             <View style={styles.userInfo}>
-              <View style={styles.avatarContainer}>
+              <View style={[styles.avatarContainer, { backgroundColor: colors.gray100 }]}>
                 <Ionicons name="person" size={24} color={colors.gray400} />
               </View>
               <View style={styles.userDetails}>
-                <Text style={styles.userName}>{user?.name || 'User'}</Text>
-                <Text style={styles.userEmail}>{user?.email}</Text>
-                <Text style={styles.userRole}>{user?.role === 'pro' ? 'Professional' : 'Customer'}</Text>
+                <Text style={[styles.userName, { color: colors.gray900 }]}>{user?.name || 'User'}</Text>
+                <Text style={[styles.userEmail, { color: colors.gray600 }]}>{user?.email}</Text>
+                <Text style={[styles.userRole, { color: colors.primary, backgroundColor: colors.primary + '15' }]}>{user?.role === 'pro' ? 'Professional' : 'Customer'}</Text>
               </View>
             </View>
           </View>
@@ -255,7 +255,7 @@ const SettingsScreen = () => {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>General</Text>
           </View>
-          <View style={styles.settingsGroup}>
+          <View style={[styles.settingsGroup, { backgroundColor: colors.surface, borderColor: colors.gray200 }]}>
             {generalSettings.map(renderSettingItem)}
           </View>
 
@@ -263,7 +263,7 @@ const SettingsScreen = () => {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>Privacy & Data</Text>
           </View>
-          <View style={styles.settingsGroup}>
+          <View style={[styles.settingsGroup, { backgroundColor: colors.surface, borderColor: colors.gray200 }]}>
             {privacySettings.map(renderSettingItem)}
           </View>
 
@@ -271,12 +271,12 @@ const SettingsScreen = () => {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>Account</Text>
           </View>
-          <View style={styles.settingsGroup}>
+          <View style={[styles.settingsGroup, { backgroundColor: colors.surface, borderColor: colors.gray200 }]}>
             {accountSettings.map(renderSettingItem)}
           </View>
 
           {/* App Info */}
-          <View style={styles.appInfo}>
+          <View style={[styles.appInfo, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}>
             <Text style={[styles.appInfoTitle, { color: colors.primary }]}>Vkire v2.0.0</Text>
             <Text style={[styles.appInfoText, { color: colors.gray700 }]}>
               Built with ❤️ for creators and customers
@@ -287,7 +287,7 @@ const SettingsScreen = () => {
           </View>
 
           {/* Sign Out Button */}
-          <TouchableOpacity style={styles.signOutButton}>
+          <TouchableOpacity style={[styles.signOutButton, { backgroundColor: colors.error + '10', borderColor: colors.error + '30' }]}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
             <Text style={[styles.signOutText, { color: colors.error }]}>Sign Out</Text>
           </TouchableOpacity>
@@ -296,8 +296,8 @@ const SettingsScreen = () => {
         {/* Location Options Modal */}
         {showLocationOptions && (
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
+            <View style={[styles.modalContent, { backgroundColor: colors.white }]}>
+              <View style={[styles.modalHeader, { borderBottomColor: colors.gray200 }]}>
                 <Text style={[styles.modalTitle, { color: colors.gray900 }]}>Location Preferences</Text>
                 <TouchableOpacity onPress={() => setShowLocationOptions(false)}>
                   <Ionicons name="close" size={24} color={colors.gray600} />
@@ -306,10 +306,8 @@ const SettingsScreen = () => {
 
               <View style={styles.locationOptions}>
                 <TouchableOpacity
-                  style={styles.locationOption}
-                  onPress={() => handleLocationPreferenceChange('gps')}
-                >
-                  <View style={styles.locationOptionIcon}>
+                  style={[styles.locationOption, { backgroundColor: colors.gray50 }]}>
+                  <View style={[styles.locationOptionIcon, { backgroundColor: colors.white }]}>
                     <Ionicons name="location" size={24} color={colors.primary} />
                   </View>
                   <View style={styles.locationOptionContent}>
@@ -324,10 +322,8 @@ const SettingsScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.locationOption}
-                  onPress={() => handleLocationPreferenceChange('manual')}
-                >
-                  <View style={styles.locationOptionIcon}>
+                  style={[styles.locationOption, { backgroundColor: colors.gray50 }]}>
+                  <View style={[styles.locationOptionIcon, { backgroundColor: colors.white }]}>
                     <Ionicons name="map" size={24} color={colors.warning} />
                   </View>
                   <View style={styles.locationOptionContent}>
@@ -342,10 +338,8 @@ const SettingsScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.locationOption}
-                  onPress={() => handleLocationPreferenceChange('none')}
-                >
-                  <View style={styles.locationOptionIcon}>
+                  style={[styles.locationOption, { backgroundColor: colors.gray50 }]}>
+                  <View style={[styles.locationOptionIcon, { backgroundColor: colors.white }]}>
                     <Ionicons name="location" size={24} color={colors.error} />
                   </View>
                   <View style={styles.locationOptionContent}>
@@ -361,7 +355,7 @@ const SettingsScreen = () => {
               </View>
 
               {manualLocation && (
-                <View style={styles.currentLocation}>
+                <View style={[styles.currentLocation, { borderTopColor: colors.gray200 }]}>
                   <Text style={[styles.currentLocationLabel, { color: colors.gray600 }]}>Current Location:</Text>
                   <Text style={[styles.currentLocationText, { color: colors.gray900 }]}>{manualLocation}</Text>
                 </View>
@@ -377,11 +371,9 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -390,13 +382,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
   },
   headerSpacer: {
     width: 24,
@@ -406,12 +395,10 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
   },
   userSection: {
-    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.xl,
     borderWidth: 1,
-    borderColor: Colors.gray200,
     ...Shadows.sm,
   },
   userInfo: {
@@ -422,7 +409,6 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -433,19 +419,15 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
     marginBottom: Spacing.xs,
   },
   userEmail: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
     marginBottom: Spacing.xs,
   },
   userRole: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.primary,
     fontWeight: Typography.fontWeight.medium,
-    backgroundColor: Colors.primary + '15',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
@@ -458,14 +440,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
   },
   settingsGroup: {
-    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.gray200,
     overflow: 'hidden',
     ...Shadows.sm,
   },
@@ -475,7 +454,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#D1D1D6', // Replaced colors.gray200 with static hex
   },
   settingInfo: {
     flexDirection: 'row',
@@ -496,55 +475,45 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
     marginBottom: Spacing.xs,
   },
   settingDescription: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
   appInfo: {
-    backgroundColor: Colors.primary + '10',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.xl,
     borderWidth: 1,
-    borderColor: Colors.primary + '30',
     alignItems: 'center',
   },
   appInfoTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
     marginBottom: Spacing.sm,
   },
   appInfoText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   appInfoSubtext: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray600,
     textAlign: 'center',
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.error + '10',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.error + '30',
     gap: Spacing.sm,
   },
   signOutText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.error,
   },
   modalOverlay: {
     position: 'absolute',
@@ -558,7 +527,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: Colors.white,
     borderRadius: BorderRadius['2xl'],
     margin: Spacing.xl,
     maxWidth: 400,
@@ -571,12 +539,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#D1D1D6', // Replaced colors.gray200 with static hex
   },
   modalTitle: {
     fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
   },
   locationOptions: {
     padding: Spacing.lg,
@@ -586,14 +553,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
     marginBottom: Spacing.sm,
   },
   locationOptionIcon: {
     width: 48,
     height: 48,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
@@ -605,27 +570,23 @@ const styles = StyleSheet.create({
   locationOptionTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
     marginBottom: 2,
   },
   locationOptionDescription: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
   },
   currentLocation: {
     padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    borderTopColor: '#D1D1D6', // Replaced colors.gray200 with static hex
   },
   currentLocationLabel: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
     marginBottom: Spacing.xs,
   },
   currentLocationText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
   },
 });
 

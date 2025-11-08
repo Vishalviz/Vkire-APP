@@ -13,7 +13,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useProfileViews } from '../contexts/ProfileViewContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type PostDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PostDetail'>;
 type PostDetailScreenRouteProp = RouteProp<RootStackParamList, 'PostDetail'>;
@@ -25,6 +26,7 @@ const PostDetailScreen = () => {
   const { profileViews, decrementProfileViews, hasUnlimitedAccess } = useProfileViews();
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likes, setLikes] = useState(post.likes);
+  const { colors } = useTheme();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -69,19 +71,19 @@ const PostDetailScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Post</Text>
             <View style={styles.creditDisplay}>
-              <Ionicons name="eye" size={14} color={Colors.primary} />
+              <Ionicons name="eye" size={14} color={colors.primary} />
               <Text style={styles.creditText}>
                 {hasUnlimitedAccess ? '∞' : profileViews} views
               </Text>
             </View>
           </View>
           <TouchableOpacity>
-            <Ionicons name="ellipsis-horizontal" size={24} color={Colors.gray900} />
+            <Ionicons name="ellipsis-horizontal" size={24} color={colors.gray900} />
           </TouchableOpacity>
         </View>
 
@@ -94,18 +96,18 @@ const PostDetailScreen = () => {
             <Ionicons 
               name={isLiked ? "heart" : "heart-outline"} 
               size={28} 
-              color={isLiked ? Colors.error : Colors.gray900} 
+              color={isLiked ? colors.error : colors.gray900} 
             />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="chatbubble-outline" size={28} color={Colors.gray900} />
+            <Ionicons name="chatbubble-outline" size={28} color={colors.gray900} />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="paper-plane-outline" size={28} color={Colors.gray900} />
+            <Ionicons name="paper-plane-outline" size={28} color={colors.gray900} />
           </TouchableOpacity>
           <View style={styles.postActionsSpacer} />
           <TouchableOpacity>
-            <Ionicons name="bookmark-outline" size={28} color={Colors.gray900} />
+            <Ionicons name="bookmark-outline" size={28} color={colors.gray900} />
           </TouchableOpacity>
         </View>
 
@@ -146,11 +148,11 @@ const PostDetailScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8F9FA', // Static gray50
   },
   header: {
     flexDirection: 'row',
@@ -159,8 +161,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
+    borderBottomColor: '#D1D1D6', // Static gray200
+    backgroundColor: '#FFFFFF', // Static white
   },
   headerCenter: {
     flex: 1,
@@ -169,13 +171,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
     marginBottom: Spacing.xs,
   },
   creditDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: '#007AFF20', // Static primary + '20'
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
@@ -183,20 +185,20 @@ const styles = StyleSheet.create({
   creditText: {
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary
     marginLeft: Spacing.xs,
   },
   postImage: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#E5E7EB', // Static gray200
   },
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
   },
   postActionsSpacer: {
     flex: 1,
@@ -204,17 +206,17 @@ const styles = StyleSheet.create({
   postContent: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
   },
   postLikes: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
     marginBottom: Spacing.sm,
   },
   postCaption: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Spacing.sm,
   },
@@ -223,12 +225,12 @@ const styles = StyleSheet.create({
   },
   postViewComments: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#007AFF', // Static primary
     marginBottom: Spacing.sm,
   },
   postTime: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray500,
+    color: '#636366', // Static gray600
   },
   profileSection: {
     flexDirection: 'row',
@@ -236,9 +238,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
     borderTopWidth: 0.5,
-    borderTopColor: Colors.gray200,
+    borderTopColor: '#D1D1D6', // Static gray200
   },
   creatorInfo: {
     flexDirection: 'row',
@@ -257,14 +259,14 @@ const styles = StyleSheet.create({
   creatorName: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
   },
   creatorHandle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#636366', // Static gray600
   },
   viewProfileButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary
     borderRadius: BorderRadius.full,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
   viewProfileButtonText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
+    color: '#FFFFFF', // Static white
   },
 });
 

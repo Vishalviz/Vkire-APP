@@ -6,13 +6,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/AppThemeContext';
 import { 
   RootStackParamList, 
   CustomerTabParamList, 
   ProfessionalTabParamList 
 } from '../types';
-import { Colors, Typography, Spacing, ComponentStyles } from '../constants/designSystem';
+import { Typography, Spacing, ComponentStyles } from '../constants/designSystem';
 
 // Import screens
 import SplashScreen from '../screens/SplashScreen';
@@ -50,6 +50,7 @@ const ProfessionalTab = createBottomTabNavigator<ProfessionalTabParamList>();
 
 // Customer Tab Navigator
 const CustomerTabNavigator = () => {
+  const { colors } = useTheme();
   return (
     <CustomerTab.Navigator
       screenOptions={({ route }) => ({
@@ -88,8 +89,8 @@ const CustomerTabNavigator = () => {
             </Text>
           );
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.gray500,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.gray500,
         tabBarStyle: ComponentStyles.tabBar,
         headerShown: false,
       })}

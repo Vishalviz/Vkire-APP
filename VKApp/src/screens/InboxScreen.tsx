@@ -12,7 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/designSystem';
+import { Spacing, Typography, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type InboxScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -79,6 +80,8 @@ const InboxScreen = () => {
     },
   ]);
 
+  const { colors } = useTheme();
+
   const handleConversationPress = (bookingId: string) => {
     // Mark conversation as read when opened
     setConversations(prev => prev.map(conv => 
@@ -132,7 +135,7 @@ const InboxScreen = () => {
             'notifications-outline'
           } 
           size={24} 
-          color={item.read ? Colors.gray500 : Colors.primary} 
+          color={item.read ? colors.gray500 : colors.primary} 
         />
       </View>
       <View style={styles.notificationContent}>
@@ -157,7 +160,7 @@ const InboxScreen = () => {
     >
       <View style={styles.avatarContainer}>
         <View style={styles.avatarPlaceholder}>
-          <Ionicons name="person" size={24} color="#666" />
+          <Ionicons name="person" size={24} color={colors.gray500} />
         </View>
         {item.unreadCount > 0 && (
           <View style={styles.unreadBadge}>
@@ -191,7 +194,7 @@ const InboxScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Inbox</Text>
           <TouchableOpacity>
-            <Ionicons name="create-outline" size={24} color="#007AFF" />
+            <Ionicons name="create-outline" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -219,7 +222,7 @@ const InboxScreen = () => {
       {activeTab === 'chats' ? (
         conversations.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
+            <Ionicons name="chatbubbles-outline" size={64} color={colors.gray500} />
             <Text style={styles.emptyTitle}>No messages yet</Text>
             <Text style={styles.emptySubtitle}>
               Start a conversation by sending an inquiry to a creator
@@ -236,8 +239,8 @@ const InboxScreen = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#007AFF"
-                colors={['#007AFF']}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
               />
             }
           />
@@ -245,7 +248,7 @@ const InboxScreen = () => {
       ) : (
         notifications.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="notifications-outline" size={64} color="#ccc" />
+            <Ionicons name="notifications-outline" size={64} color={colors.gray500} />
             <Text style={styles.emptyTitle}>No notifications</Text>
             <Text style={styles.emptySubtitle}>
               You'll see updates about your bookings and inquiries here
@@ -262,8 +265,8 @@ const InboxScreen = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#007AFF"
-                colors={['#007AFF']}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
               />
             }
           />
@@ -277,35 +280,35 @@ const InboxScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F5F5', // Merged color
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F5F5F5', // Merged color
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F5F5', // Merged color
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#E0E0E0', // Merged color
     ...Shadows.sm,
   },
   headerTitle: {
     fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#333', // Merged color
   },
   // Tab Navigation Styles
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F5F5', // Merged color
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#E0E0E0', // Merged color
   },
   tab: {
     flex: 1,
@@ -313,31 +316,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     marginHorizontal: Spacing.xs,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#E0E0E0', // Merged color
     alignItems: 'center',
   },
   activeTab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Merged color
   },
   tabText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
+    color: '#666', // Merged color
   },
   activeTabText: {
-    color: Colors.white,
+    color: '#FFF', // Merged color
   },
   // Notification Styles
   notificationItem: {
     flexDirection: 'row',
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F5F5', // Merged color
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#E0E0E0', // Merged color
     alignItems: 'flex-start',
   },
   unreadNotification: {
-    backgroundColor: Colors.gray50,
+    backgroundColor: '#F0F0F0', // Merged color
   },
   notificationIcon: {
     marginRight: Spacing.md,
@@ -354,28 +357,28 @@ const styles = StyleSheet.create({
   notificationTitle: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#333', // Merged color
     marginBottom: Spacing.xs,
   },
   unreadNotificationText: {
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
+    color: '#333', // Merged color
   },
   notificationMessage: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#666', // Merged color
     marginBottom: Spacing.xs,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   notificationTimestamp: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray500,
+    color: '#999', // Merged color
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Merged color
     marginTop: Spacing.sm,
   },
   notificationsList: {
@@ -386,7 +389,7 @@ const styles = StyleSheet.create({
   },
   conversationItem: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F5F5', // Merged color
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#E0E0E0', // Merged color
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -408,7 +411,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: -2,
-    backgroundColor: Colors.error,
+    backgroundColor: '#FF5252', // Merged color
     borderRadius: BorderRadius.full,
     minWidth: 20,
     height: 20,
@@ -416,7 +419,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unreadText: {
-    color: Colors.white,
+    color: '#FFF', // Merged color
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
   },
@@ -432,15 +435,15 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#333', // Merged color
   },
   timestamp: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#999', // Merged color
   },
   lastMessage: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#666', // Merged color
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Spacing.sm,
   },
@@ -450,14 +453,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeTag: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Merged color
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
   },
   typeText: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.white,
+    color: '#FFF', // Merged color
     fontWeight: Typography.fontWeight.medium,
   },
   emptyState: {
@@ -469,13 +472,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#333', // Merged color
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptySubtitle: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#666', // Merged color
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },

@@ -15,14 +15,16 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import ImagePickerModal from '../components/ImagePickerModal';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type EditProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
 
 const EditProfileScreen = () => {
   const navigation = useNavigation<EditProfileScreenNavigationProp>();
   const { user, updateProfile } = useAuth();
+  const { colors } = useTheme();
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -90,7 +92,7 @@ const EditProfileScreen = () => {
       // Update user data
       await updateProfile({
         ...formData,
-        avatar_url: formData.avatar, // Map avatar to avatar_url
+        avatar_url: formData.avatar || '', // Map avatar to avatar_url, ensure it's string
       });
       
       Alert.alert(
@@ -116,19 +118,19 @@ const EditProfileScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, {backgroundColor: colors.surface, borderBottomColor: colors.gray200}]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Profile</Text>
+          <Text style={[styles.headerTitle, {color: colors.gray900}]}>Edit Profile</Text>
           <TouchableOpacity onPress={handleSave}>
-            <Text style={styles.saveButton}>Save</Text>
+            <Text style={[styles.saveButton, {color: colors.primary}]}>Save</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Profile Picture Section */}
-          <View style={styles.avatarSection}>
+          <View style={[styles.avatarSection, {backgroundColor: colors.surface}]}>
             <TouchableOpacity 
               style={styles.avatarContainer}
               onPress={() => setShowImagePicker(true)}
@@ -136,79 +138,79 @@ const EditProfileScreen = () => {
               {formData.avatar ? (
                 <Image source={{ uri: formData.avatar }} style={styles.avatar} />
               ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={40} color={Colors.gray400} />
+                <View style={[styles.avatarPlaceholder, {backgroundColor: colors.gray100}]}>
+                  <Ionicons name="person" size={40} color={colors.gray400} />
                 </View>
               )}
-              <View style={styles.avatarEditIcon}>
-                <Ionicons name="camera" size={16} color={Colors.white} />
+              <View style={[styles.avatarEditIcon, {backgroundColor: colors.primary, borderColor: colors.surface}]}>
+                <Ionicons name="camera" size={16} color={colors.white} />
               </View>
             </TouchableOpacity>
-            <Text style={styles.avatarLabel}>Tap to change photo</Text>
+            <Text style={[styles.avatarLabel, {color: colors.gray600}]}>Tap to change photo</Text>
           </View>
 
           {/* Form Fields */}
           <View style={styles.formSection}>
             {/* Basic Information */}
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Basic Information</Text>
+              <Text style={[styles.sectionTitle, {color: colors.gray900}]}>Basic Information</Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Full Name *</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Full Name *</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.name}
                 onChangeText={(value) => updateField('name', value)}
                 placeholder="Enter your full name"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email *</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Email *</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.email}
                 onChangeText={(value) => updateField('email', value)}
                 placeholder="Enter your email"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Phone Number</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.phone}
                 onChangeText={(value) => updateField('phone', value)}
                 placeholder="Enter your phone number"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 keyboardType="phone-pad"
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Location</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Location</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.location}
                 onChangeText={(value) => updateField('location', value)}
                 placeholder="Enter your location"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Bio</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Bio</Text>
               <TextInput
-                style={[styles.textInput, styles.textArea]}
+                style={[styles.textInput, styles.textArea, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.bio}
                 onChangeText={(value) => updateField('bio', value)}
                 placeholder="Tell us about yourself..."
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -217,30 +219,30 @@ const EditProfileScreen = () => {
 
             {/* Social Links */}
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Social Links</Text>
+              <Text style={[styles.sectionTitle, {color: colors.gray900}]}>Social Links</Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Website</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Website</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.website}
                 onChangeText={(value) => updateField('website', value)}
                 placeholder="https://yourwebsite.com"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 keyboardType="url"
                 autoCapitalize="none"
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Instagram</Text>
+              <Text style={[styles.inputLabel, {color: colors.gray700}]}>Instagram</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {backgroundColor: colors.surface, borderColor: colors.gray200, color: colors.gray900}]}
                 value={formData.instagram}
                 onChangeText={(value) => updateField('instagram', value)}
                 placeholder="@yourusername"
-                placeholderTextColor={Colors.gray500}
+                placeholderTextColor={colors.gray500}
                 autoCapitalize="none"
               />
             </View>
@@ -251,7 +253,7 @@ const EditProfileScreen = () => {
         <ImagePickerModal
           visible={showImagePicker}
           onClose={() => setShowImagePicker(false)}
-          onImageSelect={handleImageSelect}
+          onImageSelected={handleImageSelect}
         />
       </View>
     </SafeAreaView>
@@ -261,11 +263,11 @@ const EditProfileScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8F9FA', // Static gray50
   },
   header: {
     flexDirection: 'row',
@@ -274,18 +276,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
+    borderBottomColor: '#D1D1D6', // Static gray200
+    backgroundColor: '#FFFFFF', // Static white
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
   },
   saveButton: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary
   },
   content: {
     flex: 1,
@@ -293,7 +295,7 @@ const styles = StyleSheet.create({
   avatarSection: {
     alignItems: 'center',
     paddingVertical: Spacing.xl,
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
   },
   avatarContainer: {
     position: 'relative',
@@ -308,7 +310,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#F2F2F7', // Static gray100
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -319,15 +321,15 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: Colors.surface,
+    borderColor: '#FFFFFF', // Static white
   },
   avatarLabel: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#636366', // Static gray600
   },
   formSection: {
     padding: Spacing.lg,
@@ -339,7 +341,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
   },
   inputGroup: {
     marginBottom: Spacing.lg,
@@ -347,18 +349,18 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray700,
+    color: '#4B5563', // Static gray700
     marginBottom: Spacing.sm,
   },
   textInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#D1D1D6', // Static gray200
     ...Shadows.sm,
   },
   textArea: {

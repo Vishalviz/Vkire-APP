@@ -15,16 +15,16 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, ProProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../components/Logo';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type ProfessionalOnboardingRouteProp = RouteProp<RootStackParamList, 'ProfessionalOnboarding'>;
 type ProfessionalOnboardingNavigationProp = StackNavigationProp<RootStackParamList, 'ProfessionalOnboarding'>;
 
 const ProfessionalOnboardingScreen = () => {
   const navigation = useNavigation<ProfessionalOnboardingNavigationProp>();
-  // const route = useRoute<ProfessionalOnboardingRouteProp>();
   const { user, updateProfile, createProfessionalProfile, markProfileCompleted } = useAuth();
-  // const { role } = route.params;
+  const { colors } = useTheme(); // FIXED: Added useTheme hook
 
   const [currentStep, setCurrentStep] = useState(1);
   
@@ -48,7 +48,7 @@ const ProfessionalOnboardingScreen = () => {
     editingSoftware: [] as string[],
     serviceAreas: [] as string[],
     travelRadius: '',
-    city: user?.city || '', // Pre-fill city from user data
+    city: user?.city || '',
   });
 
   const equipmentOptions = ['DSLR Camera', 'Mirrorless Camera', 'Lens Kit', 'Lighting Equipment', 'Tripod', 'Drone', 'Gimbal', 'External Mic'];
@@ -118,8 +118,6 @@ const ProfessionalOnboardingScreen = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      // If on first step, go back to the previous screen
-      // For professionals, go to Dashboard (MyJobs) instead of Feed
       if (user?.role === 'pro') {
         navigation.navigate('Main');
       } else {
@@ -130,7 +128,6 @@ const ProfessionalOnboardingScreen = () => {
 
   const handleComplete = async () => {
     try {
-      // Create professional profile data
       const proProfile: Partial<ProProfile> = {
         business_name: formData.businessName,
         bio: formData.bio,
@@ -145,21 +142,15 @@ const ProfessionalOnboardingScreen = () => {
         travel_radius_km: parseInt(formData.travelRadius, 10) || 50,
       };
 
-      // Create professional profile
       if (createProfessionalProfile) {
         await createProfessionalProfile(proProfile);
       }
 
-      // Update user profile with professional data
       await updateProfile({
         bio: formData.bio,
-        // Add other fields as needed
       });
 
-      // Mark profile as completed
       await markProfileCompleted();
-
-      // Navigate to main app
       navigation.replace('Main');
     } catch (error) {
       Alert.alert('Error', 'Failed to complete onboarding. Please try again.');
@@ -176,14 +167,15 @@ const ProfessionalOnboardingScreen = () => {
 
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Tell us about yourself</Text>
+      <Text style={[styles.stepTitle, { color: colors.gray900 }]}>Tell us about yourself</Text>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Business Name</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Business Name</Text>
         <TextInput
           ref={businessNameRef}
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="Enter your business name"
+          placeholderTextColor={colors.gray500}
           value={formData.businessName}
           onChangeText={(text) => setFormData({ ...formData, businessName: text })}
           onSubmitEditing={() => bioRef.current?.focus()}
@@ -191,11 +183,12 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Bio</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Bio</Text>
         <TextInput
           ref={bioRef}
-          style={[styles.input, styles.textArea]}
+          style={[styles.input, styles.textArea, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="Tell us about your photography/videography experience"
+          placeholderTextColor={colors.gray500}
           value={formData.bio}
           onChangeText={(text) => setFormData({ ...formData, bio: text })}
           multiline
@@ -204,11 +197,12 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Years of Experience</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Years of Experience</Text>
         <TextInput
           ref={experienceRef}
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="e.g., 5"
+          placeholderTextColor={colors.gray500}
           value={formData.experienceYears}
           onChangeText={(text) => setFormData({ ...formData, experienceYears: text })}
           keyboardType="numeric"
@@ -219,14 +213,15 @@ const ProfessionalOnboardingScreen = () => {
 
   const renderStep2 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Your Equipment & Style</Text>
+      <Text style={[styles.stepTitle, { color: colors.gray900 }]}>Your Equipment & Style</Text>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Main Camera</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Main Camera</Text>
         <TextInput
           ref={mainCameraRef}
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="e.g., Canon EOS R5"
+          placeholderTextColor={colors.gray500}
           value={formData.mainCamera}
           onChangeText={(text) => setFormData({ ...formData, mainCamera: text })}
           onSubmitEditing={() => secondaryCameraRef.current?.focus()}
@@ -234,25 +229,27 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Secondary Camera</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Secondary Camera</Text>
         <TextInput
           ref={secondaryCameraRef}
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="e.g., Sony A7III"
+          placeholderTextColor={colors.gray500}
           value={formData.secondaryCamera}
           onChangeText={(text) => setFormData({ ...formData, secondaryCamera: text })}
         />
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Equipment</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Equipment</Text>
         <View style={styles.tagContainer}>
           {equipmentOptions.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
                 styles.tag,
-                formData.equipment.includes(item) && styles.tagSelected
+                { backgroundColor: colors.gray100, borderColor: colors.gray300 },
+                formData.equipment.includes(item) && { backgroundColor: colors.primary, borderColor: colors.primary }
               ]}
               onPress={() => toggleArrayItem(formData.equipment, item, (items) => 
                 setFormData({ ...formData, equipment: items })
@@ -260,7 +257,8 @@ const ProfessionalOnboardingScreen = () => {
             >
               <Text style={[
                 styles.tagText,
-                formData.equipment.includes(item) && styles.tagTextSelected
+                { color: colors.gray700 },
+                formData.equipment.includes(item) && { color: colors.white }
               ]}>
                 {item}
               </Text>
@@ -270,14 +268,15 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Photography Styles</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Photography Styles</Text>
         <View style={styles.tagContainer}>
           {photographyStyles.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
                 styles.tag,
-                formData.photographyStyle.includes(item) && styles.tagSelected
+                { backgroundColor: colors.gray100, borderColor: colors.gray300 },
+                formData.photographyStyle.includes(item) && { backgroundColor: colors.primary, borderColor: colors.primary }
               ]}
               onPress={() => toggleArrayItem(formData.photographyStyle, item, (items) => 
                 setFormData({ ...formData, photographyStyle: items })
@@ -285,7 +284,8 @@ const ProfessionalOnboardingScreen = () => {
             >
               <Text style={[
                 styles.tagText,
-                formData.photographyStyle.includes(item) && styles.tagTextSelected
+                { color: colors.gray700 },
+                formData.photographyStyle.includes(item) && { color: colors.white }
               ]}>
                 {item}
               </Text>
@@ -295,14 +295,15 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Video Styles</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Video Styles</Text>
         <View style={styles.tagContainer}>
           {videoStyles.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
                 styles.tag,
-                formData.videoStyle.includes(item) && styles.tagSelected
+                { backgroundColor: colors.gray100, borderColor: colors.gray300 },
+                formData.videoStyle.includes(item) && { backgroundColor: colors.primary, borderColor: colors.primary }
               ]}
               onPress={() => toggleArrayItem(formData.videoStyle, item, (items) => 
                 setFormData({ ...formData, videoStyle: items })
@@ -310,7 +311,8 @@ const ProfessionalOnboardingScreen = () => {
             >
               <Text style={[
                 styles.tagText,
-                formData.videoStyle.includes(item) && styles.tagTextSelected
+                { color: colors.gray700 },
+                formData.videoStyle.includes(item) && { color: colors.white }
               ]}>
                 {item}
               </Text>
@@ -323,17 +325,18 @@ const ProfessionalOnboardingScreen = () => {
 
   const renderStep3 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Services & Availability</Text>
+      <Text style={[styles.stepTitle, { color: colors.gray900 }]}>Services & Availability</Text>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Editing Software</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Editing Software</Text>
         <View style={styles.tagContainer}>
           {editingSoftware.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
                 styles.tag,
-                formData.editingSoftware.includes(item) && styles.tagSelected
+                { backgroundColor: colors.gray100, borderColor: colors.gray300 },
+                formData.editingSoftware.includes(item) && { backgroundColor: colors.primary, borderColor: colors.primary }
               ]}
               onPress={() => toggleArrayItem(formData.editingSoftware, item, (items) => 
                 setFormData({ ...formData, editingSoftware: items })
@@ -341,7 +344,8 @@ const ProfessionalOnboardingScreen = () => {
             >
               <Text style={[
                 styles.tagText,
-                formData.editingSoftware.includes(item) && styles.tagTextSelected
+                { color: colors.gray700 },
+                formData.editingSoftware.includes(item) && { color: colors.white }
               ]}>
                 {item}
               </Text>
@@ -351,14 +355,15 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Service Areas</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Service Areas</Text>
         <View style={styles.tagContainer}>
           {serviceAreas.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
                 styles.tag,
-                formData.serviceAreas.includes(item) && styles.tagSelected
+                { backgroundColor: colors.gray100, borderColor: colors.gray300 },
+                formData.serviceAreas.includes(item) && { backgroundColor: colors.primary, borderColor: colors.primary }
               ]}
               onPress={() => toggleArrayItem(formData.serviceAreas, item, (items) => 
                 setFormData({ ...formData, serviceAreas: items })
@@ -366,7 +371,8 @@ const ProfessionalOnboardingScreen = () => {
             >
               <Text style={[
                 styles.tagText,
-                formData.serviceAreas.includes(item) && styles.tagTextSelected
+                { color: colors.gray700 },
+                formData.serviceAreas.includes(item) && { color: colors.white }
               ]}>
                 {item}
               </Text>
@@ -376,11 +382,12 @@ const ProfessionalOnboardingScreen = () => {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Travel Radius (km)</Text>
+        <Text style={[styles.label, { color: colors.gray900 }]}>Travel Radius (km)</Text>
         <TextInput
           ref={travelRadiusRef}
-          style={styles.input}
+          style={[styles.input, { borderColor: colors.gray300, color: colors.gray900, backgroundColor: colors.surface }]}
           placeholder="e.g., 100"
+          placeholderTextColor={colors.gray500}
           value={formData.travelRadius}
           onChangeText={(text) => setFormData({ ...formData, travelRadius: text })}
           keyboardType="numeric"
@@ -390,27 +397,27 @@ const ProfessionalOnboardingScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="chevron-back" size={18} color={Colors.primary} />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Ionicons name="chevron-back" size={18} color={colors.primary} />
+          <Text style={[styles.backButtonText, { color: colors.primary }]}>Back</Text>
         </TouchableOpacity>
         
         <View style={styles.logoContainer}>
           <Logo size="small" />
-          <Text style={styles.headerTitle}>Professional Setup</Text>
+          <Text style={[styles.headerTitle, { color: colors.gray900 }]}>Professional Setup</Text>
         </View>
         
-        <View style={styles.stepIndicator}>
-          <Text style={styles.stepText}>Step {currentStep} of 3</Text>
+        <View style={[styles.stepIndicator, { backgroundColor: colors.gray200 }]}>
+          <Text style={[styles.stepText, { color: colors.gray700 }]}>Step {currentStep} of 3</Text>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <View style={[styles.progressBar, { width: `${(currentStep / 3) * 100}%` }]} />
+      <View style={[styles.progressContainer, { backgroundColor: colors.gray200 }]}>
+        <View style={[styles.progressBar, { width: `${(currentStep / 3) * 100}%`, backgroundColor: colors.primary }]} />
       </View>
 
       {/* Content */}
@@ -421,12 +428,12 @@ const ProfessionalOnboardingScreen = () => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.gray200 }]}>
+        <TouchableOpacity style={[styles.nextButton, { backgroundColor: colors.primary }]} onPress={handleNext}>
+          <Text style={[styles.nextButtonText, { color: colors.white }]}>
             {currentStep === 3 ? 'Complete Setup' : 'Next'}
           </Text>
-          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+          <Ionicons name="arrow-forward" size={18} color={colors.white} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -436,7 +443,6 @@ const ProfessionalOnboardingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -444,9 +450,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
     ...Shadows.sm,
   },
   backButton: {
@@ -456,7 +460,6 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.primary,
     marginLeft: Spacing.xs,
   },
   logoContainer: {
@@ -466,30 +469,25 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
     marginLeft: Spacing.md,
   },
   stepIndicator: {
-    backgroundColor: Colors.gray200,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.md,
   },
   stepText: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray700,
     fontWeight: Typography.fontWeight.medium,
   },
   progressContainer: {
     height: 4,
-    backgroundColor: Colors.gray200,
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.sm,
     borderRadius: 2,
   },
   progressBar: {
     height: '100%',
-    backgroundColor: Colors.primary,
     borderRadius: 2,
   },
   content: {
@@ -502,7 +500,6 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
     marginBottom: Spacing.xl,
     textAlign: 'center',
   },
@@ -512,18 +509,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
     marginBottom: Spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.gray300,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: Typography.fontSize.md,
-    color: Colors.gray900,
-    backgroundColor: Colors.surface,
   },
   textArea: {
     height: 100,
@@ -538,33 +531,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray100,
     borderWidth: 1,
-    borderColor: Colors.gray300,
-  },
-  tagSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
   },
   tagText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
-  },
-  tagTextSelected: {
-    color: Colors.white,
-    fontWeight: Typography.fontWeight.semiBold,
   },
   footer: {
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
   },
   nextButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     ...Shadows.md,
@@ -572,7 +551,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
     marginRight: Spacing.sm,
   },
 });

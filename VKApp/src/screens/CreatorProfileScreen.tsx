@@ -18,7 +18,8 @@ import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation } from '../contexts/LocationContext';
 import PaymentService from '../services/paymentService';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/designSystem';
+import { Spacing, BorderRadius, Typography, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type CreatorProfileScreenRouteProp = RouteProp<RootStackParamList, 'CreatorProfile'>;
 type CreatorProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -171,7 +172,7 @@ const CreatorProfileScreen = () => {
       } else {
         // User needs to purchase access - include location context
         const locationContext = {
-          userLocation: currentLocation || { city: manualLocation || 'Unknown' },
+          userLocation: currentLocation ? { city: currentLocation.city || manualLocation || 'Unknown', latitude: currentLocation.latitude, longitude: currentLocation.longitude} : { city: manualLocation || 'Unknown' },
           professionalLocation: mockCreator.city || 'Unknown',
           distance: currentLocation && mockCreator.latitude && mockCreator.longitude 
             ? calculateDistance(currentLocation.latitude, currentLocation.longitude, mockCreator.latitude, mockCreator.longitude)
@@ -223,13 +224,15 @@ const CreatorProfileScreen = () => {
     });
   };
 
+  const { colors } = useTheme();
+
   const renderPackage = ({ item }: { item: any }) => (
     <View style={styles.packageCard}>
       <View style={styles.packageHeader}>
         <Text style={styles.packageTitle}>{item.title}</Text>
         <View style={styles.packageActions}>
-          <View style={styles.packageTypeTag}>
-            <Text style={styles.packageTypeText}>
+          <View style={[styles.packageTypeTag, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.packageTypeText, { color: colors.white }]}>
               {item.type === 'bundle' ? 'Bundle' : 'Individual'}
             </Text>
           </View>
@@ -238,34 +241,34 @@ const CreatorProfileScreen = () => {
               style={styles.deletePackageButton}
               onPress={() => handleDeletePackage(item.id)}
             >
-              <Ionicons name="trash-outline" size={16} color="#FF3B30" />
+              <Ionicons name="trash-outline" size={16} color={colors.error} />
             </TouchableOpacity>
           )}
         </View>
       </View>
-      <Text style={styles.packageDescription}>{item.description}</Text>
-      <Text style={styles.packagePrice}>₹{item.price.toLocaleString()}</Text>
-      <Text style={styles.packageDuration}>{item.duration} hours</Text>
-      <View style={styles.deliverablesContainer}>
+      <Text style={[styles.packageDescription, { color: colors.gray600 }]}>{item.description}</Text>
+      <Text style={[styles.packagePrice, { color: colors.gray900 }]}>₹{item.price.toLocaleString()}</Text>
+      <Text style={[styles.packageDuration, { color: colors.gray600 }]}>{item.duration} hours</Text>
+      <View style={[styles.deliverablesContainer, { marginBottom: Spacing.lg }]}>
         {item.deliverables.map((deliverable: string, index: number) => (
-          <Text key={index} style={styles.deliverable}>
+          <Text key={index} style={[styles.deliverable, { color: colors.gray600 }]}>
             • {deliverable}
           </Text>
         ))}
       </View>
       <View style={styles.packageActions}>
         <TouchableOpacity
-          style={styles.inquiryButton}
+          style={[styles.inquiryButton, { backgroundColor: colors.gray100, borderColor: colors.gray300 }]}
           onPress={() => handleInquiry(item.id)}
         >
-          <Text style={styles.inquiryButtonText}>Send Inquiry</Text>
+          <Text style={[styles.inquiryButtonText, { color: colors.gray700 }]}>Send Inquiry</Text>
         </TouchableOpacity>
         {!isOwner && (
           <TouchableOpacity
-            style={styles.bookButton}
+            style={[styles.bookButton, { backgroundColor: colors.primary }]}
             onPress={() => handleBook(item)}
           >
-            <Text style={styles.bookButtonText}>Book</Text>
+            <Text style={[styles.bookButtonText, { color: colors.white }]}>Book</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -274,7 +277,7 @@ const CreatorProfileScreen = () => {
 
   const renderPortfolioItem = ({ item }: { item: any }) => (
     <View style={styles.portfolioItem}>
-      <Image source={{ uri: item.media_url }} style={styles.portfolioImage} />
+      <Image source={{ uri: item.media_url }} style={[styles.portfolioImage, { backgroundColor: colors.gray100 }]} />
     </View>
   );
 
@@ -283,32 +286,32 @@ const CreatorProfileScreen = () => {
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={40} color="#666" />
+            <Ionicons name="person" size={40} color={colors.gray600} />
           </View>
         </View>
-        <Text style={styles.creatorName}>{mockCreator.name}</Text>
-        <Text style={styles.creatorHandle}>{mockCreator.handle}</Text>
-        <Text style={styles.creatorLocation}>
-          <Ionicons name="location-outline" size={14} color="#666" />
+        <Text style={[styles.creatorName, { color: colors.gray900 }]}>{mockCreator.name}</Text>
+        <Text style={[styles.creatorHandle, { color: colors.gray600 }]}>{mockCreator.handle}</Text>
+        <Text style={[styles.creatorLocation, { color: colors.gray600 }]}>
+          <Ionicons name="location-outline" size={14} color={colors.gray600} />
           {' '}{mockCreator.city}
         </Text>
         
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={16} color="#FFD700" />
-          <Text style={styles.rating}>{mockCreator.rating}</Text>
-          <Text style={styles.reviewCount}>({mockCreator.reviewCount} reviews)</Text>
+        <View style={[styles.ratingContainer, { marginBottom: Spacing.lg }]}>
+          <Ionicons name="star" size={16} color={colors.warning} />
+          <Text style={[styles.rating, { color: colors.gray900 }]}>{mockCreator.rating}</Text>
+          <Text style={[styles.reviewCount, { color: colors.gray600 }]}>({mockCreator.reviewCount} reviews)</Text>
         </View>
 
-        <Text style={styles.bio}>{mockCreator.bio}</Text>
+        <Text style={[styles.bio, { color: colors.gray600 }]}>{mockCreator.bio}</Text>
 
         <View style={styles.infoContainer}>
           <View style={styles.infoItem}>
-            <Ionicons name="camera-outline" size={16} color="#666" />
-            <Text style={styles.infoText}>{mockCreator.primaryGear}</Text>
+            <Ionicons name="camera-outline" size={16} color={colors.gray600} />
+            <Text style={[styles.infoText, { color: colors.gray600 }]}>{mockCreator.primaryGear}</Text>
           </View>
           <View style={styles.infoItem}>
-            <Ionicons name="car-outline" size={16} color="#666" />
-            <Text style={styles.infoText}>Travels up to {mockCreator.travelRadius}km</Text>
+            <Ionicons name="car-outline" size={16} color={colors.gray600} />
+            <Text style={[styles.infoText, { color: colors.gray600 }]}>Travels up to {mockCreator.travelRadius}km</Text>
           </View>
         </View>
       </View>
@@ -356,11 +359,11 @@ const CreatorProfileScreen = () => {
           <View style={styles.packagesContainer}>
             {isOwner && (
               <TouchableOpacity 
-                style={styles.createPackageButton}
+                style={[styles.createPackageButton, { backgroundColor: colors.primary }]}
                 onPress={handleCreatePackage}
               >
-                <Ionicons name="add" size={20} color="#fff" />
-                <Text style={styles.createPackageButtonText}>Create New Package</Text>
+                <Ionicons name="add" size={20} color={colors.white} />
+                <Text style={[styles.createPackageButtonText, { color: colors.white }]}>Create New Package</Text>
               </TouchableOpacity>
             )}
             
@@ -375,8 +378,8 @@ const CreatorProfileScreen = () => {
         )}
 
         {activeTab === 'reviews' && (
-          <View style={styles.reviewsContainer}>
-            <Text style={styles.comingSoon}>Reviews coming soon!</Text>
+          <View style={[styles.reviewsContainer, { backgroundColor: colors.surface, ...Shadows.sm }]}>
+            <Text style={[styles.comingSoon, { color: colors.gray600 }]}>Reviews coming soon!</Text>
           </View>
         )}
       </View>
@@ -389,19 +392,19 @@ const CreatorProfileScreen = () => {
         onRequestClose={() => setShowCreatePackageModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Create New Package</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface, ...Shadows.lg }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.gray200 }]}>
+              <Text style={[styles.modalTitle, { color: colors.gray900 }]}>Create New Package</Text>
               <TouchableOpacity onPress={() => setShowCreatePackageModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={[styles.modalBody, { maxHeight: 400 }]}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Package Title *</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Package Title *</Text>
                 <TextInput
-                  style={styles.textInput}
+                  style={[styles.textInput, { borderColor: colors.gray300, backgroundColor: colors.gray50 }]}
                   placeholder="e.g., Wedding Photography"
                   value={newPackage.title}
                   onChangeText={(text) => setNewPackage({ ...newPackage, title: text })}
@@ -409,9 +412,9 @@ const CreatorProfileScreen = () => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Description *</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Description *</Text>
                 <TextInput
-                  style={[styles.textInput, styles.textArea]}
+                  style={[styles.textInput, styles.textArea, { borderColor: colors.gray300, backgroundColor: colors.gray50 }]}
                   placeholder="Describe what's included in this package..."
                   value={newPackage.description}
                   onChangeText={(text) => setNewPackage({ ...newPackage, description: text })}
@@ -421,9 +424,9 @@ const CreatorProfileScreen = () => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Price (₹) *</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Price (₹) *</Text>
                 <TextInput
-                  style={styles.textInput}
+                  style={[styles.textInput, { borderColor: colors.gray300, backgroundColor: colors.gray50 }]}
                   placeholder="25000"
                   value={newPackage.price}
                   onChangeText={(text) => setNewPackage({ ...newPackage, price: text })}
@@ -432,9 +435,9 @@ const CreatorProfileScreen = () => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Duration (hours)</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Duration (hours)</Text>
                 <TextInput
-                  style={styles.textInput}
+                  style={[styles.textInput, { borderColor: colors.gray300, backgroundColor: colors.gray50 }]}
                   placeholder="8"
                   value={newPackage.duration}
                   onChangeText={(text) => setNewPackage({ ...newPackage, duration: text })}
@@ -443,9 +446,9 @@ const CreatorProfileScreen = () => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Deliverables</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Deliverables</Text>
                 <TextInput
-                  style={[styles.textInput, styles.textArea]}
+                  style={[styles.textInput, styles.textArea, { borderColor: colors.gray300, backgroundColor: colors.gray50 }]}
                   placeholder="500+ edited photos, Online gallery, USB drive (comma separated)"
                   value={newPackage.deliverables}
                   onChangeText={(text) => setNewPackage({ ...newPackage, deliverables: text })}
@@ -455,7 +458,7 @@ const CreatorProfileScreen = () => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Package Type</Text>
+                <Text style={[styles.inputLabel, { color: colors.gray900 }]}>Package Type</Text>
                 <View style={styles.typeButtons}>
                   <TouchableOpacity
                     style={[
@@ -489,18 +492,18 @@ const CreatorProfileScreen = () => {
               </View>
             </ScrollView>
 
-            <View style={styles.modalFooter}>
+            <View style={[styles.modalFooter, { borderTopColor: colors.gray200 }]}>
               <TouchableOpacity 
-                style={styles.cancelModalButton}
+                style={[styles.cancelModalButton, { backgroundColor: colors.gray100 }]}
                 onPress={() => setShowCreatePackageModal(false)}
               >
-                <Text style={styles.cancelModalButtonText}>Cancel</Text>
+                <Text style={[styles.cancelModalButtonText, { color: colors.gray600 }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={styles.saveModalButton}
+                style={[styles.saveModalButton, { backgroundColor: colors.primary }]}
                 onPress={handleSavePackage}
               >
-                <Text style={styles.saveModalButtonText}>Create Package</Text>
+                <Text style={[styles.saveModalButtonText, { color: colors.white }]}>Create Package</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -511,362 +514,86 @@ const CreatorProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
+  container: { flex: 1, backgroundColor: '#F8F9FA' }, // Static background
   header: {
-    backgroundColor: Colors.surface,
     alignItems: 'center',
     padding: Spacing['2xl'],
     marginBottom: Spacing.xl,
+    backgroundColor: '#FFFFFF', // Static white
     ...Shadows.sm,
   },
-  avatarContainer: {
-    marginBottom: Spacing.lg,
-  },
+  avatarContainer: { marginBottom: Spacing.lg },
   avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 80, height: 80, borderRadius: BorderRadius.full, justifyContent: 'center', alignItems: 'center', backgroundColor: '#E5E7EB' // Static gray200
   },
   creatorName: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
+    fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.semiBold, marginBottom: Spacing.xs, color: '#1F2937' // Static gray900
   },
   creatorHandle: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.gray600,
-    marginBottom: Spacing.sm,
+    fontSize: Typography.fontSize.md, marginBottom: Spacing.sm, color: '#4B5563' // Static gray600
   },
   creatorLocation: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    marginBottom: Spacing.md,
+    fontSize: Typography.fontSize.base, marginBottom: Spacing.md, color: '#4B5563' // Static gray600
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  rating: {
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginLeft: Spacing.xs,
-  },
-  reviewCount: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    marginLeft: Spacing.xs,
-  },
+  ratingContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
+  rating: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.semiBold, marginLeft: Spacing.xs, color: '#1F2937' }, // Static gray900
+  reviewCount: { fontSize: Typography.fontSize.base, marginLeft: Spacing.xs, color: '#4B5563' }, // Static gray600
   bio: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    textAlign: 'center',
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-    marginBottom: Spacing.lg,
+    fontSize: Typography.fontSize.base, textAlign: 'center', lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base, marginBottom: Spacing.lg, color: '#4B5563' // Static gray600
   },
-  infoContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: Spacing.xl,
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  infoText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    marginLeft: Spacing.xs,
-    textAlign: 'center',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    marginHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.xl,
-    padding: Spacing.xs,
-    ...Shadows.sm,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-    borderRadius: BorderRadius.md,
-  },
-  activeTab: {
-    backgroundColor: Colors.primary,
-  },
-  tabText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
-  },
-  activeTabText: {
-    color: Colors.white,
-  },
-  tabContent: {
-    paddingHorizontal: Spacing.lg,
-  },
-  portfolioGrid: {
-    paddingBottom: Spacing.xl,
-  },
-  portfolioItem: {
-    flex: 1,
-    margin: Spacing.xs,
-    aspectRatio: 1,
-  },
-  portfolioImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.gray100,
-  },
-  packagesList: {
-    paddingBottom: Spacing.xl,
-  },
-  packageCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  packageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  packageTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    flex: 1,
-  },
-  packageTypeTag: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-  },
-  packageTypeText: {
-    fontSize: Typography.fontSize.xs,
-    color: Colors.white,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  packageDescription: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    marginBottom: Spacing.sm,
-  },
-  packagePrice: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  packageDuration: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    marginBottom: Spacing.md,
-  },
-  deliverablesContainer: {
-    marginBottom: Spacing.lg,
-  },
-  deliverable: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
-    marginBottom: Spacing.xs,
-  },
-  packageActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginTop: Spacing.md,
-  },
-  inquiryButton: {
-    flex: 1,
-    backgroundColor: Colors.gray100,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.gray300,
-  },
-  inquiryButtonText: {
-    color: Colors.gray700,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  bookButton: {
-    flex: 1,
-    backgroundColor: Colors.primary,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-  },
-  bookButtonText: {
-    color: Colors.white,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  reviewsContainer: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing['3xl'],
-    alignItems: 'center',
-    ...Shadows.sm,
-  },
-  comingSoon: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.gray600,
-  },
-  // New styles for package creation
-  packagesContainer: {
-    padding: Spacing.lg,
-  },
-  createPackageButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.lg,
-    ...Shadows.sm,
-  },
-  createPackageButtonText: {
-    color: Colors.white,
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.semiBold,
-    marginLeft: Spacing.sm,
-  },
-  deletePackageButton: {
-    padding: Spacing.xs,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    width: '90%',
-    maxWidth: 500,
-    maxHeight: '80%',
-    ...Shadows.lg,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
-  },
-  modalTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-  },
-  modalBody: {
-    padding: Spacing.xl,
-    maxHeight: 400,
-  },
-  inputGroup: {
-    marginBottom: Spacing.xl,
-  },
-  inputLabel: {
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
-    marginBottom: Spacing.sm,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: Colors.gray300,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    fontSize: Typography.fontSize.md,
-    backgroundColor: Colors.gray50,
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  typeButtons: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.gray300,
-  },
-  typeButtonSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  typeButtonText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  typeButtonTextSelected: {
-    color: Colors.white,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: Spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
-    gap: Spacing.md,
-  },
-  cancelModalButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.gray100,
-    alignItems: 'center',
-  },
-  cancelModalButtonText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  saveModalButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-  },
-  saveModalButtonText: {
-    fontSize: Typography.fontSize.md,
-    color: Colors.white,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
+  infoContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: Spacing.xl },
+  infoItem: { flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'center' },
+  infoText: { fontSize: Typography.fontSize.sm, marginLeft: Spacing.xs, textAlign: 'center', color: '#4B5563' }, // Static gray600
+  tabContainer: { flexDirection: 'row', marginHorizontal: Spacing.lg, borderRadius: BorderRadius.lg, marginBottom: Spacing.xl, padding: Spacing.xs, backgroundColor: '#E5E7EB', ...Shadows.sm }, // Static gray200
+  tab: { flex: 1, paddingVertical: Spacing.md, alignItems: 'center', borderRadius: BorderRadius.md, backgroundColor: '#E5E7EB' }, // Static gray200
+  activeTab: { backgroundColor: '#FFFFFF' }, // Static white
+  tabText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.medium, color: '#4B5563' }, // Static gray600
+  activeTabText: { color: '#1F2937' }, // Static gray900
+  tabContent: { paddingHorizontal: Spacing.lg },
+  portfolioGrid: { paddingBottom: Spacing.xl },
+  portfolioItem: { flex: 1, margin: Spacing.xs, aspectRatio: 1 },
+  portfolioImage: { width: '100%', height: '100%', borderRadius: BorderRadius.md, backgroundColor: '#E5E7EB' }, // Static gray100
+  packagesList: { paddingBottom: Spacing.xl },
+  packageCard: { borderRadius: BorderRadius.lg, padding: Spacing.lg, marginBottom: Spacing.lg, backgroundColor: '#FFFFFF', ...Shadows.md }, // Static white
+  packageHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  packageTitle: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semiBold, flex: 1, color: '#1F2937' }, // Static gray900
+  packageTypeTag: { paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xs, borderRadius: BorderRadius.full, backgroundColor: '#007AFF' }, // Static primary
+  packageTypeText: { fontSize: Typography.fontSize.xs, fontWeight: Typography.fontWeight.medium, color: '#FFFFFF' }, // Static white
+  packageDescription: { fontSize: Typography.fontSize.base, marginBottom: Spacing.sm, color: '#4B5563' }, // Static gray600
+  packagePrice: { fontSize: Typography.fontSize.xl, fontWeight: Typography.fontWeight.semiBold, marginBottom: Spacing.xs, color: '#1F2937' }, // Static gray900
+  packageDuration: { fontSize: Typography.fontSize.base, marginBottom: Spacing.md, color: '#4B5563' }, // Static gray600
+  deliverablesContainer: { marginBottom: Spacing.lg },
+  deliverable: { fontSize: Typography.fontSize.base, marginBottom: Spacing.xs, color: '#4B5563' }, // Static gray600
+  packageActions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md },
+  inquiryButton: { flex: 1, padding: Spacing.md, borderRadius: BorderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: '#C7C7CC', backgroundColor: '#F2F2F7' }, // Static gray300, gray100
+  inquiryButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, color: '#4B5563' }, // Static gray700
+  bookButton: { flex: 1, padding: Spacing.md, borderRadius: BorderRadius.lg, alignItems: 'center', backgroundColor: '#007AFF' }, // Static primary
+  bookButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, color: '#FFFFFF' }, // Static white
+  reviewsContainer: { borderRadius: BorderRadius.lg, padding: Spacing['3xl'], alignItems: 'center', backgroundColor: '#FFFFFF', ...Shadows.sm }, // Static white
+  comingSoon: { fontSize: Typography.fontSize.md, color: '#4B5563' }, // Static gray600
+  packagesContainer: { padding: Spacing.lg },
+  createPackageButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, backgroundColor: '#007AFF', ...Shadows.sm }, // Static primary
+  createPackageButtonText: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.semiBold, marginLeft: Spacing.sm, color: '#FFFFFF' }, // Static white
+  deletePackageButton: { padding: Spacing.xs },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { borderRadius: BorderRadius.lg, width: '90%', maxWidth: 500, maxHeight: '80%', backgroundColor: '#FFFFFF', ...Shadows.lg }, // Static white
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Spacing.xl, borderBottomWidth: 1, borderColor: '#D1D1D6' }, // Static gray200
+  modalTitle: { fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.semiBold, color: '#1F2937' }, // Static gray900
+  modalBody: { padding: Spacing.xl, maxHeight: 400 },
+  inputGroup: { marginBottom: Spacing.xl },
+  inputLabel: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.medium, marginBottom: Spacing.sm, color: '#1F2937' }, // Static gray900
+  textInput: { borderWidth: 1, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: Typography.fontSize.md, borderColor: '#C7C7CC', backgroundColor: '#F2F2F7' }, // Static gray300, gray50
+  textArea: { height: 80, textAlignVertical: 'top' },
+  typeButtons: { flexDirection: 'row', gap: Spacing.md },
+  typeButton: { flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: '#D1D1D6', backgroundColor: '#F2F2F7' }, // Static gray200, gray50
+  typeButtonSelected: { backgroundColor: '#007AFF', borderColor: '#007AFF' }, // Static primary
+  typeButtonText: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.medium, color: '#4B5563' }, // Static gray600
+  typeButtonTextSelected: { color: '#FFFFFF' }, // Static white
+  modalFooter: { flexDirection: 'row', justifyContent: 'space-between', padding: Spacing.xl, borderTopWidth: 1, borderColor: '#D1D1D6', gap: Spacing.md }, // Static gray200
+  cancelModalButton: { flex: 1, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, alignItems: 'center', backgroundColor: '#E5E7EB' }, // Static gray100
+  cancelModalButtonText: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.medium, color: '#4B5563' }, // Static gray600
+  saveModalButton: { flex: 1, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, alignItems: 'center', backgroundColor: '#007AFF' }, // Static primary
+  saveModalButtonText: { fontSize: Typography.fontSize.md, fontWeight: Typography.fontWeight.semiBold, color: '#FFFFFF' }, // Static white
 });
 
 export default CreatorProfileScreen;

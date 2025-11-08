@@ -35,6 +35,9 @@ export const COLORS = {
   placeholder: '#C7C7CC',
 };
 
+// Export colors as lowercase alias for consistency
+export const colors = COLORS;
+
 // App Dimensions
 export const DIMENSIONS = {
   borderRadius: 8,

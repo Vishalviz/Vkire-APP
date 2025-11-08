@@ -12,8 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import PaymentService from '../services/paymentService';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type BookingDetailsScreenRouteProp = RouteProp<RootStackParamList, 'BookingDetails'>;
 type BookingDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookingDetails'>;
@@ -22,6 +23,7 @@ const BookingDetailsScreen = () => {
   const route = useRoute<BookingDetailsScreenRouteProp>();
   const navigation = useNavigation<BookingDetailsScreenNavigationProp>();
   const { bookingId, booking } = route.params;
+  const { colors } = useTheme();
 
   // Mock booking data
   const mockBooking = booking || {
@@ -111,10 +113,10 @@ const BookingDetailsScreen = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return Colors.primary;
-      case 'completed': return Colors.success;
-      case 'cancelled': return Colors.error;
-      default: return Colors.gray600;
+      case 'confirmed': return colors.primary;
+      case 'completed': return colors.success;
+      case 'cancelled': return colors.error;
+      default: return colors.gray600;
     }
   };
 
@@ -172,7 +174,7 @@ const BookingDetailsScreen = () => {
         {/* Custom Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitle}>Booking Details</Text>
@@ -199,7 +201,7 @@ const BookingDetailsScreen = () => {
             <Text style={styles.deliverablesTitle}>What's Included:</Text>
             {(mockBooking.package_details?.deliverables || []).map((item, index) => (
               <View key={index} style={styles.deliverableItem}>
-                <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+                <Ionicons name="checkmark-circle" size={16} color={colors.success} />
                 <Text style={styles.deliverableText}>{item}</Text>
               </View>
             ))}
@@ -211,7 +213,7 @@ const BookingDetailsScreen = () => {
           <Text style={styles.sectionTitle}>Event Details</Text>
           
           <View style={styles.detailRow}>
-            <Ionicons name="calendar-outline" size={20} color={Colors.gray600} />
+            <Ionicons name="calendar-outline" size={20} color={colors.gray600} />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Date & Time</Text>
               <Text style={styles.detailValue}>{mockBooking.date} at {mockBooking.time}</Text>
@@ -219,7 +221,7 @@ const BookingDetailsScreen = () => {
           </View>
           
           <View style={styles.detailRow}>
-            <Ionicons name="location-outline" size={20} color={Colors.gray600} />
+            <Ionicons name="location-outline" size={20} color={colors.gray600} />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Location</Text>
               <Text style={styles.detailValue}>{mockBooking.location}</Text>
@@ -227,7 +229,7 @@ const BookingDetailsScreen = () => {
           </View>
           
           <View style={styles.detailRow}>
-            <Ionicons name="time-outline" size={20} color={Colors.gray600} />
+            <Ionicons name="time-outline" size={20} color={colors.gray600} />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Duration</Text>
               <Text style={styles.detailValue}>{mockBooking.package_details?.duration || 0} hours</Text>
@@ -258,9 +260,9 @@ const BookingDetailsScreen = () => {
             <Ionicons 
               name={mockBooking.payment_status === 'paid' ? 'checkmark-circle' : 'time-outline'} 
               size={16} 
-              color={mockBooking.payment_status === 'paid' ? Colors.success : Colors.warning} 
+              color={mockBooking.payment_status === 'paid' ? colors.success : colors.warning} 
             />
-            <Text style={[styles.paymentStatusText, { color: mockBooking.payment_status === 'paid' ? Colors.success : Colors.warning }]}>
+            <Text style={[styles.paymentStatusText, { color: mockBooking.payment_status === 'paid' ? colors.success : colors.warning }]}>
               {mockBooking.payment_status === 'paid' ? 'Payment Completed' : 'Payment Pending'}
             </Text>
           </View>
@@ -271,15 +273,15 @@ const BookingDetailsScreen = () => {
           <Text style={styles.sectionTitle}>Contact Information</Text>
           
           <TouchableOpacity style={styles.contactRow}>
-            <Ionicons name="call-outline" size={20} color={Colors.primary} />
+            <Ionicons name="call-outline" size={20} color={colors.primary} />
             <Text style={styles.contactValue}>{mockBooking.contact_info?.phone || 'Not available'}</Text>
-            <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
+            <Ionicons name="chevron-forward" size={16} color={colors.gray400} />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.contactRow}>
-            <Ionicons name="mail-outline" size={20} color={Colors.primary} />
+            <Ionicons name="mail-outline" size={20} color={colors.primary} />
             <Text style={styles.contactValue}>{mockBooking.contact_info?.email || 'Not available'}</Text>
-            <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
+            <Ionicons name="chevron-forward" size={16} color={colors.gray400} />
           </TouchableOpacity>
         </View>
 
@@ -290,14 +292,14 @@ const BookingDetailsScreen = () => {
             onPress={handleCancelBooking}
             disabled={isCancellationDisabled}
           >
-            <Ionicons name="close-circle-outline" size={20} color={isCancellationDisabled ? Colors.gray400 : Colors.error} />
+            <Ionicons name="close-circle-outline" size={20} color={isCancellationDisabled ? colors.gray400 : colors.error} />
             <Text style={[styles.cancelButtonText, isCancellationDisabled && styles.disabledButtonText]}>
               Cancel Booking
             </Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.contactButton} onPress={handleContactCreator}>
-            <Ionicons name="chatbubble-outline" size={20} color={Colors.white} />
+            <Ionicons name="chatbubble-outline" size={20} color={colors.white} />
             <Text style={styles.contactButtonText}>
               {mockBooking.status === 'confirmed' || mockBooking.status === 'completed' 
                 ? 'Chat with Creator' 
@@ -315,20 +317,20 @@ const BookingDetailsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: colors.gray200,
     ...Shadows.sm,
   },
   backButton: {
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     textAlign: 'center',
   },
   headerRightSpacer: {
@@ -356,7 +358,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
   },
   packageCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
@@ -378,21 +380,21 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: Typography.fontSize.xs,
     fontWeight: '600',
-    color: Colors.white,
+    color: colors.white,
   },
   bookingId: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   packageTitle: {
     fontSize: Typography.fontSize.xl,
     fontWeight: '700',
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.sm,
   },
   packageDescription: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: colors.gray600,
     lineHeight: 22,
     marginBottom: Spacing.lg,
   },
@@ -402,7 +404,7 @@ const styles = StyleSheet.create({
   deliverablesTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.sm,
   },
   deliverableItem: {
@@ -412,11 +414,11 @@ const styles = StyleSheet.create({
   },
   deliverableText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     marginLeft: Spacing.sm,
   },
   detailsCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
@@ -425,7 +427,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: '600',
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.lg,
   },
   detailRow: {
@@ -439,16 +441,16 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     marginBottom: Spacing.xs,
   },
   detailValue: {
     fontSize: Typography.fontSize.base,
     fontWeight: '500',
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   paymentCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
@@ -462,28 +464,28 @@ const styles = StyleSheet.create({
   },
   paymentLabel: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   paymentValue: {
     fontSize: Typography.fontSize.base,
     fontWeight: '500',
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   paymentTotal: {
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    borderTopColor: colors.gray200,
     paddingTop: Spacing.sm,
     marginTop: Spacing.sm,
   },
   paymentTotalLabel: {
     fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   paymentTotalValue: {
     fontSize: Typography.fontSize.lg,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
   },
   paymentStatus: {
     flexDirection: 'row',
@@ -496,7 +498,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
   contactCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
@@ -507,12 +509,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray100,
+    borderBottomColor: colors.gray100,
   },
   contactValue: {
     flex: 1,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginLeft: Spacing.md,
   },
   actionButtons: {
@@ -528,13 +530,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.error,
-    backgroundColor: Colors.white,
+    borderColor: colors.error,
+    backgroundColor: colors.white,
   },
   cancelButtonText: {
     fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    color: Colors.error,
+    color: colors.error,
     marginLeft: Spacing.sm,
   },
   contactButton: {
@@ -544,20 +546,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
   },
   contactButtonText: {
     fontSize: Typography.fontSize.base,
     fontWeight: '600',
-    color: Colors.white,
+    color: colors.white,
     marginLeft: Spacing.sm,
   },
   disabledButton: {
-    borderColor: Colors.gray300,
-    backgroundColor: Colors.gray100,
+    borderColor: colors.gray300,
+    backgroundColor: colors.gray100,
   },
   disabledButtonText: {
-    color: Colors.gray400,
+    color: colors.gray400,
   },
 });
 

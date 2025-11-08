@@ -8,10 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import { DatabaseService } from '../services/supabase';
 import NotificationService from '../services/notificationService';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/AppThemeContext';
 
 interface Job {
   id: string;
@@ -146,23 +146,23 @@ const MyJobsScreen: React.FC = () => {
       case 'confirmed': return colors.primary;
       case 'completed': return colors.success;
       case 'cancelled': return colors.error;
-      default: return colors.textSecondary;
+      default: return colors.gray500;
     }
   };
 
   const renderJobItem = ({ item }: { item: Job }) => (
     <TouchableOpacity 
-      style={styles.jobCard}
+      style={[styles.jobCard, { backgroundColor: colors.white }]}
       onPress={() => handleViewDetails(item)}
     >
       <View style={styles.jobHeader}>
         <View style={styles.customerInfo}>
-          <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color={colors.textSecondary} />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: colors.gray100, borderColor: colors.gray200 }]}>
+            <Ionicons name="person" size={24} color={colors.gray500} />
           </View>
           <View style={styles.customerDetails}>
-            <Text style={styles.customerName}>{item.customerName}</Text>
-            <Text style={styles.service}>{item.service}</Text>
+            <Text style={[styles.customerName, { color: colors.gray900 }]}>{item.customerName}</Text>
+            <Text style={[styles.service, { color: colors.gray600 }]}>{item.service}</Text>
           </View>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
@@ -172,32 +172,32 @@ const MyJobsScreen: React.FC = () => {
       
       <View style={styles.jobDetails}>
         <View style={styles.detailRow}>
-          <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.detailText}>{item.date}</Text>
+          <Ionicons name="calendar-outline" size={16} color={colors.gray600} />
+          <Text style={[styles.detailText, { color: colors.gray600 }]}>{item.date}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.detailText}>{item.location}</Text>
+          <Ionicons name="location-outline" size={16} color={colors.gray600} />
+          <Text style={[styles.detailText, { color: colors.gray600 }]}>{item.location}</Text>
         </View>
         <View style={styles.detailRow}>
-          <Ionicons name="card-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
+          <Ionicons name="card-outline" size={16} color={colors.gray600} />
+          <Text style={[styles.detailText, { color: colors.gray600 }]}>₹{item.amount.toLocaleString()}</Text>
         </View>
       </View>
 
       {item.status === 'pending' && (
         <View style={styles.actionButtons}>
           <TouchableOpacity 
-            style={[styles.actionButton, styles.acceptButton]}
+            style={[styles.actionButton, styles.acceptButton, { backgroundColor: colors.primary }]}
             onPress={() => handleAcceptJob(item.id)}
           >
             <Text style={styles.acceptButtonText}>Accept</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.actionButton, styles.declineButton]}
+            style={[styles.actionButton, styles.declineButton, { backgroundColor: colors.gray100 }]}
             onPress={() => handleDeclineJob(item.id)}
           >
-            <Text style={styles.declineButtonText}>Decline</Text>
+            <Text style={[styles.declineButtonText, { color: colors.gray600 }]}>Decline</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -205,10 +205,10 @@ const MyJobsScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Jobs</Text>
-        <Text style={styles.subtitle}>Manage your photography bookings</Text>
+    <View style={[styles.container, { backgroundColor: colors.gray50 }]}>
+      <View style={[styles.header, { backgroundColor: colors.white, borderBottomColor: colors.gray200 }]}>
+        <Text style={[styles.title, { color: colors.primary }]}>My Jobs</Text>
+        <Text style={[styles.subtitle, { color: colors.gray600 }]}>Manage your photography bookings</Text>
       </View>
 
       <FlatList
@@ -219,9 +219,9 @@ const MyJobsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="briefcase-outline" size={64} color={colors.textSecondary} />
-            <Text style={styles.emptyTitle}>No jobs yet</Text>
-            <Text style={styles.emptySubtitle}>
+            <Ionicons name="briefcase-outline" size={64} color={colors.gray600} />
+            <Text style={[styles.emptyTitle, { color: colors.gray600 }]}>No jobs yet</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.gray600 }]}>
               Start posting your work to get discovered by customers
             </Text>
           </View>
@@ -234,34 +234,32 @@ const MyJobsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
   },
   header: {
     padding: Spacing.lg,
     paddingTop: 60,
-    backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    borderColor: '#E0E0E0', // Static gray200 border
+    backgroundColor: '#FFFFFF', // Static white background
   },
   title: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: '700',
-    color: Colors.primary,
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#666666', // Static gray600 color
   },
   listContainer: {
     padding: Spacing.md,
   },
   jobCard: {
-    backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     ...Shadows.md,
+    backgroundColor: '#FFFFFF', // Static white background
   },
   jobHeader: {
     flexDirection: 'row',
@@ -278,10 +276,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    backgroundColor: '#F3F4F6', // Static gray100 background
+    borderColor: '#E5E7EB', // Static gray200 border
   },
   customerDetails: {
     flex: 1,
@@ -289,12 +288,12 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.gray900,
     marginBottom: 2,
+    color: '#1F2937', // Static gray900 color
   },
   service: {
     fontSize: 14,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -304,7 +303,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#fff',
+    color: '#FFFFFF', // Static white color
   },
   jobDetails: {
     gap: 8,
@@ -317,7 +316,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   actionButtons: {
     flexDirection: 'row',
@@ -330,18 +329,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   acceptButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
   },
   declineButton: {
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#F3F4F6', // Static gray100 background
   },
   acceptButtonText: {
-    color: '#fff',
+    color: '#FFFFFF', // Static white color
     fontWeight: '600',
     fontSize: 14,
   },
   declineButtonText: {
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
     fontWeight: '600',
     fontSize: 14,
   },
@@ -353,15 +352,15 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.gray600,
     marginTop: 16,
     marginBottom: 8,
+    color: '#4B5563', // Static gray600 color
   },
   emptySubtitle: {
     fontSize: 16,
-    color: Colors.gray600,
     textAlign: 'center',
     lineHeight: 22,
+    color: '#4B5563', // Static gray600 color
   },
 });
 

@@ -15,8 +15,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfileViews } from '../contexts/ProfileViewContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
-import { useTheme } from '../contexts/ThemeContext';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -135,26 +135,26 @@ const ProfileScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Modern Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.white, borderBottomColor: colors.gray200 }]}>
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Profile</Text>
+            <Text style={[styles.headerTitle, { color: colors.gray900 }]}>Profile</Text>
           </View>
         </View>
 
         {/* Profile Section */}
-        <View style={styles.profileHeader}>
+        <View style={[styles.profileHeader, { backgroundColor: colors.white, borderColor: '#E5E7EB' }]}>
           <View style={styles.avatarContainer}>
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={50} color={colors.textSecondary} />
+            <View style={[styles.avatarPlaceholder, { backgroundColor: '#F3F4F6', borderColor: '#FFFFFF' }]}>
+              <Ionicons name="person" size={50} color={colors.gray500} />
             </View>
-            <TouchableOpacity style={styles.editAvatarButton}>
+            <TouchableOpacity style={[styles.editAvatarButton, { backgroundColor: '#007AFF', borderColor: '#FFFFFF' }]}>
               <Ionicons name="camera" size={16} color={colors.white} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>{user?.name || 'User'}</Text>
-          <Text style={styles.userEmail}>{user?.email}</Text>
-          <View style={styles.userBadge}>
-            <Text style={styles.userRole}>
+          <Text style={[styles.userName, { color: '#1F2937' }]}>{user?.name || 'User'}</Text>
+          <Text style={[styles.userEmail, { color: '#4B5563' }]}>{user?.email}</Text>
+          <View style={[styles.userBadge, { backgroundColor: '#007AFF15' }]}>
+            <Text style={[styles.userRole, { color: '#007AFF' }]}>
               {user?.role === 'pro' ? 'Professional' : 'Customer'}
             </Text>
           </View>
@@ -162,40 +162,40 @@ const ProfileScreen = () => {
           {/* Profile Completion Indicator */}
           <View style={styles.profileCompletionContainer}>
             <View style={styles.profileCompletionHeader}>
-              <Text style={styles.profileCompletionLabel}>Profile Completion</Text>
-              <Text style={styles.profileCompletionPercentage}>{profileCompletion}%</Text>
+              <Text style={[styles.profileCompletionLabel, { color: '#4B5563' }]}>Profile Completion</Text>
+              <Text style={[styles.profileCompletionPercentage, { color: '#007AFF' }]}>{profileCompletion}%</Text>
             </View>
-            <View style={styles.profileCompletionBar}>
+            <View style={[styles.profileCompletionBar, { backgroundColor: '#E5E7EB' }]}>
               <View 
                 style={[
                   styles.profileCompletionProgress, 
-                  { width: `${profileCompletion}%` }
+                  { width: `${profileCompletion}%`, backgroundColor: '#007AFF' }
                 ]} 
               />
             </View>
             {profileCompletion < 100 && (
-              <Text style={styles.profileCompletionHint}>
+              <Text style={[styles.profileCompletionHint, { color: '#6B7280' }]}>
                 Complete your profile to get more visibility
               </Text>
             )}
           </View>
           {user?.city && (
             <View style={styles.locationContainer}>
-              <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.userLocation}>{user.city}</Text>
+              <Ionicons name="location-outline" size={16} color={colors.gray600} />
+              <Text style={[styles.userLocation, { color: '#4B5563' }]}>{user.city}</Text>
             </View>
           )}
         </View>
 
         {/* Credits Section */}
-        <View style={styles.creditsCard}>
+        <View style={[styles.creditsCard, { backgroundColor: '#FFFFFF' }]}>
           <View style={styles.creditsHeader}>
-            <View style={styles.creditsIcon}>
+            <View style={[styles.creditsIcon, { backgroundColor: '#007AFF15' }]}>
               <Ionicons name="eye" size={24} color={colors.primary} />
             </View>
             <View style={styles.creditsInfo}>
-              <Text style={styles.creditsTitle}>Profile Views</Text>
-              <Text style={styles.creditsSubtitle}>
+              <Text style={[styles.creditsTitle, { color: '#1F2937' }]}>Profile Views</Text>
+              <Text style={[styles.creditsSubtitle, { color: '#4B5563' }]}>
                 {hasUnlimitedAccess 
                   ? 'Unlimited access active' 
                   : `${profileViews} free views remaining`
@@ -203,37 +203,37 @@ const ProfileScreen = () => {
               </Text>
             </View>
             <TouchableOpacity 
-              style={styles.buyCreditsButton}
+              style={[styles.buyCreditsButton, { backgroundColor: '#007AFF' }]}
               onPress={() => setShowCreditModal(true)}
             >
-              <Text style={styles.buyCreditsText}>Buy More</Text>
+              <Text style={[styles.buyCreditsText, { color: '#FFFFFF' }]}>Buy More</Text>
             </TouchableOpacity>
           </View>
           {!hasUnlimitedAccess && (
             <View style={styles.creditsProgress}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${(profileViews / 5) * 100}%` }]} />
+              <View style={[styles.progressBar, { backgroundColor: '#E5E7EB' }]}>
+                <View style={[styles.progressFill, { width: `${(profileViews / 5) * 100}%`, backgroundColor: '#007AFF' }]} />
               </View>
-              <Text style={styles.progressText}>{profileViews}/5</Text>
+              <Text style={[styles.progressText, { color: '#4B5563' }]}>{profileViews}/5</Text>
             </View>
           )}
         </View>
 
         {/* Options Section */}
-        <View style={styles.optionsContainer}>
+        <View style={[styles.optionsContainer, { backgroundColor: '#FFFFFF' }]}>
           {profileOptions.map((option, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.optionItem}
+              style={[styles.optionItem, { borderBottomColor: '#E5E7EB' }]}
               onPress={option.onPress}
             >
               <View style={styles.optionLeft}>
-                <View style={styles.optionIconContainer}>
+                <View style={[styles.optionIconContainer, { backgroundColor: '#007AFF10' }]}>
                   <Ionicons name={option.icon as any} size={20} color={colors.primary} />
                 </View>
-                <Text style={styles.optionText}>{option.title}</Text>
+                <Text style={[styles.optionText, { color: '#1F2937' }]}>{option.title}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+              <Ionicons name="chevron-forward" size={18} color={colors.gray600} />
             </TouchableOpacity>
           ))}
         </View>
@@ -241,7 +241,7 @@ const ProfileScreen = () => {
         {/* Debug Button - Remove in production */}
         <View style={styles.signOutContainer}>
           <TouchableOpacity 
-            style={[styles.signOutButton, { backgroundColor: colors.warning + '20' }]} 
+            style={[styles.signOutButton, { backgroundColor: '#FFFFFF', borderColor: '#EF444430' }]} 
             onPress={() => {
               Alert.alert(
                 'Reset Credits',
@@ -254,22 +254,22 @@ const ProfileScreen = () => {
             }}
           >
             <Ionicons name="refresh-outline" size={20} color={colors.warning} />
-            <Text style={[styles.signOutText, { color: colors.warning }]}>Reset Credits (Debug)</Text>
+            <Text style={[styles.signOutText, { color: '#EF4444', fontWeight: Typography.fontWeight.semiBold }]}>Reset Credits (Debug)</Text>
           </TouchableOpacity>
         </View>
 
         {/* Sign Out Button */}
         <View style={styles.signOutContainer}>
-          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <TouchableOpacity style={[styles.signOutButton, { backgroundColor: '#FFFFFF', borderColor: '#EF444430' }]} onPress={handleSignOut}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={[styles.signOutText, { color: '#EF4444', fontWeight: Typography.fontWeight.semiBold }]}>Sign Out</Text>
           </TouchableOpacity>
         </View>
 
         {/* App Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.appVersion}>Vkire v2.0.0</Text>
-          <Text style={styles.appDescription}>
+          <Text style={[styles.appVersion, { color: '#6B7280', fontWeight: Typography.fontWeight.medium }]}>Vkire v2.0.0</Text>
+          <Text style={[styles.appDescription, { color: '#9CA3AF' }]}>
             Connect and create with visual professionals
           </Text>
         </View>
@@ -282,39 +282,39 @@ const ProfileScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowCreditModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: '#FFFFFF' }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Buy Profile Views</Text>
+              <Text style={[styles.modalTitle, { color: '#1F2937', fontWeight: Typography.fontWeight.semiBold }]}>Buy Profile Views</Text>
               <TouchableOpacity onPress={() => setShowCreditModal(false)}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
+                <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.modalDescription}>
+            <Text style={[styles.modalDescription, { color: '#4B5563' }]}>
               Choose your profile viewing plan:
             </Text>
             <View style={styles.paymentOptions}>
               <TouchableOpacity
-                style={styles.paymentOption}
+                style={[styles.paymentOption, { borderWidth: 1, borderColor: '#E5E7EB' }]}
                 onPress={() => handlePurchaseCredits('single')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={styles.optionTitle}>Single View</Text>
-                  <Text style={styles.optionPrice}>₹59</Text>
+                  <Text style={[styles.optionTitle, { color: '#1F2937', fontWeight: Typography.fontWeight.semiBold }]}>Single View</Text>
+                  <Text style={[styles.optionPrice, { color: '#007AFF' }]}>₹59</Text>
                 </View>
-                <Text style={styles.optionDescription}>View one more profile</Text>
+                <Text style={[styles.optionDescription, { color: '#4B5563' }]}>View one more profile</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.paymentOption, styles.recommendedOption]}
+                style={[styles.paymentOption, styles.recommendedOption, { borderColor: '#007AFF', backgroundColor: '#007AFF08' }]}
                 onPress={() => handlePurchaseCredits('unlimited')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={styles.optionTitle}>Unlimited 24h</Text>
-                  <Text style={styles.optionPrice}>₹299</Text>
+                  <Text style={[styles.optionTitle, { color: '#1F2937', fontWeight: Typography.fontWeight.semiBold }]}>Unlimited 24h</Text>
+                  <Text style={[styles.optionPrice, { color: '#007AFF' }]}>₹299</Text>
                 </View>
-                <Text style={styles.optionDescription}>Unlimited profile views for 24 hours</Text>
-                <View style={styles.recommendedBadge}>
-                  <Text style={styles.recommendedText}>Most Value</Text>
+                <Text style={[styles.optionDescription, { color: '#4B5563' }]}>Unlimited profile views for 24 hours</Text>
+                <View style={[styles.recommendedBadge, { backgroundColor: '#007AFF' }]}>
+                  <Text style={[styles.recommendedText, { color: '#FFFFFF', fontWeight: Typography.fontWeight.semiBold }]}>Most Value</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -328,15 +328,12 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
   },
   header: {
-    backgroundColor: Colors.white,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
     ...Shadows.sm,
   },
   headerContent: {
@@ -345,11 +342,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
     textAlign: 'center',
   },
   profileHeader: {
-    backgroundColor: Colors.white,
     alignItems: 'center',
     padding: Spacing['2xl'],
     marginHorizontal: Spacing.lg,
@@ -357,7 +352,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius['2xl'],
     ...Shadows.lg,
     borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderColor: '#E5E7EB', // Static gray100 border
   },
   avatarContainer: {
     position: 'relative',
@@ -367,39 +362,39 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#F3F4F6', // Static gray100 background
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: Colors.white,
+    borderColor: '#FFFFFF', // Static white border
     ...Shadows.md,
   },
   editAvatarButton: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
     width: 32,
     height: 32,
     borderRadius: BorderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: Colors.white,
+    borderColor: '#FFFFFF', // Static white border
   },
   userName: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     marginBottom: Spacing.xs,
   },
   userEmail: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
     marginBottom: Spacing.md,
   },
   userBadge: {
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: '#007AFF15', // Static primary + '15' background
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
@@ -407,7 +402,7 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary color
     fontWeight: Typography.fontWeight.semiBold,
   },
   profileCompletionContainer: {
@@ -422,28 +417,28 @@ const styles = StyleSheet.create({
   },
   profileCompletionLabel: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
+    color: '#4B5563', // Static gray700 color
     fontWeight: Typography.fontWeight.medium,
   },
   profileCompletionPercentage: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary color
     fontWeight: Typography.fontWeight.bold,
   },
   profileCompletionBar: {
     height: 6,
-    backgroundColor: Colors.gray200,
+    backgroundColor: '#E5E7EB', // Static gray200 background
     borderRadius: BorderRadius.full,
     overflow: 'hidden',
   },
   profileCompletionProgress: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
     borderRadius: BorderRadius.full,
   },
   profileCompletionHint: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray500,
+    color: '#6B7280', // Static gray500 color
     textAlign: 'center',
     marginTop: Spacing.xs,
   },
@@ -454,10 +449,10 @@ const styles = StyleSheet.create({
   },
   userLocation: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   creditsCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF', // Static white background
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.lg,
     borderRadius: BorderRadius.xl,
@@ -473,7 +468,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: BorderRadius.xl,
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: '#007AFF15', // Static primary + '15' background
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
@@ -484,15 +479,15 @@ const styles = StyleSheet.create({
   creditsTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     marginBottom: Spacing.xs,
   },
   creditsSubtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   buyCreditsButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.lg,
@@ -500,7 +495,7 @@ const styles = StyleSheet.create({
   buyCreditsText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
+    color: '#FFFFFF', // Static white color
   },
   creditsProgress: {
     flexDirection: 'row',
@@ -510,22 +505,22 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 8,
-    backgroundColor: Colors.gray200,
+    backgroundColor: '#E5E7EB', // Static gray200 background
     borderRadius: BorderRadius.sm,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
     borderRadius: BorderRadius.sm,
   },
   progressText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   optionsContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF', // Static white background
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.lg,
     borderRadius: BorderRadius.xl,
@@ -537,7 +532,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray100,
+    borderColor: '#E5E7EB', // Static gray100 border
   },
   optionLeft: {
     flexDirection: 'row',
@@ -547,14 +542,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: '#007AFF10', // Static primary + '10' background
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
   },
   optionText: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     fontWeight: Typography.fontWeight.medium,
   },
   signOutContainer: {
@@ -565,16 +560,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF', // Static white background
     padding: Spacing.lg,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.error + '30',
+    borderColor: '#EF444430', // Static error + '30' border
     ...Shadows.md,
   },
   signOutText: {
     fontSize: Typography.fontSize.base,
-    color: Colors.error,
+    color: '#EF4444', // Static error color
     marginLeft: Spacing.sm,
     fontWeight: Typography.fontWeight.semiBold,
   },
@@ -585,13 +580,13 @@ const styles = StyleSheet.create({
   },
   appVersion: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray500,
+    color: '#6B7280', // Static gray500 color
     marginBottom: Spacing.xs,
     fontWeight: Typography.fontWeight.medium,
   },
   appDescription: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray400,
+    color: '#9CA3AF', // Static gray400 color
     textAlign: 'center',
   },
   // Modal Styles
@@ -602,7 +597,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF', // Static white background
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     width: '90%',
@@ -617,11 +612,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
   },
   modalDescription: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
     marginBottom: Spacing.lg,
     textAlign: 'center',
   },
@@ -630,14 +625,14 @@ const styles = StyleSheet.create({
   },
   paymentOption: {
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#E5E7EB', // Static gray200 border
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     position: 'relative',
   },
   recommendedOption: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primary + '08',
+    borderColor: '#007AFF', // Static primary border
+    backgroundColor: '#007AFF08', // Static primary + '08' background
   },
   optionHeader: {
     flexDirection: 'row',
@@ -648,28 +643,28 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
   },
   optionPrice: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary color
   },
   optionDescription: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   recommendedBadge: {
     position: 'absolute',
     top: -Spacing.xs,
     right: Spacing.lg,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007AFF', // Static primary background
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.sm,
   },
   recommendedText: {
-    color: Colors.white,
+    color: '#FFFFFF', // Static white color
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
   },

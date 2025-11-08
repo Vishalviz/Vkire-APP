@@ -8,13 +8,18 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/AppThemeContext';
 import { useNavigation } from '@react-navigation/native';
-import { ComponentStyles, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { LightColors } from '../constants/designSystem';
+
+type DashboardScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 const DashboardScreen: React.FC = () => {
   const { colors, theme } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<DashboardScreenNavigationProp>();
   const [analyticsVisible, setAnalyticsVisible] = useState(false);
   // Mock data for demo
   const stats = {
@@ -165,24 +170,24 @@ const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: LightColors.background,
   },
   header: {
-    padding: 20,
+    padding: Spacing.lg,
     paddingTop: 60,
-    backgroundColor: '#fff',
+    backgroundColor: LightColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    borderBottomColor: LightColors.gray200,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: LightColors.gray900,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: LightColors.gray600,
   },
   content: {
     flex: 1,
@@ -190,130 +195,118 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
+    padding: Spacing.lg,
+    gap: Spacing.md,
   },
   statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: LightColors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     alignItems: 'center',
     flex: 1,
     minWidth: '45%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.md,
   },
   statIcon: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: LightColors.gray900,
+    marginBottom: Spacing.xs,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: LightColors.gray600,
     textAlign: 'center',
   },
   section: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: LightColors.gray900,
   },
   seeAllText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
+    fontSize: Typography.fontSize.base,
+    color: LightColors.primary,
+    fontWeight: Typography.fontWeight.medium,
   },
   actionsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: Spacing.md,
   },
   actionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: LightColors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     alignItems: 'center',
     flex: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.md,
   },
   actionText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000',
-    marginTop: 8,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: LightColors.gray900,
+    marginTop: Spacing.sm,
     textAlign: 'center',
   },
   inquiryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: LightColors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.md,
   },
   inquiryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   inquiryInfo: {
     flex: 1,
   },
   customerName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 2,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: LightColors.gray900,
+    marginBottom: Spacing.xs,
   },
   service: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: LightColors.gray600,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.md,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: LightColors.white,
   },
   inquiryDetails: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailText: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.sm,
+    color: LightColors.gray600,
   },
 });
 

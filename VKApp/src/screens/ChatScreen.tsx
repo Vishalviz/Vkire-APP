@@ -17,6 +17,8 @@ import { RootStackParamList, Message } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { DatabaseService } from '../services/supabase';
 import NotificationService from '../services/notificationService';
+import { useTheme } from '../contexts/AppThemeContext';
+import { BorderRadius, Spacing, Typography } from '../constants/designSystem'; // Corrected import path
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -26,6 +28,7 @@ const ChatScreen = () => {
   const navigation = useNavigation<ChatScreenNavigationProp>();
   const { bookingId, professionalId, professionalName, packageId, transactionId } = route.params;
   const { user } = useAuth();
+  const { colors } = useTheme();
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -213,7 +216,7 @@ const ChatScreen = () => {
           activeOpacity={0.7}
         >
           <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color="#666" />
+            <Ionicons name="person" size={24} color={colors.gray500} />
           </View>
           <View>
             <Text style={styles.headerName}>
@@ -225,7 +228,7 @@ const ChatScreen = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Ionicons name="call-outline" size={24} color="#007AFF" />
+          <Ionicons name="call-outline" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -253,7 +256,7 @@ const ChatScreen = () => {
             maxLength={500}
           />
           <TouchableOpacity style={styles.attachButton}>
-            <Ionicons name="attach-outline" size={24} color="#666" />
+            <Ionicons name="attach-outline" size={24} color={colors.gray500} />
           </TouchableOpacity>
         </View>
         <TouchableOpacity
@@ -264,7 +267,7 @@ const ChatScreen = () => {
           <Ionicons 
             name="send" 
             size={20} 
-            color={newMessage.trim() && !sending ? "#fff" : "#ccc"} 
+            color={newMessage.trim() && !sending ? colors.white : colors.gray500} 
           />
         </TouchableOpacity>
       </View>
@@ -275,7 +278,7 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8F9FA', // Static gray50
   },
   loadingContainer: {
     flex: 1,
@@ -286,10 +289,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: Spacing.lg,
+    backgroundColor: '#FFFFFF', // Static white
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
+    borderBottomColor: '#E5E7EB', // Static gray200
   },
   headerInfo: {
     flexDirection: 'row',
@@ -298,112 +301,113 @@ const styles = StyleSheet.create({
   avatarPlaceholder: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    borderRadius: BorderRadius.full,
+    backgroundColor: '#F2F2F7', // Static gray100
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   headerName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: '#1F2937', // Static gray900
   },
   headerStatus: {
-    fontSize: 12,
-    color: '#34C759',
+    fontSize: Typography.fontSize.xs,
+    color: '#34C759', // Static success green
   },
   messagesList: {
     flex: 1,
   },
   messagesContent: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   dateSeparator: {
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: Spacing.lg,
   },
   dateText: {
-    fontSize: 12,
-    color: '#666',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    fontSize: Typography.fontSize.sm,
+    color: '#636366', // Static gray600
+    backgroundColor: '#F2F2F7', // Static gray100
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.md,
   },
   messageContainer: {
     maxWidth: '80%',
-    marginBottom: 8,
-    padding: 12,
-    borderRadius: 16,
+    marginBottom: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
   },
   myMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007AFF',
-    borderBottomRightRadius: 4,
+    backgroundColor: '#007AFF', // Static primary
+    borderBottomRightRadius: BorderRadius.xs,
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 4,
+    backgroundColor: '#FFFFFF', // Static white
+    borderBottomLeftRadius: BorderRadius.xs,
   },
   messageText: {
-    fontSize: 16,
-    lineHeight: 20,
-    marginBottom: 4,
+    fontSize: Typography.fontSize.base,
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.base,
+    marginBottom: Spacing.xs,
   },
   myMessageText: {
-    color: '#fff',
+    color: '#FFFFFF', // Static white
   },
   otherMessageText: {
-    color: '#333',
+    color: '#1A1A1A', // Static black
   },
   messageTime: {
-    fontSize: 11,
+    fontSize: Typography.fontSize.xs,
   },
   myMessageTime: {
     color: 'rgba(255, 255, 255, 0.7)',
   },
   otherMessageTime: {
-    color: '#666',
+    color: '#636366', // Static gray600
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: Spacing.lg,
+    backgroundColor: '#FFFFFF', // Static white
     borderTopWidth: 1,
-    borderTopColor: '#e1e5e9',
+    borderTopColor: '#E5E7EB', // Static gray200
   },
   inputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: '#f1f3f4',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 12,
+    backgroundColor: '#F2F2F7', // Static gray100
+    borderRadius: BorderRadius.xl,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginRight: Spacing.md,
   },
   textInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: Typography.fontSize.base,
     maxHeight: 100,
-    paddingVertical: 8,
+    paddingVertical: Spacing.xs,
+    color: '#1A1A1A', // Static black
   },
   attachButton: {
-    padding: 4,
+    padding: Spacing.xs,
   },
   sendButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
+    borderRadius: BorderRadius.full,
+    backgroundColor: '#007AFF', // Static primary
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendButtonDisabled: {
-    backgroundColor: '#e1e5e9',
+    backgroundColor: '#D1D1D6', // Static gray300
   },
 });
 

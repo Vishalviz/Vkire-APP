@@ -13,7 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type PaymentMethodsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PaymentMethods'>;
 
@@ -47,6 +48,7 @@ const PaymentMethodsScreen = () => {
       icon: 'phone-portrait',
     },
   ]);
+  const { colors } = useTheme();
 
   const handleAddMethod = (type: 'card' | 'upi' | 'wallet') => {
     setShowAddMethodModal(false);
@@ -96,10 +98,10 @@ const PaymentMethodsScreen = () => {
 
   const getMethodColor = (type: string) => {
     switch (type) {
-      case 'card': return Colors.primary;
-      case 'upi': return Colors.success;
-      case 'wallet': return Colors.warning;
-      default: return Colors.primary;
+      case 'card': return colors.primary;
+      case 'upi': return colors.success;
+      case 'wallet': return colors.warning;
+      default: return colors.primary;
     }
   };
 
@@ -109,11 +111,11 @@ const PaymentMethodsScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Payment Methods</Text>
           <TouchableOpacity onPress={() => setShowAddMethodModal(true)}>
-            <Ionicons name="add" size={24} color={Colors.primary} />
+            <Ionicons name="add" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -171,7 +173,7 @@ const PaymentMethodsScreen = () => {
                     style={[styles.actionButton, styles.deleteButton]}
                     onPress={() => handleDeleteMethod(method.id)}
                   >
-                    <Ionicons name="trash-outline" size={16} color={Colors.error} />
+                    <Ionicons name="trash-outline" size={16} color={colors.error} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -183,14 +185,14 @@ const PaymentMethodsScreen = () => {
             style={styles.addMethodButton}
             onPress={() => setShowAddMethodModal(true)}
           >
-            <Ionicons name="add-circle-outline" size={24} color={Colors.primary} />
+            <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
             <Text style={styles.addMethodText}>Add New Payment Method</Text>
           </TouchableOpacity>
 
           {/* Payment Security Info */}
           <View style={styles.securityInfo}>
             <View style={styles.securityHeader}>
-              <Ionicons name="shield-checkmark" size={20} color={Colors.success} />
+              <Ionicons name="shield-checkmark" size={20} color={colors.success} />
               <Text style={styles.securityTitle}>Secure Payments</Text>
             </View>
             <Text style={styles.securityText}>
@@ -211,7 +213,7 @@ const PaymentMethodsScreen = () => {
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Add Payment Method</Text>
                 <TouchableOpacity onPress={() => setShowAddMethodModal(false)}>
-                  <Ionicons name="close" size={24} color={Colors.gray600} />
+                  <Ionicons name="close" size={24} color={colors.gray600} />
                 </TouchableOpacity>
               </View>
               
@@ -220,42 +222,42 @@ const PaymentMethodsScreen = () => {
                   style={styles.methodOption}
                   onPress={() => handleAddMethod('card')}
                 >
-                  <View style={[styles.methodIcon, { backgroundColor: Colors.primary + '20' }]}>
-                    <Ionicons name="card" size={24} color={Colors.primary} />
+                  <View style={[styles.methodIcon, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="card" size={24} color={colors.primary} />
                   </View>
                   <View style={styles.methodInfo}>
                     <Text style={styles.methodName}>Credit/Debit Card</Text>
                     <Text style={styles.methodDescription}>Add a new card</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
+                  <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                   style={styles.methodOption}
                   onPress={() => handleAddMethod('upi')}
                 >
-                  <View style={[styles.methodIcon, { backgroundColor: Colors.success + '20' }]}>
-                    <Ionicons name="phone-portrait" size={24} color={Colors.success} />
+                  <View style={[styles.methodIcon, { backgroundColor: colors.success + '20' }]}>
+                    <Ionicons name="phone-portrait" size={24} color={colors.success} />
                   </View>
                   <View style={styles.methodInfo}>
                     <Text style={styles.methodName}>UPI</Text>
                     <Text style={styles.methodDescription}>Add UPI ID</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
+                  <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                   style={styles.methodOption}
                   onPress={() => handleAddMethod('wallet')}
                 >
-                  <View style={[styles.methodIcon, { backgroundColor: Colors.warning + '20' }]}>
-                    <Ionicons name="wallet" size={24} color={Colors.warning} />
+                  <View style={[styles.methodIcon, { backgroundColor: colors.warning + '20' }]}>
+                    <Ionicons name="wallet" size={24} color={colors.warning} />
                   </View>
                   <View style={styles.methodInfo}>
                     <Text style={styles.methodName}>Digital Wallet</Text>
                     <Text style={styles.methodDescription}>Add wallet account</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={Colors.gray400} />
+                  <Ionicons name="chevron-forward" size={20} color={colors.gray400} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -269,11 +271,11 @@ const PaymentMethodsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -282,13 +284,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
+    borderBottomColor: colors.gray200,
+    backgroundColor: colors.surface,
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   content: {
     flex: 1,
@@ -300,24 +302,24 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
   },
   sectionSubtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   paymentCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
     ...Shadows.sm,
   },
   defaultCard: {
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderWidth: 2,
   },
   cardHeader: {
@@ -344,15 +346,15 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
   },
   cardSubtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   defaultBadge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
@@ -360,7 +362,7 @@ const styles = StyleSheet.create({
   defaultBadgeText: {
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
+    color: colors.white,
   },
   cardActions: {
     flexDirection: 'row',
@@ -371,41 +373,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: colors.primary + '20',
   },
   actionButtonText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.primary,
+    color: colors.primary,
   },
   deleteButton: {
-    backgroundColor: Colors.error + '20',
+    backgroundColor: colors.error + '20',
     padding: Spacing.sm,
   },
   addMethodButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.xl,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderStyle: 'dashed',
   },
   addMethodText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.primary,
+    color: colors.primary,
     marginLeft: Spacing.sm,
   },
   securityInfo: {
-    backgroundColor: Colors.success + '10',
+    backgroundColor: colors.success + '10',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.success + '30',
+    borderColor: colors.success + '30',
   },
   securityHeader: {
     flexDirection: 'row',
@@ -415,12 +417,12 @@ const styles = StyleSheet.create({
   securityTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.success,
+    color: colors.success,
     marginLeft: Spacing.sm,
   },
   securityText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
+    color: colors.gray700,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
   modalOverlay: {
@@ -429,7 +431,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
     padding: Spacing.lg,
@@ -444,7 +446,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   methodOptions: {
     gap: Spacing.md,
@@ -452,11 +454,11 @@ const styles = StyleSheet.create({
   methodOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
   },
   methodIcon: {
     width: 48,
@@ -472,12 +474,12 @@ const styles = StyleSheet.create({
   methodName: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
   },
   methodDescription: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
 });
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/AppThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacing, BorderRadius, Typography, Shadows } from '../constants/designSystem';
 import { useNavigation } from '@react-navigation/native';
+import { LightColors } from '../constants/designSystem';
 
 const mockServices = [
   { id: 1, service: 'Wedding Photography', price: 25000 },
@@ -24,33 +25,101 @@ const PriceListEditorScreen = () => {
     navigation.goBack();
   };
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={styles.fullContainer}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.lg, paddingTop: Spacing['2xl'], paddingBottom: Spacing.md, backgroundColor: colors.surface, borderBottomWidth: 0.5, borderBottomColor: colors.gray200 }}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={24} color={colors.primary} /></TouchableOpacity>
-        <Text style={{ fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.bold, color: colors.gray900, marginLeft: Spacing.md }}>Edit Price List</Text>
+        <Text style={styles.headerTitle}>Edit Price List</Text>
       </View>
-      <ScrollView style={{ flex: 1, padding: Spacing.lg }} contentContainerStyle={{ paddingBottom: Spacing.xl }}>
+      <ScrollView style={styles.scrollViewContent}>
         {prices.map(item => (
-          <View key={item.id} style={{ backgroundColor: colors.surface, padding: Spacing.lg, borderRadius: BorderRadius.lg, marginBottom: Spacing.lg, ...Shadows.md }}>
-            <Text style={{ color: colors.gray700, fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, marginBottom: Spacing.md }}>{item.service}</Text>
+          <View key={item.id} style={styles.serviceCard}>
+            <Text style={styles.serviceName}>{item.service}</Text>
             <TextInput
               value={item.price.toString()}
               onChangeText={(v) => handlePriceChange(item.id, v)}
               keyboardType="numeric"
-              style={{ backgroundColor: colors.gray100, borderColor: colors.gray300, borderWidth: 1, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: Typography.fontSize.base, color: colors.gray900 }}
+              style={styles.priceInput}
               placeholder="Enter price"
-              placeholderTextColor={colors.gray500}
+              placeholderTextColor={LightColors.gray500}
             />
           </View>
         ))}
       </ScrollView>
-      <View style={{ padding: Spacing.lg, backgroundColor: colors.surface, borderTopWidth: 0.5, borderTopColor: colors.gray200 }}>
-        <TouchableOpacity onPress={handleSave} style={{ backgroundColor: colors.primary, padding: Spacing.lg, borderRadius: BorderRadius.xl, alignItems: 'center', ...Shadows.sm }}>
-          <Text style={{ color: colors.white, fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold }}>Save Changes</Text>
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 export default PriceListEditorScreen;
+
+const styles = StyleSheet.create({
+  fullContainer: {
+    flex: 1,
+    backgroundColor: LightColors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing['2xl'],
+    paddingBottom: Spacing.md,
+    backgroundColor: LightColors.surface,
+    borderBottomWidth: 0.5,
+    borderBottomColor: LightColors.gray200,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: LightColors.gray900,
+    marginLeft: Spacing.md,
+  },
+  scrollViewContent: {
+    flex: 1,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xl,
+  },
+  serviceCard: {
+    backgroundColor: LightColors.surface,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
+  },
+  serviceName: {
+    color: LightColors.gray700,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+    marginBottom: Spacing.md,
+  },
+  priceInput: {
+    backgroundColor: LightColors.gray100,
+    borderColor: LightColors.gray300,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: LightColors.gray900,
+  },
+  footer: {
+    padding: Spacing.lg,
+    backgroundColor: LightColors.surface,
+    borderTopWidth: 0.5,
+    borderTopColor: LightColors.gray200,
+  },
+  saveButton: {
+    backgroundColor: LightColors.primary,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    alignItems: 'center',
+    ...Shadows.sm,
+  },
+  saveButtonText: {
+    color: LightColors.white,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semiBold,
+  },
+});

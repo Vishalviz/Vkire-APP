@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 import Logo from '../components/Logo';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useAppContextTheme } from '../contexts/AppThemeContext';
 
 const AuthScreen = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -32,6 +33,7 @@ const AuthScreen = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const { signIn, signUp } = useAuth();
+  const { colors } = useAppContextTheme();
   
   // Animation refs for smooth transitions
   const customerButtonScale = useRef(new Animated.Value(1)).current;
@@ -183,6 +185,57 @@ const AuthScreen = () => {
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    backgroundGradient: {
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.background,
+    },
+    header: {
+      alignItems: 'center', paddingTop: Spacing['2xl'], paddingBottom: Spacing['2xl'], paddingHorizontal: Spacing['2xl'], backgroundColor: 'transparent',
+    },
+    appTitle: {
+      fontSize: Typography.fontSize['4xl'], fontWeight: Typography.fontWeight.extraBold, letterSpacing: 0.5, marginBottom: Spacing.sm, textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: Typography.fontSize.lg, fontWeight: Typography.fontWeight.medium, textAlign: 'center', lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.lg, marginBottom: Spacing.md,
+    },
+    mainContent: { flex: 1, },
+    scrollView: { flex: 1 },
+    scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: Spacing.xl, paddingTop: Spacing.lg, paddingBottom: Spacing.xl },
+    roleSelectionContainer: { backgroundColor: 'transparent', padding: 0, maxWidth: 400, alignSelf: 'center', width: '100%' },
+    roleSelectionTitle: { fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.bold, textAlign: 'center', marginBottom: Spacing.xs, letterSpacing: 0.3 },
+    roleSelectionSubtitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.regular, textAlign: 'center', marginBottom: Spacing['2xl'], lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base },
+    roleButtons: { gap: Spacing.md },
+    roleButton: { borderRadius: BorderRadius.xl, padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', ...Shadows.md, borderWidth: 0.5, borderColor: colors.gray200, minHeight: 88, backgroundColor: colors.surface },
+    roleButtonIconContainer: { width: 52, height: 52, borderRadius: BorderRadius.lg, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.md, backgroundColor: colors.primary + '10' },
+    roleButtonContent: { flex: 1 },
+    roleButtonTitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, marginBottom: 4, color: colors.gray900 },
+    roleButtonDescription: { fontSize: Typography.fontSize.sm, fontWeight: Typography.fontWeight.regular, color: colors.gray600 },
+    roleButtonArrow: { marginLeft: Spacing.sm, opacity: 0.6, color: colors.gray400 },
+    formContainer: { borderRadius: BorderRadius['2xl'], padding: Spacing['2xl'], ...Shadows.lg, maxWidth: 420, alignSelf: 'center', width: '100%', borderWidth: 0.5, borderColor: colors.gray200, marginTop: Spacing.lg, backgroundColor: colors.surface },
+    formContent: { flex: 1, paddingTop: Spacing.md },
+    formHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: Spacing.xl },
+    backButton: { marginRight: Spacing.lg, padding: Spacing.sm, borderRadius: BorderRadius.lg, backgroundColor: colors.gray100 },
+    formTitleContainer: { flex: 1 },
+    formTitle: { fontSize: Typography.fontSize['2xl'], fontWeight: Typography.fontWeight.bold, marginBottom: Spacing.xs, letterSpacing: 0.3, color: colors.gray900 },
+    formSubtitle: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.regular, lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base, color: colors.gray600 },
+    inputGroup: { marginBottom: Spacing.lg },
+    inputLabel: { fontSize: Typography.fontSize.sm, fontWeight: Typography.fontWeight.medium, marginBottom: Spacing.sm, color: colors.gray700 },
+    inputWrapper: { flexDirection: 'row', alignItems: 'center', borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.gray300, paddingHorizontal: Spacing.md, paddingVertical: Spacing.md, minHeight: 48, backgroundColor: colors.surface, ...Shadows.sm },
+    inputWrapperError: { borderColor: colors.error },
+    inputIcon: { marginRight: Spacing.md, color: colors.gray500 },
+    input: { flex: 1, paddingVertical: 0, fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.medium, color: colors.gray900 },
+    passwordToggle: { padding: Spacing.sm, marginLeft: Spacing.sm },
+    errorText: { fontSize: Typography.fontSize.sm, fontWeight: Typography.fontWeight.medium, marginTop: Spacing.xs, color: colors.error },
+    primaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: BorderRadius.xl, padding: Spacing.lg, marginTop: Spacing.xl, minHeight: 56, backgroundColor: colors.primary, ...Shadows.lg },
+    primaryButtonDisabled: { backgroundColor: colors.gray400, ...Shadows.sm },
+    primaryButtonText: { fontSize: Typography.fontSize.base, fontWeight: Typography.fontWeight.semiBold, marginRight: Spacing.sm },
+    buttonIcon: { marginLeft: Spacing.xs },
+  }), [colors]);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Background Gradient */}
@@ -190,8 +243,8 @@ const AuthScreen = () => {
       
       {/* Modern Header */}
       <View style={styles.header}>
-        <Text style={styles.appTitle}>Vkire</Text>
-        <Text style={styles.subtitle}>Where creativity meets opportunity</Text>
+        <Text style={[styles.appTitle, { color: colors.primary }]}>Vkire</Text>
+        <Text style={[styles.subtitle, { color: colors.gray600 }]}>Where creativity meets opportunity</Text>
       </View>
 
       {/* Main Content - Centered with Keyboard Awareness */}
@@ -216,8 +269,8 @@ const AuthScreen = () => {
           {/* Modern Role Selection */}
           {!selectedRole ? (
             <View style={styles.roleSelectionContainer}>
-              <Text style={styles.roleSelectionTitle}>Choose your path</Text>
-              <Text style={styles.roleSelectionSubtitle}>How would you like to use Vkire?</Text>
+              <Text style={[styles.roleSelectionTitle, { color: colors.gray900 }]}>Choose your path</Text>
+              <Text style={[styles.roleSelectionSubtitle, { color: colors.gray600 }]}>How would you like to use Vkire?</Text>
               
               <View style={styles.roleButtons}>
                 <Animated.View style={{ transform: [{ scale: customerButtonScale }] }}>
@@ -227,16 +280,16 @@ const AuthScreen = () => {
                     activeOpacity={0.8}
                   >
                     <View style={styles.roleButtonIconContainer}>
-                      <Ionicons name="search" size={32} color={Colors.primary} />
+                      <Ionicons name="search" size={32} color={colors.primary} />
                     </View>
                     <View style={styles.roleButtonContent}>
-                      <Text style={styles.roleButtonTitle}>Find Creatives</Text>
-                      <Text style={styles.roleButtonDescription}>
+                      <Text style={[styles.roleButtonTitle, { color: colors.gray900 }]}>Find Creatives</Text>
+                      <Text style={[styles.roleButtonDescription, { color: colors.gray600 }]}>
                         Find creative professionals
                       </Text>
                     </View>
                     <View style={styles.roleButtonArrow}>
-                      <Ionicons name="arrow-forward" size={20} color={Colors.gray400} />
+                      <Ionicons name="arrow-forward" size={20} color={colors.gray400} />
                     </View>
                   </TouchableOpacity>
                 </Animated.View>
@@ -248,16 +301,16 @@ const AuthScreen = () => {
                     activeOpacity={0.8}
                   >
                     <View style={styles.roleButtonIconContainer}>
-                      <Ionicons name="camera" size={32} color={Colors.primary} />
+                      <Ionicons name="camera" size={32} color={colors.primary} />
                     </View>
                     <View style={styles.roleButtonContent}>
-                      <Text style={styles.roleButtonTitle}>Showcase Talent</Text>
-                      <Text style={styles.roleButtonDescription}>
+                      <Text style={[styles.roleButtonTitle, { color: colors.gray900 }]}>Showcase Talent</Text>
+                      <Text style={[styles.roleButtonDescription, { color: colors.gray600 }]}>
                         Showcase your work
                       </Text>
                     </View>
                     <View style={styles.roleButtonArrow}>
-                      <Ionicons name="arrow-forward" size={20} color={Colors.gray400} />
+                      <Ionicons name="arrow-forward" size={20} color={colors.gray400} />
                     </View>
                   </TouchableOpacity>
                 </Animated.View>
@@ -280,13 +333,13 @@ const AuthScreen = () => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+                  <Ionicons name="arrow-back" size={24} color={colors.primary} />
                 </TouchableOpacity>
                 <View style={styles.formTitleContainer}>
-                  <Text style={styles.formTitle}>
+                  <Text style={[styles.formTitle, { color: colors.gray900 }]}>
                     {selectedRole === 'pro' ? 'Join as Professional' : 'Find Creatives'}
                   </Text>
-                  <Text style={styles.formSubtitle}>
+                  <Text style={[styles.formSubtitle, { color: colors.gray600 }]}>
                     {selectedRole === 'pro' 
                       ? 'Showcase your work'
                       : 'Find creative professionals'
@@ -297,14 +350,14 @@ const AuthScreen = () => {
 
               <View style={styles.formContent}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Full Name</Text>
+                  <Text style={[styles.inputLabel, { color: colors.gray700 }]}>Full Name</Text>
                   <View style={styles.inputWrapper}>
-                    <Ionicons name="person-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                    <Ionicons name="person-outline" size={20} color={colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={nameInputRef}
                       style={styles.input}
                       placeholder="Enter your full name"
-                      placeholderTextColor={Colors.gray500}
+                      placeholderTextColor={colors.gray500}
                       value={name}
                       onChangeText={setName}
                       autoCapitalize="words"
@@ -317,14 +370,14 @@ const AuthScreen = () => {
                 {selectedRole === 'pro' && (
                   <>
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>City</Text>
+                      <Text style={[styles.inputLabel, { color: colors.gray700 }]}>City</Text>
                       <View style={styles.inputWrapper}>
-                        <Ionicons name="location-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                        <Ionicons name="location-outline" size={20} color={colors.primary} style={styles.inputIcon} />
                         <TextInput
                           ref={cityInputRef}
                           style={styles.input}
                           placeholder="Enter your city"
-                          placeholderTextColor={Colors.gray500}
+                          placeholderTextColor={colors.gray500}
                           value={city}
                           onChangeText={setCity}
                           autoCapitalize="words"
@@ -335,14 +388,14 @@ const AuthScreen = () => {
                     </View>
 
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Phone</Text>
+                      <Text style={[styles.inputLabel, { color: colors.gray700 }]}>Phone</Text>
                       <View style={styles.inputWrapper}>
-                        <Ionicons name="call-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                        <Ionicons name="call-outline" size={20} color={colors.primary} style={styles.inputIcon} />
                         <TextInput
                           ref={phoneInputRef}
                           style={styles.input}
                           placeholder="Enter your phone number"
-                          placeholderTextColor={Colors.gray500}
+                          placeholderTextColor={colors.gray500}
                           value={phone}
                           onChangeText={setPhone}
                           keyboardType="phone-pad"
@@ -355,14 +408,14 @@ const AuthScreen = () => {
                 )}
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Email Address</Text>
+                  <Text style={[styles.inputLabel, { color: colors.gray700 }]}>Email Address</Text>
                   <View style={[styles.inputWrapper, emailError && styles.inputWrapperError]}>
-                    <Ionicons name="mail-outline" size={20} color={emailError ? Colors.error : Colors.primary} style={styles.inputIcon} />
+                    <Ionicons name="mail-outline" size={20} color={emailError ? colors.error : colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={emailInputRef}
                       style={styles.input}
                       placeholder="Enter your email"
-                      placeholderTextColor={Colors.gray500}
+                      placeholderTextColor={colors.gray500}
                       value={email}
                       onChangeText={handleEmailChange}
                       keyboardType="email-address"
@@ -372,18 +425,18 @@ const AuthScreen = () => {
                       onSubmitEditing={() => passwordInputRef.current?.focus()}
                     />
                   </View>
-                  {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+                  {emailError ? <Text style={[styles.errorText, { color: colors.error }]}>{emailError}</Text> : null}
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Password</Text>
+                  <Text style={[styles.inputLabel, { color: colors.gray700 }]}>Password</Text>
                   <View style={styles.inputWrapper}>
-                    <Ionicons name="lock-closed-outline" size={20} color={Colors.primary} style={styles.inputIcon} />
+                    <Ionicons name="lock-closed-outline" size={20} color={colors.primary} style={styles.inputIcon} />
                     <TextInput
                       ref={passwordInputRef}
                       style={styles.input}
                       placeholder="Enter your password"
-                      placeholderTextColor={Colors.gray500}
+                      placeholderTextColor={colors.gray500}
                       value={password}
                       onChangeText={setPassword}
                       secureTextEntry={!showPassword}
@@ -399,7 +452,7 @@ const AuthScreen = () => {
                       <Ionicons 
                         name={showPassword ? "eye-off-outline" : "eye-outline"} 
                         size={20} 
-                        color={Colors.gray500} 
+                        color={colors.gray500} 
                       />
                     </TouchableOpacity>
                   </View>
@@ -413,13 +466,13 @@ const AuthScreen = () => {
                   disabled={loading}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.primaryButtonText}>
+                  <Text style={[styles.primaryButtonText, { color: colors.white }]}>
                     {loading ? 'Loading...' : selectedRole === 'pro' ? 'Create Account' : 'Sign In'}
                   </Text>
                   <Ionicons 
                     name={selectedRole === 'pro' ? "arrow-forward" : "log-in-outline"} 
                     size={20} 
-                    color="#fff" 
+                    color={colors.white} 
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
@@ -431,237 +484,5 @@ const AuthScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-  },
-  backgroundGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#FAFAFA',
-  },
-  header: {
-    alignItems: 'center',
-    paddingTop: Spacing['2xl'],
-    paddingBottom: Spacing['2xl'],
-    paddingHorizontal: Spacing['2xl'],
-    backgroundColor: 'transparent',
-  },
-  appTitle: {
-    fontSize: Typography.fontSize['4xl'],
-    fontWeight: Typography.fontWeight.extraBold,
-    color: Colors.primary,
-    letterSpacing: 0.5,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
-    textAlign: 'center',
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.lg,
-    marginBottom: 0,
-  },
-  mainContent: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.xl,
-  },
-  roleSelectionContainer: {
-    backgroundColor: 'transparent',
-    padding: 0,
-    maxWidth: 400,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  roleSelectionTitle: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-    letterSpacing: 0.3,
-  },
-  roleSelectionSubtitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.regular,
-    color: Colors.gray600,
-    textAlign: 'center',
-    marginBottom: Spacing['2xl'],
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-  },
-  roleButtons: {
-    gap: Spacing.md,
-  },
-  roleButton: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 0.5,
-    borderColor: Colors.gray200,
-    minHeight: 88,
-  },
-  roleButtonIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.primary + '12',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  roleButtonContent: {
-    flex: 1,
-  },
-  roleButtonTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: 4,
-  },
-  roleButtonDescription: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.regular,
-  },
-  roleButtonArrow: {
-    marginLeft: Spacing.sm,
-    opacity: 0.6,
-  },
-  formContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing['2xl'],
-    ...Shadows.lg,
-    maxWidth: 420,
-    alignSelf: 'center',
-    width: '100%',
-    borderWidth: 0.5,
-    borderColor: Colors.gray200,
-    marginTop: Spacing.lg,
-  },
-  formContent: {
-    flex: 1,
-    paddingTop: Spacing.md,
-  },
-  formHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: Spacing.xl,
-  },
-  backButton: {
-    marginRight: Spacing.lg,
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
-  },
-  formTitleContainer: {
-    flex: 1,
-  },
-  formTitle: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
-    marginBottom: Spacing.xs,
-    letterSpacing: 0.3,
-  },
-  formSubtitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.regular,
-    color: Colors.gray600,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-  },
-  inputGroup: {
-    marginBottom: Spacing.lg,
-  },
-  inputLabel: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray700,
-    marginBottom: Spacing.sm,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.gray200,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    minHeight: 48,
-    ...Shadows.sm,
-  },
-  inputWrapperError: {
-    borderColor: Colors.error,
-    backgroundColor: Colors.error + '08',
-  },
-  inputIcon: {
-    marginRight: Spacing.md,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 0,
-    fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  passwordToggle: {
-    padding: Spacing.sm,
-    marginLeft: Spacing.sm,
-  },
-  errorText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.error,
-    marginTop: Spacing.xs,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.xl,
-    marginTop: Spacing.xl,
-    minHeight: 56,
-    ...Shadows.lg,
-  },
-  primaryButtonDisabled: {
-    backgroundColor: Colors.gray400,
-    ...Shadows.sm,
-  },
-  primaryButtonText: {
-    color: Colors.white,
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    marginRight: Spacing.sm,
-  },
-  buttonIcon: {
-    marginLeft: Spacing.xs,
-  },
-});
 
 export default AuthScreen;

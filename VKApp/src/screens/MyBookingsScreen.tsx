@@ -14,8 +14,9 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useLocation } from '../contexts/LocationContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 import PaymentService from '../services/paymentService';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -52,6 +53,7 @@ interface Inquiry {
 const MyBookingsScreen: React.FC = () => {
   const navigation = useNavigation<MyBookingsScreenNavigationProp>();
   const { currentLocation, manualLocation, isLocationEnabled } = useLocation();
+  const { colors } = useTheme();
   
   // Enhanced mock data for comprehensive testing
   const [bookings, setBookings] = useState<Booking[]>([
@@ -251,13 +253,13 @@ const MyBookingsScreen: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return Colors.primary;
-      case 'completed': return Colors.success;
-      case 'cancelled': return Colors.error;
-      case 'pending': return Colors.warning;
-      case 'accepted': return Colors.success;
-      case 'declined': return Colors.error;
-      default: return Colors.gray500;
+      case 'confirmed': return colors.primary;
+      case 'completed': return colors.success;
+      case 'cancelled': return colors.error;
+      case 'pending': return colors.warning;
+      case 'accepted': return colors.success;
+      case 'declined': return colors.error;
+      default: return colors.gray500;
     }
   };
 
@@ -309,7 +311,7 @@ const MyBookingsScreen: React.FC = () => {
       <View style={styles.bookingHeader}>
         <View style={styles.proInfo}>
           <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color="#8E8E93" />
+            <Ionicons name="person" size={24} color={colors.gray500} />
           </View>
           <View style={styles.proDetails}>
             <Text style={styles.proName}>{item.proName}</Text>
@@ -330,12 +332,12 @@ const MyBookingsScreen: React.FC = () => {
       
       <View style={styles.bookingDetails}>
         <View style={styles.detailRow}>
-          <Ionicons name="calendar-outline" size={16} color="#8E8E93" />
+          <Ionicons name="calendar-outline" size={16} color={colors.gray500} />
           <Text style={styles.detailText}>{item.date}</Text>
         </View>
         {(item.type === 'booking' && 'location' in item) || (item.type === 'inquiry' && item.location) ? (
           <View style={styles.detailRow}>
-            <Ionicons name="location-outline" size={16} color="#8E8E93" />
+            <Ionicons name="location-outline" size={16} color={colors.gray500} />
             <View style={styles.locationInfo}>
               <Text style={styles.detailText}>
                 {item.type === 'booking' ? item.location : item.location}
@@ -354,7 +356,7 @@ const MyBookingsScreen: React.FC = () => {
           </View>
         ) : null}
         <View style={styles.detailRow}>
-          <Ionicons name="card-outline" size={16} color="#8E8E93" />
+          <Ionicons name="card-outline" size={16} color={colors.gray500} />
           <Text style={styles.detailText}>₹{item.amount.toLocaleString()}</Text>
         </View>
         {item.type === 'inquiry' && (
@@ -362,9 +364,9 @@ const MyBookingsScreen: React.FC = () => {
             <Ionicons 
               name={item.chatUnlocked ? "chatbubble-outline" : "lock-closed-outline"} 
               size={16} 
-              color={item.chatUnlocked ? Colors.success : Colors.gray500} 
+              color={item.chatUnlocked ? colors.success : colors.gray500} 
             />
-            <Text style={[styles.detailText, { color: item.chatUnlocked ? Colors.success : Colors.gray500 }]}>
+            <Text style={[styles.detailText, { color: item.chatUnlocked ? colors.success : colors.gray500 }]}>
               {item.chatUnlocked ? 'Chat Available' : 'Chat Locked'}
             </Text>
           </View>
@@ -386,11 +388,11 @@ const MyBookingsScreen: React.FC = () => {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={20} color={Colors.gray500} />
+          <Ionicons name="search-outline" size={20} color={colors.gray500} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search bookings, professionals, services..."
-            placeholderTextColor={Colors.gray500}
+            placeholderTextColor={colors.gray500}
             value={searchQuery}
             onChangeText={(text) => {
               console.log('Search input changed:', text);
@@ -399,7 +401,7 @@ const MyBookingsScreen: React.FC = () => {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color={Colors.gray500} />
+              <Ionicons name="close-circle" size={20} color={colors.gray500} />
             </TouchableOpacity>
           )}
         </View>
@@ -443,8 +445,8 @@ const MyBookingsScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         ListEmptyComponent={
@@ -452,7 +454,7 @@ const MyBookingsScreen: React.FC = () => {
             <Ionicons 
               name={searchQuery ? "search-outline" : "calendar-outline"} 
               size={64} 
-              color={Colors.gray400} 
+              color={colors.gray400} 
             />
             <Text style={styles.emptyTitle}>
               {searchQuery ? "No results found" : "No bookings yet"}
@@ -481,15 +483,15 @@ const MyBookingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.gray50,
+    backgroundColor: colors.gray50,
   },
   header: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     paddingTop: 50,
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: colors.gray200,
     ...Shadows.sm,
   },
   headerContent: {
@@ -498,28 +500,28 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
+    color: colors.gray900,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   headerSubtitle: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: colors.gray600,
     fontWeight: Typography.fontWeight.regular,
     textAlign: 'center',
   },
   // Search Bar Styles
   searchContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: colors.gray200,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray100,
+    backgroundColor: colors.gray100,
     borderRadius: BorderRadius.xl,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -528,16 +530,16 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: Spacing.sm,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
+    color: colors.gray900,
   },
   // Filter Tabs Styles
   filterContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: colors.gray200,
   },
   filterTab: {
     flex: 1,
@@ -545,31 +547,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     marginHorizontal: Spacing.xs,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.gray100,
+    backgroundColor: colors.gray100,
     alignItems: 'center',
   },
   activeFilterTab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
   },
   filterTabText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
+    color: colors.gray600,
   },
   activeFilterTabText: {
-    color: Colors.white,
+    color: colors.white,
   },
   listContainer: {
     padding: Spacing.lg,
   },
   bookingCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: BorderRadius['2xl'],
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     ...Shadows.lg,
     borderWidth: 0.5,
-    borderColor: Colors.gray100,
+    borderColor: colors.gray100,
   },
   bookingHeader: {
     flexDirection: 'row',
@@ -586,12 +588,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: BorderRadius.xl,
-    backgroundColor: Colors.gray100,
+    backgroundColor: colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
     borderWidth: 2,
-    borderColor: Colors.gray200,
+    borderColor: colors.gray200,
   },
   proDetails: {
     flex: 1,
@@ -599,12 +601,12 @@ const styles = StyleSheet.create({
   proName: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: colors.gray900,
     marginBottom: Spacing.xs,
   },
   service: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     fontWeight: Typography.fontWeight.medium,
   },
   statusContainer: {
@@ -620,18 +622,18 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
+    color: colors.white,
   },
   typeBadge: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: colors.primary + '20',
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
   },
   typeText: {
-    color: Colors.primary,
+    color: colors.primary,
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
   },
@@ -645,7 +647,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: colors.gray600,
     fontWeight: Typography.fontWeight.medium,
   },
   locationInfo: {
@@ -654,7 +656,7 @@ const styles = StyleSheet.create({
   },
   distanceText: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: Typography.fontWeight.medium,
     marginTop: 2,
   },
@@ -667,13 +669,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray600,
+    color: colors.gray600,
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptySubtitle: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray500,
+    color: colors.gray500,
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     fontWeight: Typography.fontWeight.regular,
@@ -682,13 +684,13 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.full,
   },
   clearSearchText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.white,
+    color: colors.white,
     textAlign: 'center',
   },
 });

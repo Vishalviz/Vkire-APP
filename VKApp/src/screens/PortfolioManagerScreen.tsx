@@ -13,8 +13,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 // import * as ImagePicker from 'expo-image-picker'; // Not used directly, handled by ImagePickerModal
 import ImagePickerModal from '../components/ImagePickerModal';
-import { useTheme } from '../contexts/ThemeContext';
-import { Typography, Spacing, BorderRadius, Shadows } from '../designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 interface PortfolioPost {
   id: string;
@@ -155,7 +155,7 @@ const PortfolioManagerScreen: React.FC = () => {
             <Text style={styles.engagementText}>{item.likes}</Text>
           </View>
           <View style={styles.engagementItem}>
-            <Ionicons name="chatbubble" size={16} color={colors.textSecondary} />
+            <Ionicons name="chatbubble" size={16} color={colors.gray500} />
             <Text style={styles.engagementText}>{item.comments}</Text>
           </View>
           <Text style={styles.dateText}>{item.createdAt}</Text>
@@ -163,7 +163,7 @@ const PortfolioManagerScreen: React.FC = () => {
       </View>
       
       <TouchableOpacity style={styles.moreButton}>
-        <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
+        <Ionicons name="ellipsis-horizontal" size={20} color={colors.gray500} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -177,7 +177,7 @@ const PortfolioManagerScreen: React.FC = () => {
 
       <View style={styles.actionBar}>
         <TouchableOpacity style={styles.addButton} onPress={handleAddPost}>
-          <Ionicons name="add" size={20} color={colors.onPrimary} />
+          <Ionicons name="add" size={20} color={colors.white} />
           <Text style={styles.addButtonText}>Add Post</Text>
         </TouchableOpacity>
         
@@ -197,7 +197,7 @@ const PortfolioManagerScreen: React.FC = () => {
         columnWrapperStyle={styles.row}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={64} color={colors.textSecondary} />
+            <Ionicons name="images-outline" size={64} color={colors.gray500} />
             <Text style={styles.emptyTitle}>No portfolio posts yet</Text>
             <Text style={styles.emptySubtitle}>
               Start building your portfolio by adding your best work
@@ -221,7 +221,7 @@ const PortfolioManagerScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Portfolio Post</Text>
               <TouchableOpacity onPress={() => setShowAddPostModal(false)}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
+                <Ionicons name="close" size={24} color={colors.gray500} />
               </TouchableOpacity>
             </View>
 
@@ -235,7 +235,7 @@ const PortfolioManagerScreen: React.FC = () => {
                     style={styles.imagePlaceholder}
                     onPress={() => setShowImagePicker(true)}
                   >
-                    <Ionicons name="camera" size={32} color={colors.textSecondary} />
+                    <Ionicons name="camera" size={32} color={colors.gray500} />
                     <Text style={styles.imagePlaceholderText}>Select Image</Text>
                   </TouchableOpacity>
                 )}
@@ -306,110 +306,105 @@ const PortfolioManagerScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8F9FA', // Static gray50
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    padding: Spacing.lg,
+    paddingTop: Spacing['3xl'],
+    backgroundColor: '#FFFFFF', // Static white
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#E5E7EB', // Static gray200
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+    color: '#1F2937', // Static gray900
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: '#636366', // Static gray600
   },
   actionBar: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    padding: Spacing.lg,
+    gap: Spacing.md,
   },
   addButton: {
     flex: 1,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#007AFF', // Static primary
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.xs,
   },
   addButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    color: '#FFFFFF', // Static white
+    fontWeight: Typography.fontWeight.semiBold,
+    fontSize: Typography.fontSize.base,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: '#007AFF',
-    gap: 8,
+    borderColor: '#007AFF', // Static primary
+    gap: Spacing.xs,
   },
   filterButtonText: {
-    color: '#007AFF',
-    fontWeight: '600',
-    fontSize: 16,
+    color: '#007AFF', // Static primary
+    fontWeight: Typography.fontWeight.semiBold,
+    fontSize: Typography.fontSize.base,
   },
   listContainer: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   row: {
     justifyContent: 'space-between',
   },
   portfolioCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: '#FFFFFF', // Static white
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.md,
     width: '48%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    position: 'relative',
+    ...Shadows.md,
   },
   portfolioImage: {
     width: '100%',
     height: 120,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
   },
   portfolioContent: {
-    padding: 12,
+    padding: Spacing.md,
   },
   caption: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000',
-    marginBottom: 8,
-    lineHeight: 18,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: '#1F2937', // Static gray900
+    marginBottom: Spacing.sm,
+    lineHeight: Typography.lineHeight.tight * Typography.fontSize.sm,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
-    marginBottom: 8,
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   tag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 6,
+    backgroundColor: '#F2F2F7', // Static gray100
+    paddingHorizontal: Spacing.xs,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: BorderRadius.sm,
   },
   tagText: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.xs,
+    color: '#636366', // Static gray600
   },
   engagementRow: {
     flexDirection: 'row',
@@ -419,52 +414,52 @@ const styles = StyleSheet.create({
   engagementItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.xs,
   },
   engagementText: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.xs,
+    color: '#636366', // Static gray600
   },
   dateText: {
-    fontSize: 12,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.xs,
+    color: '#636366', // Static gray600
   },
   moreButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
+    top: Spacing.sm,
+    right: Spacing.sm,
+    padding: Spacing.xs,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Spacing['3xl'],
     width: '100%',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: '#636366', // Static gray600
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+    fontSize: Typography.fontSize.base,
+    color: '#636366', // Static gray600
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    marginBottom: Spacing.xl,
   },
   emptyActionButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#007AFF', // Static primary
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
   emptyActionButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    color: '#FFFFFF', // Static white
+    fontWeight: Typography.fontWeight.semiBold,
+    fontSize: Typography.fontSize.base,
   },
   // Modal Styles
   modalOverlay: {
@@ -474,114 +469,115 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF', // Static white
+    borderRadius: BorderRadius.lg,
     width: '90%',
     maxWidth: 500,
     maxHeight: '80%',
+    ...Shadows.lg,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E5E7EB', // Static gray200
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semiBold,
+    color: '#1F2937', // Static gray900
   },
   modalBody: {
-    padding: 20,
+    padding: Spacing.lg,
   },
   imageSection: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   selectedImage: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.sm,
   },
   imagePlaceholder: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    backgroundColor: '#f8f9fa',
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#F8F9FA', // Static gray50
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#e9ecef',
+    borderColor: '#E9ECEF', // Static gray200
     borderStyle: 'dashed',
-    marginBottom: 12,
+    marginBottom: Spacing.sm,
   },
   imagePlaceholderText: {
-    fontSize: 16,
-    color: '#8E8E93',
-    marginTop: 8,
+    fontSize: Typography.fontSize.base,
+    color: '#636366', // Static gray600
+    marginTop: Spacing.sm,
   },
   changeImageButton: {
-    backgroundColor: '#f8f9fa',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: '#F2F2F7', // Static gray100
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
     alignSelf: 'center',
   },
   changeImageButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontWeight: '500',
+    color: '#007AFF', // Static primary
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   inputLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: '#1F2937', // Static gray900
+    marginBottom: Spacing.sm,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    borderColor: '#C7C7CC', // Static gray300
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: Typography.fontSize.base,
+    backgroundColor: '#F8F9FA', // Static background
   },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    gap: 12,
+    borderTopColor: '#E5E7EB', // Static gray200
+    gap: Spacing.md,
   },
   cancelModalButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#F2F2F7', // Static gray100
     alignItems: 'center',
   },
   cancelModalButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: Typography.fontSize.base,
+    color: '#636366', // Static gray600
+    fontWeight: Typography.fontWeight.medium,
   },
   saveModalButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#007AFF',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#007AFF', // Static primary
     alignItems: 'center',
   },
   saveModalButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
+    fontSize: Typography.fontSize.base,
+    color: '#FFFFFF', // Static white
+    fontWeight: Typography.fontWeight.semiBold,
   },
 });
 

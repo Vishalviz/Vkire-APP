@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { Colors, Shadows } from '../constants/designSystem';
+import { Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -13,6 +14,8 @@ const Logo: React.FC<LogoProps> = ({
   showBackground = true, 
   style 
 }) => {
+  const { colors } = useTheme();
+
   const getSize = () => {
     switch (size) {
       case 'small':
@@ -72,13 +75,13 @@ const Logo: React.FC<LogoProps> = ({
 
 const styles = StyleSheet.create({
   logoContainer: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#007bff', // Inline color for background
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
   },
   logoText: {
-    color: Colors.white,
+    color: '#ffffff', // Inline color for text
     fontWeight: '800',
     textAlign: 'center',
   },

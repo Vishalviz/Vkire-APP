@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useAppContextTheme } from '../contexts/AppThemeContext';
+
+const windowWidth = Dimensions.get('window').width;
+const ITEM_WIDTH = Math.round(windowWidth * 0.7);
 
 interface TimeSlot {
   id: string;
@@ -30,6 +35,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   selectedDate,
   selectedTimeSlot,
 }) => {
+  const { colors, theme } = useAppContextTheme();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Mock availability data - in a real app, this would come from the professional's schedule
@@ -136,6 +142,181 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: colors.background,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray100,
+    },
+    calendarHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.lg,
+    },
+    navButton: {
+      padding: Spacing.sm,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: colors.gray50,
+    },
+    monthYear: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    dayNamesRow: {
+      flexDirection: 'row',
+      marginBottom: Spacing.sm,
+    },
+    dayName: {
+      flex: 1,
+      textAlign: 'center',
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray600,
+    },
+    legendContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: Spacing.lg,
+      marginBottom: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    legendItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    legendDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    legendText: {
+      fontSize: Typography.fontSize.xs,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    calendarGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: Spacing.md,
+    },
+    dayCell: {
+      width: '14.28%',
+      aspectRatio: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: Spacing.xs,
+    },
+    todayCell: {
+      backgroundColor: colors.primary + '20',
+      borderRadius: BorderRadius.lg,
+    },
+    selectedCell: {
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.lg,
+    },
+    pastCell: {
+      opacity: 0.3,
+    },
+    dayText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    todayText: {
+      color: colors.primary,
+      fontWeight: Typography.fontWeight.semiBold,
+    },
+    selectedText: {
+      color: colors.white,
+      fontWeight: Typography.fontWeight.semiBold,
+    },
+    pastText: {
+      color: colors.gray400,
+    },
+    disabledCell: {
+      opacity: 0.3,
+    },
+    disabledText: {
+      color: colors.gray400,
+    },
+    statusDot: {
+      position: 'absolute',
+      bottom: 2,
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+    },
+    availableDot: {
+      backgroundColor: colors.success,
+    },
+    busyDot: {
+      backgroundColor: colors.warning,
+    },
+    unavailableDot: {
+      backgroundColor: colors.error,
+    },
+    timeSlotsContainer: {
+      borderTopWidth: 1,
+      borderTopColor: colors.gray200,
+      paddingTop: Spacing.lg,
+    },
+    timeSlotsTitle: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.md,
+    },
+    timeSlotsRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+    },
+    timeSlot: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: colors.gray50,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+    },
+    unavailableSlot: {
+      backgroundColor: colors.gray100,
+      borderColor: colors.gray300,
+    },
+    selectedTimeSlot: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    timeSlotText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    unavailableSlotText: {
+      color: colors.gray400,
+    },
+    selectedTimeSlotText: {
+      color: colors.white,
+    },
+    unavailableMessage: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: Spacing.lg,
+      gap: Spacing.sm,
+    },
+    unavailableText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       {/* Calendar Header */}
@@ -144,7 +325,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           style={styles.navButton}
           onPress={() => navigateMonth('prev')}
         >
-          <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         
         <Text style={styles.monthYear}>
@@ -155,7 +336,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           style={styles.navButton}
           onPress={() => navigateMonth('next')}
         >
-          <Ionicons name="chevron-forward" size={24} color={Colors.primary} />
+          <Ionicons name="chevron-forward" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -269,187 +450,12 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       {/* Unavailable date message */}
       {selectedDate && getTimeSlots(selectedDate).length === 0 && (
         <View style={styles.unavailableMessage}>
-          <Ionicons name="calendar-outline" size={24} color={Colors.gray500} />
+          <Ionicons name="calendar-outline" size={24} color={colors.gray500} />
           <Text style={styles.unavailableText}>No time slots available for this date</Text>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: Colors.gray100,
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  navButton: {
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
-  },
-  monthYear: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-  },
-  dayNamesRow: {
-    flexDirection: 'row',
-    marginBottom: Spacing.sm,
-  },
-  dayName: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray600,
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.lg,
-    marginBottom: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: Typography.fontSize.xs,
-    color: Colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: Spacing.md, // Reduced margin to fix gap
-  },
-  dayCell: {
-    width: '14.28%',
-    aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  todayCell: {
-    backgroundColor: Colors.primary + '20',
-    borderRadius: BorderRadius.lg,
-  },
-  selectedCell: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
-  },
-  pastCell: {
-    opacity: 0.3,
-  },
-  dayText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
-  },
-  todayText: {
-    color: Colors.primary,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  selectedText: {
-    color: Colors.white,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  pastText: {
-    color: Colors.gray400,
-  },
-  disabledCell: {
-    opacity: 0.3,
-  },
-  disabledText: {
-    color: Colors.gray400,
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: 2,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  availableDot: {
-    backgroundColor: Colors.success,
-  },
-  busyDot: {
-    backgroundColor: Colors.warning,
-  },
-  unavailableDot: {
-    backgroundColor: Colors.error,
-  },
-  timeSlotsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
-    paddingTop: Spacing.lg,
-  },
-  timeSlotsTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
-    marginBottom: Spacing.md,
-  },
-  timeSlotsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  timeSlot: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.gray50,
-    borderWidth: 1,
-    borderColor: Colors.gray200,
-  },
-  unavailableSlot: {
-    backgroundColor: Colors.gray100,
-    borderColor: Colors.gray300,
-  },
-  selectedTimeSlot: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  timeSlotText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
-  },
-  unavailableSlotText: {
-    color: Colors.gray400,
-  },
-  selectedTimeSlotText: {
-    color: Colors.white,
-  },
-  unavailableMessage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  unavailableText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
-    textAlign: 'center',
-  },
-});
 
 export default AvailabilityCalendar;

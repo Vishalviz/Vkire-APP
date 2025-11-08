@@ -13,7 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
 
 type NotificationSettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'NotificationSettings'>;
 
@@ -28,6 +29,7 @@ interface NotificationSetting {
 
 const NotificationSettingsScreen = () => {
   const navigation = useNavigation<NotificationSettingsScreenNavigationProp>();
+  const { colors } = useTheme();
   const [settings, setSettings] = useState<NotificationSetting[]>([
     // General Notifications
     {
@@ -187,11 +189,11 @@ const NotificationSettingsScreen = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'general': return Colors.primary;
-      case 'bookings': return Colors.success;
-      case 'messages': return Colors.warning;
-      case 'marketing': return Colors.error;
-      default: return Colors.primary;
+      case 'general': return colors.primary;
+      case 'bookings': return colors.success;
+      case 'messages': return colors.warning;
+      case 'marketing': return colors.error;
+      default: return colors.primary;
     }
   };
 
@@ -203,7 +205,7 @@ const NotificationSettingsScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.gray900} />
+            <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Notifications</Text>
           <TouchableOpacity onPress={handleSaveSettings}>
@@ -220,7 +222,7 @@ const NotificationSettingsScreen = () => {
                 setSettings(prev => prev.map(s => ({ ...s, enabled: true })));
               }}
             >
-              <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text style={styles.quickActionText}>Enable All</Text>
             </TouchableOpacity>
             
@@ -230,7 +232,7 @@ const NotificationSettingsScreen = () => {
                 setSettings(prev => prev.map(s => ({ ...s, enabled: false })));
               }}
             >
-              <Ionicons name="close-circle" size={20} color={Colors.error} />
+              <Ionicons name="close-circle" size={20} color={colors.error} />
               <Text style={styles.quickActionText}>Disable All</Text>
             </TouchableOpacity>
           </View>
@@ -262,8 +264,8 @@ const NotificationSettingsScreen = () => {
                   <Switch
                     value={allEnabled}
                     onValueChange={() => handleToggleCategory(category)}
-                    trackColor={{ false: Colors.gray300, true: getCategoryColor(category) + '50' }}
-                    thumbColor={allEnabled ? getCategoryColor(category) : Colors.gray500}
+                    trackColor={{ false: colors.gray300, true: getCategoryColor(category) + '50' }}
+                    thumbColor={allEnabled ? getCategoryColor(category) : colors.gray500}
                   />
                 </TouchableOpacity>
 
@@ -283,8 +285,8 @@ const NotificationSettingsScreen = () => {
                       <Switch
                         value={setting.enabled}
                         onValueChange={() => handleToggleSetting(setting.id)}
-                        trackColor={{ false: Colors.gray300, true: getCategoryColor(category) + '50' }}
-                        thumbColor={setting.enabled ? getCategoryColor(category) : Colors.gray500}
+                        trackColor={{ false: colors.gray300, true: getCategoryColor(category) + '50' }}
+                        thumbColor={setting.enabled ? getCategoryColor(category) : colors.gray500}
                       />
                     </View>
                   ))}
@@ -296,7 +298,7 @@ const NotificationSettingsScreen = () => {
           {/* Notification Info */}
           <View style={styles.infoSection}>
             <View style={styles.infoHeader}>
-              <Ionicons name="information-circle" size={20} color={Colors.primary} />
+              <Ionicons name="information-circle" size={20} color={colors.primary} />
               <Text style={styles.infoTitle}>About Notifications</Text>
             </View>
             <Text style={styles.infoText}>
@@ -312,11 +314,9 @@ const NotificationSettingsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -325,18 +325,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
-    backgroundColor: Colors.surface,
+    borderBottomColor: '#D1D1D6', // Static gray border
+    backgroundColor: '#FFFFFF', // Static white background
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static dark gray color
   },
   saveButton: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary color
   },
   content: {
     flex: 1,
@@ -352,17 +352,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white background
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#E5E7EB', // Static gray200 border
     gap: Spacing.sm,
   },
   quickActionText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray700,
+    color: '#4B5563', // Static gray700 color
   },
   categorySection: {
     marginBottom: Spacing.xl,
@@ -371,12 +371,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white background
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#E5E7EB', // Static gray200 border
     ...Shadows.sm,
   },
   categoryInfo: {
@@ -398,12 +398,12 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     marginBottom: Spacing.xs,
   },
   categorySubtitle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
   },
   settingsList: {
     gap: Spacing.sm,
@@ -412,11 +412,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF', // Static white background
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#E5E7EB', // Static gray200 border
   },
   settingInfo: {
     flexDirection: 'row',
@@ -437,20 +437,20 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
-    color: Colors.gray900,
+    color: '#1F2937', // Static gray900 color
     marginBottom: Spacing.xs,
   },
   settingDescription: {
     fontSize: Typography.fontSize.xs,
-    color: Colors.gray600,
+    color: '#4B5563', // Static gray600 color
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
   },
   infoSection: {
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: '#F0F8FF', // Static primary + '10' color
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.primary + '30',
+    borderColor: '#CCE0FF', // Static primary + '30' color
     marginTop: Spacing.lg,
   },
   infoHeader: {
@@ -461,12 +461,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.primary,
+    color: '#007AFF', // Static primary color
     marginLeft: Spacing.sm,
   },
   infoText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray700,
+    color: '#4B5563', // Static gray700 color
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
 });

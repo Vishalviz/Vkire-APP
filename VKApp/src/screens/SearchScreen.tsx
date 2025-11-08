@@ -17,8 +17,8 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useProfileViews } from '../contexts/ProfileViewContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
+import { useTheme } from '../contexts/AppThemeContext';
+import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -399,16 +399,16 @@ const SearchScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Instagram-style Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}>
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Search</Text>
+            <Text style={[styles.headerTitle, { color: colors.gray900 }]}>Search</Text>
           </View>
-          <View style={styles.searchContainer}>
+          <View style={[styles.searchContainer, { backgroundColor: colors.gray100 }]}>
             <Ionicons name="search" size={20} color={colors.gray500} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.gray900 }]}
               placeholder="Search creators, services, locations..."
               placeholderTextColor={colors.gray500}
               value={searchQuery}
@@ -424,9 +424,9 @@ const SearchScreen = () => {
 
         {/* Content */}
         {showSearchResults ? (
-          <View style={styles.searchResultsContainer}>
-            <View style={styles.searchResultsHeader}>
-              <Text style={styles.searchResultsTitle}>
+          <View style={[styles.searchResultsContainer, { backgroundColor: colors.background }]}>
+            <View style={[styles.searchResultsHeader, { borderBottomColor: colors.gray200 }]}>
+              <Text style={[styles.searchResultsTitle, { color: colors.gray900 }]}>
                 {searchResults.length > 0 
                   ? `${searchResults.length} result${searchResults.length === 1 ? '' : 's'} found`
                   : 'No results found'
@@ -442,8 +442,8 @@ const SearchScreen = () => {
               ListEmptyComponent={
                 <View style={styles.emptySearchResults}>
                   <Ionicons name="search" size={48} color={colors.gray400} />
-                  <Text style={styles.emptySearchTitle}>No results found</Text>
-                  <Text style={styles.emptySearchSubtitle}>
+                  <Text style={[styles.emptySearchTitle, { color: colors.gray900 }]}>No results found</Text>
+                  <Text style={[styles.emptySearchSubtitle, { color: colors.gray600 }]}>
                     Try searching for photographer, videographer, editor, or location names
                   </Text>
                 </View>
@@ -478,38 +478,38 @@ const SearchScreen = () => {
         onRequestClose={() => setShowPaymentModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>View Profile</Text>
+              <Text style={[styles.modalTitle, { color: colors.gray900 }]}>View Profile</Text>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
                 <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.modalDescription}>
+            <Text style={[styles.modalDescription, { color: colors.gray600 }]}>
               You have {profileViews} free profile views remaining. Choose an option to view {selectedCreator?.name}'s profile.
             </Text>
             <View style={styles.paymentOptions}>
               <TouchableOpacity
-                style={styles.paymentOption}
+                style={[styles.paymentOption, { borderColor: colors.gray200 }]}
                 onPress={() => handlePaymentOption('single')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={styles.optionTitle}>View This Profile</Text>
-                  <Text style={styles.optionPrice}>₹59</Text>
+                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>View This Profile</Text>
+                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹59</Text>
                 </View>
-                <Text style={styles.optionDescription}>One-time access to this profile</Text>
+                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>One-time access to this profile</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.paymentOption, styles.recommendedOption]}
+                style={[styles.paymentOption, styles.recommendedOption, { borderColor: colors.primary, backgroundColor: colors.primary + '08' }]}
                 onPress={() => handlePaymentOption('unlimited')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={styles.optionTitle}>Unlimited Today</Text>
-                  <Text style={styles.optionPrice}>₹299</Text>
+                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>Unlimited Today</Text>
+                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹299</Text>
                 </View>
-                <Text style={styles.optionDescription}>Unlimited profile views for 24 hours</Text>
-                <View style={styles.recommendedBadge}>
-                  <Text style={styles.recommendedText}>Most Value</Text>
+                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>Unlimited profile views for 24 hours</Text>
+                <View style={[styles.recommendedBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.recommendedText, { color: colors.white }]}>Most Value</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -524,18 +524,14 @@ const SearchScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: Colors.surface,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.lg,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
     ...Shadows.sm,
   },
   headerContent: {
@@ -544,12 +540,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.gray900,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray100,
     borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
@@ -560,7 +554,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: Typography.fontSize.base,
-    color: Colors.gray900,
   },
   clearButton: {
     marginLeft: Spacing.sm,
@@ -578,7 +571,7 @@ const styles = StyleSheet.create({
   postGridImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.gray100,
+    backgroundColor: '#F3F4F6',
   },
   postOverlay: {
     position: 'absolute',
@@ -600,10 +593,10 @@ const styles = StyleSheet.create({
     marginRight: Spacing.md,
   },
   postStatText: {
-    color: Colors.white,
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semiBold,
     marginLeft: Spacing.xs,
+    color: '#fff', // Statically set for overlay, as it's always white text
   },
   // Modal Styles
   modalOverlay: {
@@ -613,11 +606,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     width: '90%',
     maxWidth: 400,
+    // backgroundColor is set at render using colors.surface
   },
   modalHeader: {
     flexDirection: 'row',
@@ -628,11 +621,9 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
   },
   modalDescription: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Spacing.lg,
   },
@@ -640,15 +631,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   paymentOption: {
-    backgroundColor: Colors.gray100,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.gray200,
   },
   recommendedOption: {
-    backgroundColor: Colors.primary + '10',
-    borderColor: Colors.primary,
   },
   optionHeader: {
     flexDirection: 'row',
@@ -659,22 +646,18 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
   },
   optionPrice: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.primary,
   },
   optionDescription: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
   },
   recommendedBadge: {
     position: 'absolute',
     top: -Spacing.xs,
     right: Spacing.lg,
-    backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.md,
@@ -682,24 +665,21 @@ const styles = StyleSheet.create({
   recommendedText: {
     fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.white,
   },
   // Search Results Styles
   searchResultsContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   searchResultsHeader: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray200,
+    borderBottomColor: '#D1D1D6',
   },
   searchResultsTitle: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937',
   },
   searchResultsList: {
     paddingVertical: Spacing.sm,
@@ -709,9 +689,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.surface,
     borderBottomWidth: 0.5,
-    borderBottomColor: Colors.gray100,
+    borderBottomColor: '#F3F4F6',
+    backgroundColor: '#fff',
   },
   searchResultAvatar: {
     width: 50,
@@ -725,22 +705,22 @@ const styles = StyleSheet.create({
   searchResultName: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937',
     marginBottom: Spacing.xs,
   },
   searchResultHandle: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563',
     marginBottom: Spacing.xs,
   },
   searchResultLocation: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray600,
+    color: '#4B5563',
     marginBottom: Spacing.xs,
   },
   searchResultPost: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.gray500,
+    color: '#6B7280',
     fontStyle: 'italic',
   },
   searchResultActions: {
@@ -756,13 +736,13 @@ const styles = StyleSheet.create({
   emptySearchTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semiBold,
-    color: Colors.gray900,
+    color: '#1F2937',
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptySearchSubtitle: {
     fontSize: Typography.fontSize.base,
-    color: Colors.gray600,
+    color: '#4B5563',
     textAlign: 'center',
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
