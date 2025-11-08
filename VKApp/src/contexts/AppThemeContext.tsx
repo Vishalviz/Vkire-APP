@@ -26,6 +26,9 @@ export const useAppContextTheme = () => {
   return context;
 };
 
+// Export useTheme as an alias for useAppContextTheme for backward compatibility
+export const useTheme = useAppContextTheme;
+
 export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<ThemeType>('light');
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -104,6 +104,223 @@ const PaymentMethodsScreen = () => {
       default: return colors.primary;
     }
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+      backgroundColor: colors.surface,
+    },
+    headerTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    content: {
+      flex: 1,
+      padding: Spacing.lg,
+    },
+    sectionHeader: {
+      marginBottom: Spacing.lg,
+      marginTop: Spacing.xl,
+    },
+    sectionTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+    },
+    sectionSubtitle: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+    paymentCard: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginBottom: Spacing.md,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    defaultCard: {
+      borderColor: colors.primary,
+      borderWidth: 2,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    cardInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    cardIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: BorderRadius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: Spacing.md,
+    },
+    cardDetails: {
+      flex: 1,
+    },
+    cardName: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+    },
+    cardSubtitle: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+    defaultBadge: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.xs,
+      borderRadius: BorderRadius.full,
+    },
+    defaultBadgeText: {
+      fontSize: Typography.fontSize.xs,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.white,
+    },
+    cardActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    actionButton: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: colors.gray100,
+    },
+    actionButtonText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    deleteButton: {
+      backgroundColor: 'transparent',
+      padding: Spacing.sm,
+    },
+    addMethodButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginTop: Spacing.xl,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      borderStyle: 'dashed',
+      gap: Spacing.sm,
+    },
+    addMethodText: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.primary,
+    },
+    securityInfo: {
+      backgroundColor: colors.success + '10',
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginTop: Spacing.xl,
+      borderWidth: 1,
+      borderColor: colors.success + '30',
+    },
+    securityHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: Spacing.sm,
+      gap: Spacing.sm,
+    },
+    securityTitle: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.success,
+    },
+    securityText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray700,
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: BorderRadius['2xl'],
+      borderTopRightRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      maxHeight: '80%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.xl,
+    },
+    modalTitle: {
+      fontSize: Typography.fontSize.xl,
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.gray900,
+    },
+    methodOptions: {
+      gap: Spacing.md,
+    },
+    methodOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+    },
+    methodIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: BorderRadius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: Spacing.md,
+    },
+    methodInfo: {
+      flex: 1,
+    },
+    methodName: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+    },
+    methodDescription: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+  }), [colors]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -267,220 +484,5 @@ const PaymentMethodsScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-    backgroundColor: colors.surface,
-  },
-  headerTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-  },
-  content: {
-    flex: 1,
-    padding: Spacing.lg,
-  },
-  sectionHeader: {
-    marginBottom: Spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  sectionSubtitle: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  paymentCard: {
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  defaultCard: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  cardInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  cardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
-  cardDetails: {
-    flex: 1,
-  },
-  cardName: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  cardSubtitle: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  defaultBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-  },
-  defaultBadgeText: {
-    fontSize: Typography.fontSize.xs,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.white,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  actionButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    backgroundColor: colors.primary + '20',
-  },
-  actionButtonText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.primary,
-  },
-  deleteButton: {
-    backgroundColor: colors.error + '20',
-    padding: Spacing.sm,
-  },
-  addMethodButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
-  },
-  addMethodText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.primary,
-    marginLeft: Spacing.sm,
-  },
-  securityInfo: {
-    backgroundColor: colors.success + '10',
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.success + '30',
-  },
-  securityHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  securityTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.success,
-    marginLeft: Spacing.sm,
-  },
-  securityText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray700,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    maxHeight: '50%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
-  },
-  modalTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-  },
-  methodOptions: {
-    gap: Spacing.md,
-  },
-  methodOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-  },
-  methodIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
-  methodInfo: {
-    flex: 1,
-  },
-  methodName: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  methodDescription: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-});
 
 export default PaymentMethodsScreen;

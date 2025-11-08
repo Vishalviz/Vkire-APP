@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -263,6 +263,221 @@ const MyBookingsScreen: React.FC = () => {
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.gray50,
+    },
+    header: {
+      backgroundColor: colors.white,
+      paddingTop: 50,
+      paddingBottom: Spacing.lg,
+      paddingHorizontal: Spacing.xl,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    headerContent: {
+      alignItems: 'center',
+    },
+    headerTitle: {
+      fontSize: Typography.fontSize['2xl'],
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.gray900,
+      textAlign: 'center',
+      marginBottom: Spacing.xs,
+    },
+    headerSubtitle: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.regular,
+      textAlign: 'center',
+    },
+    // Search Bar Styles
+    searchContainer: {
+      backgroundColor: colors.white,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gray100,
+      borderRadius: BorderRadius.xl,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      marginLeft: Spacing.sm,
+      fontSize: Typography.fontSize.base,
+      color: colors.gray900,
+    },
+    // Filter Tabs Styles
+    filterContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.white,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+    },
+    filterTab: {
+      flex: 1,
+      paddingVertical: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      marginHorizontal: Spacing.xs,
+      borderRadius: BorderRadius.full,
+      backgroundColor: colors.gray100,
+      alignItems: 'center',
+    },
+    activeFilterTab: {
+      backgroundColor: colors.primary,
+    },
+    filterTabText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray600,
+    },
+    activeFilterTabText: {
+      color: colors.white,
+    },
+    listContainer: {
+      padding: Spacing.lg,
+    },
+    bookingCard: {
+      backgroundColor: colors.white,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      marginBottom: Spacing.md,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray100,
+    },
+    bookingHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.md,
+    },
+    proInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    avatarPlaceholder: {
+      width: 48,
+      height: 48,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: colors.gray100,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: Spacing.md,
+      borderWidth: 2,
+      borderColor: colors.gray200,
+    },
+    proDetails: {
+      flex: 1,
+    },
+    proName: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+    },
+    service: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      alignItems: 'center',
+    },
+    statusBadge: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.full,
+    },
+    statusText: {
+      fontSize: Typography.fontSize.xs,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.white,
+    },
+    typeBadge: {
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: Spacing.xs,
+      borderRadius: BorderRadius.full,
+      backgroundColor: colors.primary + '20',
+      borderWidth: 1,
+      borderColor: colors.primary,
+    },
+    typeText: {
+      color: colors.primary,
+      fontSize: Typography.fontSize.xs,
+      fontWeight: Typography.fontWeight.semiBold,
+    },
+    bookingDetails: {
+      gap: Spacing.sm,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    detailText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    locationInfo: {
+      flex: 1,
+      marginLeft: Spacing.sm,
+    },
+    distanceText: {
+      fontSize: Typography.fontSize.xs,
+      color: colors.primary,
+      fontWeight: Typography.fontWeight.medium,
+      marginTop: 2,
+    },
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: Spacing['6xl'],
+      paddingHorizontal: Spacing.xl,
+    },
+    emptyTitle: {
+      fontSize: Typography.fontSize.xl,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray600,
+      marginTop: Spacing.lg,
+      marginBottom: Spacing.sm,
+    },
+    emptySubtitle: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray500,
+      textAlign: 'center',
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.regular,
+    },
+    clearSearchButton: {
+      marginTop: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      paddingHorizontal: Spacing.lg,
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.full,
+    },
+    clearSearchText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.white,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   const handleItemPress = (item: Booking | Inquiry) => {
     if (item.type === 'booking') {
       navigation.navigate('BookingDetails', { 
@@ -479,220 +694,5 @@ const MyBookingsScreen: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.gray50,
-  },
-  header: {
-    backgroundColor: colors.white,
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  headerContent: {
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.bold,
-    color: colors.gray900,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  headerSubtitle: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray600,
-    fontWeight: Typography.fontWeight.regular,
-    textAlign: 'center',
-  },
-  // Search Bar Styles
-  searchContainer: {
-    backgroundColor: colors.white,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.gray100,
-    borderRadius: BorderRadius.xl,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: Spacing.sm,
-    fontSize: Typography.fontSize.base,
-    color: colors.gray900,
-  },
-  // Filter Tabs Styles
-  filterContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-  },
-  filterTab: {
-    flex: 1,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    marginHorizontal: Spacing.xs,
-    borderRadius: BorderRadius.full,
-    backgroundColor: colors.gray100,
-    alignItems: 'center',
-  },
-  activeFilterTab: {
-    backgroundColor: colors.primary,
-  },
-  filterTabText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.gray600,
-  },
-  activeFilterTabText: {
-    color: colors.white,
-  },
-  listContainer: {
-    padding: Spacing.lg,
-  },
-  bookingCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: colors.gray100,
-  },
-  bookingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  proInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.xl,
-    backgroundColor: colors.gray100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-    borderWidth: 2,
-    borderColor: colors.gray200,
-  },
-  proDetails: {
-    flex: 1,
-  },
-  proName: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  service: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    alignItems: 'center',
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-  },
-  statusText: {
-    fontSize: Typography.fontSize.xs,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.white,
-  },
-  typeBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-    backgroundColor: colors.primary + '20',
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  typeText: {
-    color: colors.primary,
-    fontSize: Typography.fontSize.xs,
-    fontWeight: Typography.fontWeight.semiBold,
-  },
-  bookingDetails: {
-    gap: Spacing.sm,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  detailText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  locationInfo: {
-    flex: 1,
-    marginLeft: Spacing.sm,
-  },
-  distanceText: {
-    fontSize: Typography.fontSize.xs,
-    color: colors.primary,
-    fontWeight: Typography.fontWeight.medium,
-    marginTop: 2,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing['6xl'],
-    paddingHorizontal: Spacing.xl,
-  },
-  emptyTitle: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray600,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.sm,
-  },
-  emptySubtitle: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray500,
-    textAlign: 'center',
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.regular,
-  },
-  clearSearchButton: {
-    marginTop: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    backgroundColor: colors.primary,
-    borderRadius: BorderRadius.full,
-  },
-  clearSearchText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.white,
-    textAlign: 'center',
-  },
-});
 
 export default MyBookingsScreen;

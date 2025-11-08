@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -122,6 +122,263 @@ const BookingDetailsScreen = () => {
 
   const isCancellationDisabled = !checkCancellationEligibility().eligible;
 
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.lg,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerTitleContainer: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    headerTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    headerRightSpacer: {
+      width: 40,
+    },
+    content: {
+      flex: 1,
+      padding: Spacing.lg,
+    },
+    packageCard: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray200,
+    },
+    packageHeader: {
+      marginBottom: Spacing.md,
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+    },
+    statusBadge: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.full,
+    },
+    statusText: {
+      fontSize: Typography.fontSize.xs,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.white,
+    },
+    bookingId: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    packageTitle: {
+      fontSize: Typography.fontSize.xl,
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.gray900,
+      marginBottom: Spacing.sm,
+    },
+    packageDescription: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray600,
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+      marginBottom: Spacing.md,
+    },
+    deliverablesContainer: {
+      marginTop: Spacing.md,
+    },
+    deliverablesTitle: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.sm,
+    },
+    deliverableItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      marginBottom: Spacing.xs,
+    },
+    deliverableText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray700,
+    },
+    detailsCard: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray200,
+    },
+    sectionTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.md,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: Spacing.md,
+    },
+    detailContent: {
+      marginLeft: Spacing.md,
+      flex: 1,
+    },
+    detailLabel: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      marginBottom: Spacing.xs,
+    },
+    detailValue: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    paymentCard: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray200,
+    },
+    paymentRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: Spacing.sm,
+    },
+    paymentLabel: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray600,
+    },
+    paymentValue: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    paymentTotal: {
+      borderTopWidth: 1,
+      borderTopColor: colors.gray200,
+      marginTop: Spacing.sm,
+      paddingTop: Spacing.md,
+    },
+    paymentTotalLabel: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    paymentTotalValue: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.primary,
+    },
+    paymentStatus: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: Spacing.md,
+      gap: Spacing.sm,
+    },
+    paymentStatusText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    contactCard: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray200,
+    },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.gray200,
+    },
+    contactValue: {
+      flex: 1,
+      fontSize: Typography.fontSize.base,
+      color: colors.gray900,
+      marginLeft: Spacing.md,
+    },
+    actionButtons: {
+      flexDirection: 'row',
+      gap: Spacing.md,
+      marginBottom: Spacing.xl,
+    },
+    cancelButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: Spacing.lg,
+      borderRadius: BorderRadius.xl,
+      borderWidth: 1,
+      borderColor: colors.error,
+      backgroundColor: colors.surface,
+      gap: Spacing.sm,
+    },
+    cancelButtonText: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.error,
+    },
+    disabledButton: {
+      opacity: 0.5,
+      borderColor: colors.gray400,
+    },
+    disabledButtonText: {
+      color: colors.gray400,
+    },
+    contactButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: Spacing.lg,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: colors.primary,
+      gap: Spacing.sm,
+      ...Shadows.lg,
+    },
+    contactButtonText: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.white,
+    },
+  }), [colors]);
+
   const handleContactCreator = async () => {
     const professionalId = 'pro_' + mockBooking.id;
     
@@ -153,16 +410,18 @@ const BookingDetailsScreen = () => {
       // Show payment modal for chat access (only for non-confirmed bookings)
       PaymentService.showInquiryPaymentModal(
         professionalId,
-        mockBooking.proName,
-        'Wedding Photography',
-        () => {
+        (transactionId) => {
           // On successful payment, navigate to chat
           navigation.navigate('Chat', {
             professionalId: professionalId,
             professionalName: mockBooking.proName,
             bookingId: mockBooking.id,
-            transactionId: 'new_purchase'
+            transactionId: transactionId
           });
+        },
+        () => {
+          // Payment cancelled
+          console.log('Payment cancelled');
         }
       );
     }
@@ -199,7 +458,7 @@ const BookingDetailsScreen = () => {
           
           <View style={styles.deliverablesContainer}>
             <Text style={styles.deliverablesTitle}>What's Included:</Text>
-            {(mockBooking.package_details?.deliverables || []).map((item, index) => (
+            {(mockBooking.package_details?.deliverables || []).map((item: string, index: number) => (
               <View key={index} style={styles.deliverableItem}>
                 <Ionicons name="checkmark-circle" size={16} color={colors.success} />
                 <Text style={styles.deliverableText}>{item}</Text>
@@ -313,254 +572,5 @@ const BookingDetailsScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitleContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    textAlign: 'center',
-  },
-  headerRightSpacer: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    padding: Spacing.lg,
-  },
-  packageCard: {
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  packageHeader: {
-    marginBottom: Spacing.md,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
-  },
-  statusText: {
-    fontSize: Typography.fontSize.xs,
-    fontWeight: '600',
-    color: colors.white,
-  },
-  bookingId: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  packageTitle: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: '700',
-    color: colors.gray900,
-    marginBottom: Spacing.sm,
-  },
-  packageDescription: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray600,
-    lineHeight: 22,
-    marginBottom: Spacing.lg,
-  },
-  deliverablesContainer: {
-    marginTop: Spacing.md,
-  },
-  deliverablesTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '600',
-    color: colors.gray900,
-    marginBottom: Spacing.sm,
-  },
-  deliverableItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  deliverableText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    marginLeft: Spacing.sm,
-  },
-  detailsCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-    ...Shadows.md,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: '600',
-    color: colors.gray900,
-    marginBottom: Spacing.lg,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: Spacing.lg,
-  },
-  detailContent: {
-    flex: 1,
-    marginLeft: Spacing.md,
-  },
-  detailLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    marginBottom: Spacing.xs,
-  },
-  detailValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '500',
-    color: colors.gray900,
-  },
-  paymentCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-    ...Shadows.md,
-  },
-  paymentRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  paymentLabel: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray600,
-  },
-  paymentValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '500',
-    color: colors.gray900,
-  },
-  paymentTotal: {
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
-    paddingTop: Spacing.sm,
-    marginTop: Spacing.sm,
-  },
-  paymentTotalLabel: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '600',
-    color: colors.gray900,
-  },
-  paymentTotalValue: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  paymentStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.md,
-  },
-  paymentStatusText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: '500',
-    marginLeft: Spacing.sm,
-  },
-  contactCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  contactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
-  },
-  contactValue: {
-    flex: 1,
-    fontSize: Typography.fontSize.base,
-    color: colors.gray900,
-    marginLeft: Spacing.md,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  cancelButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.error,
-    backgroundColor: colors.white,
-  },
-  cancelButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '600',
-    color: colors.error,
-    marginLeft: Spacing.sm,
-  },
-  contactButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: colors.primary,
-  },
-  contactButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: '600',
-    color: colors.white,
-    marginLeft: Spacing.sm,
-  },
-  disabledButton: {
-    borderColor: colors.gray300,
-    backgroundColor: colors.gray100,
-  },
-  disabledButtonText: {
-    color: colors.gray400,
-  },
-});
 
 export default BookingDetailsScreen;

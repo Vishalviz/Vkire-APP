@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -178,6 +178,214 @@ const HelpSupportScreen = () => {
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+      backgroundColor: colors.surface,
+    },
+    headerTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    headerSpacer: {
+      width: 24,
+    },
+    content: {
+      flex: 1,
+      padding: Spacing.lg,
+    },
+    searchSection: {
+      marginBottom: Spacing.xl,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.full,
+      paddingHorizontal: Spacing.md,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    searchIcon: {
+      marginRight: Spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: Spacing.md,
+      fontSize: Typography.fontSize.base,
+      color: colors.gray900,
+    },
+    sectionHeader: {
+      marginBottom: Spacing.lg,
+    },
+    sectionTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+    },
+    sectionSubtitle: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+    contactGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+      marginBottom: Spacing.xl,
+    },
+    contactCard: {
+      width: '48%',
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    contactIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: BorderRadius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: Spacing.md,
+    },
+    contactTitle: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.xs,
+      textAlign: 'center',
+    },
+    contactDescription: {
+      fontSize: Typography.fontSize.xs,
+      color: colors.gray600,
+      textAlign: 'center',
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+    },
+    faqList: {
+      marginBottom: Spacing.xl,
+    },
+    faqItem: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.lg,
+      marginBottom: Spacing.md,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      overflow: 'hidden',
+      ...Shadows.sm,
+    },
+    faqHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: Spacing.lg,
+    },
+    faqInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    categoryBadge: {
+      width: 24,
+      height: 24,
+      borderRadius: BorderRadius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: Spacing.sm,
+    },
+    faqQuestion: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+      flex: 1,
+    },
+    faqAnswer: {
+      paddingHorizontal: Spacing.lg,
+      paddingBottom: Spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.gray200,
+    },
+    faqAnswerText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray700,
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+    },
+    contactForm: {
+      backgroundColor: colors.surface,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginBottom: Spacing.xl,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    messageInput: {
+      backgroundColor: colors.background,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.md,
+      fontSize: Typography.fontSize.base,
+      color: colors.gray900,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      marginBottom: Spacing.lg,
+      minHeight: 100,
+    },
+    sendButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.full,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.lg,
+      gap: Spacing.sm,
+    },
+    sendButtonText: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.white,
+    },
+    appInfo: {
+      backgroundColor: colors.primary + '10',
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.primary + '30',
+      alignItems: 'center',
+    },
+    appInfoTitle: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.primary,
+      marginBottom: Spacing.sm,
+    },
+    appInfoText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray700,
+      textAlign: 'center',
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+    },
+  }), [colors]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -304,213 +512,5 @@ const HelpSupportScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-    backgroundColor: colors.surface,
-  },
-  headerTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-  },
-  headerSpacer: {
-    width: 24,
-  },
-  content: {
-    flex: 1,
-    padding: Spacing.lg,
-  },
-  searchSection: {
-    marginBottom: Spacing.xl,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  searchIcon: {
-    marginRight: Spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    fontSize: Typography.fontSize.base,
-    color: colors.gray900,
-  },
-  sectionHeader: {
-    marginBottom: Spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-  },
-  sectionSubtitle: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  contactGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  contactCard: {
-    width: '48%',
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  contactIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  contactTitle: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  contactDescription: {
-    fontSize: Typography.fontSize.xs,
-    color: colors.gray600,
-    textAlign: 'center',
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
-  },
-  faqList: {
-    marginBottom: Spacing.xl,
-  },
-  faqItem: {
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  faqHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.lg,
-  },
-  faqInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  categoryBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  faqQuestion: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.gray900,
-    flex: 1,
-  },
-  faqAnswer: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
-  },
-  faqAnswerText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray700,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-  },
-  contactForm: {
-    backgroundColor: colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  messageInput: {
-    backgroundColor: colors.background,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    fontSize: Typography.fontSize.base,
-    color: colors.gray900,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    marginBottom: Spacing.lg,
-    minHeight: 100,
-  },
-  sendButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: BorderRadius.full,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  sendButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.white,
-  },
-  appInfo: {
-    backgroundColor: colors.primary + '10',
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.primary + '30',
-    alignItems: 'center',
-  },
-  appInfoTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.primary,
-    marginBottom: Spacing.sm,
-  },
-  appInfoText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray700,
-    textAlign: 'center',
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-  },
-});
 
 export default HelpSupportScreen;

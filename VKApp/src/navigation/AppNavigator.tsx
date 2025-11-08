@@ -162,6 +162,7 @@ const ProfessionalTabNavigator = () => {
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
+  const { navigationTheme } = useTheme();
   const [showSplash, setShowSplash] = React.useState(true);
 
   const handleSplashComplete = () => {
@@ -205,7 +206,7 @@ const AppNavigator = () => {
   };
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>

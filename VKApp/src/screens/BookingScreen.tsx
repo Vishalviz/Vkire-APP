@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -74,6 +74,225 @@ const BookingScreen: React.FC = () => {
       packageDetails,
     });
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.xl,
+      paddingTop: 50,
+      paddingBottom: Spacing.lg,
+      backgroundColor: colors.white,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    backButton: {
+      padding: Spacing.sm,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: colors.gray50,
+    },
+    headerTitle: {
+      fontSize: Typography.fontSize['2xl'],
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.gray900,
+      letterSpacing: 0.3,
+    },
+    placeholder: {
+      width: 40,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: Spacing.xl,
+    },
+    section: {
+      marginTop: Spacing.xl,
+    },
+    sectionTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.md,
+    },
+    packageCard: {
+      backgroundColor: colors.white,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray100,
+    },
+    packageTitle: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: Spacing.sm,
+    },
+    packageDescription: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray600,
+      lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+      marginBottom: Spacing.md,
+    },
+    packageInfo: {
+      flexDirection: 'row',
+      gap: Spacing.lg,
+    },
+    packageInfoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    packageInfoText: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+    proCard: {
+      backgroundColor: colors.white,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray100,
+    },
+    proInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    proAvatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: colors.gray100,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: Spacing.md,
+    },
+    proDetails: {
+      flex: 1,
+    },
+    proName: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+      marginBottom: 2,
+    },
+    proLocation: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      marginBottom: Spacing.xs,
+    },
+    proRating: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    ratingText: {
+      fontSize: Typography.fontSize.sm,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    reviewCount: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+    },
+    summaryCard: {
+      backgroundColor: colors.white,
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      ...Shadows.lg,
+      borderWidth: 0.5,
+      borderColor: colors.gray100,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: Spacing.sm,
+    },
+    summaryLabel: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray600,
+    },
+    summaryValue: {
+      fontSize: Typography.fontSize.base,
+      fontWeight: Typography.fontWeight.medium,
+      color: colors.gray900,
+    },
+    totalRow: {
+      borderTopWidth: 1,
+      borderTopColor: colors.gray200,
+      marginTop: Spacing.sm,
+      paddingTop: Spacing.md,
+    },
+    totalLabel: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      color: colors.gray900,
+    },
+    totalValue: {
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.bold,
+      color: colors.primary,
+    },
+    footer: {
+      padding: Spacing.xl,
+      backgroundColor: colors.white,
+      borderTopWidth: 0.5,
+      borderTopColor: colors.gray200,
+      ...Shadows.lg,
+    },
+    continueButton: {
+      backgroundColor: colors.primary,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Shadows.lg,
+    },
+    continueButtonDisabled: {
+      backgroundColor: colors.gray400,
+    },
+    continueButtonText: {
+      color: colors.white,
+      fontSize: Typography.fontSize.lg,
+      fontWeight: Typography.fontWeight.semiBold,
+      marginRight: Spacing.sm,
+    },
+    locationCard: {
+      backgroundColor: colors.white,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.gray200,
+      ...Shadows.sm,
+    },
+    locationRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: Spacing.md,
+    },
+    locationInfo: {
+      marginLeft: Spacing.md,
+      flex: 1,
+    },
+    locationLabel: {
+      fontSize: Typography.fontSize.sm,
+      color: colors.gray600,
+      fontWeight: Typography.fontWeight.medium,
+    },
+    locationValue: {
+      fontSize: Typography.fontSize.base,
+      color: colors.gray900,
+      fontWeight: Typography.fontWeight.semiBold,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -235,225 +454,5 @@ const BookingScreen: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
-    paddingTop: 50,
-    paddingBottom: Spacing.lg,
-    backgroundColor: colors.white,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  backButton: {
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: colors.gray50,
-  },
-  headerTitle: {
-    fontSize: Typography.fontSize['2xl'],
-    fontWeight: Typography.fontWeight.bold,
-    color: colors.gray900,
-    letterSpacing: 0.3,
-  },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: Spacing.xl,
-  },
-  section: {
-    marginTop: Spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.md,
-  },
-  packageCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: colors.gray100,
-  },
-  packageTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: Spacing.sm,
-  },
-  packageDescription: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray600,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-    marginBottom: Spacing.md,
-  },
-  packageInfo: {
-    flexDirection: 'row',
-    gap: Spacing.lg,
-  },
-  packageInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  packageInfoText: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  proCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: colors.gray100,
-  },
-  proInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  proAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.gray100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
-  },
-  proDetails: {
-    flex: 1,
-  },
-  proName: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-    marginBottom: 2,
-  },
-  proLocation: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    marginBottom: Spacing.xs,
-  },
-  proRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  ratingText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.gray900,
-  },
-  reviewCount: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-  },
-  summaryCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius['2xl'],
-    padding: Spacing.lg,
-    ...Shadows.lg,
-    borderWidth: 0.5,
-    borderColor: colors.gray100,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-  },
-  summaryLabel: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray600,
-  },
-  summaryValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: colors.gray900,
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
-    marginTop: Spacing.sm,
-    paddingTop: Spacing.md,
-  },
-  totalLabel: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    color: colors.gray900,
-  },
-  totalValue: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: colors.primary,
-  },
-  footer: {
-    padding: Spacing.xl,
-    backgroundColor: colors.white,
-    borderTopWidth: 0.5,
-    borderTopColor: colors.gray200,
-    ...Shadows.lg,
-  },
-  continueButton: {
-    backgroundColor: colors.primary,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.lg,
-  },
-  continueButtonDisabled: {
-    backgroundColor: colors.gray400,
-  },
-  continueButtonText: {
-    color: colors.white,
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semiBold,
-    marginRight: Spacing.sm,
-  },
-  locationCard: {
-    backgroundColor: colors.white,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    ...Shadows.sm,
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  locationInfo: {
-    marginLeft: Spacing.md,
-    flex: 1,
-  },
-  locationLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: colors.gray600,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  locationValue: {
-    fontSize: Typography.fontSize.base,
-    color: colors.gray900,
-    fontWeight: Typography.fontWeight.semiBold,
-    marginTop: 2,
-  },
-});
 
 export default BookingScreen;
