@@ -165,11 +165,11 @@ export type RootStackParamList = {
   Profile: { userId: string };
   CreatorProfile: { proId: string };
   PackageDetails: { packageId: string };
-  Chat: { 
-    bookingId?: string; 
-    professionalId?: string; 
-    professionalName?: string; 
-    packageId?: string; 
+  Chat: {
+    bookingId?: string;
+    professionalId?: string;
+    professionalName?: string;
+    packageId?: string;
     transactionId?: string;
     locationContext?: {
       userLocation: {
@@ -184,8 +184,8 @@ export type RootStackParamList = {
   BookingDetails: { bookingId: string; booking?: any };
   Inquiry: { packageId: string };
   Review: { bookingId: string };
-  Payment: { 
-    amount: number; 
+  Payment: {
+    amount: number;
     bookingDetails: {
       date: Date;
       time: string;
@@ -205,6 +205,7 @@ export type RootStackParamList = {
   Settings: undefined;
   ProfessionalOnboarding: { role: 'photographer' | 'videographer' | 'editor' };
   PriceListEditor: undefined;
+  PortfolioManager: undefined;
 };
 
 // Shared tabs for all users
@@ -227,7 +228,6 @@ export type ProfessionalTabParamList = {
   Search: undefined;
   Dashboard: undefined;
   MyJobs: undefined;
-  PortfolioManager: undefined;
   Profile: undefined;
 };
 

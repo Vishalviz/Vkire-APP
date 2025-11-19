@@ -8,7 +8,6 @@ import {
   Image,
   RefreshControl,
   Alert,
-  Animated,
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +18,8 @@ import { useTheme } from '../contexts/AppThemeContext';
 import { useProfileViews } from '../contexts/ProfileViewContext';
 import { useLocation } from '../contexts/LocationContext';
 import LocationService from '../services/locationService';
-import Logo from '../components/Logo'; // Added Logo import
+import Logo from '../components/Logo';
+import PostCard from '../components/PostCard';
 import { Typography, Spacing, BorderRadius, Shadows } from '../constants/designSystem';
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
@@ -36,18 +36,13 @@ const FeedScreen = () => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const navigation = useNavigation<FeedScreenNavigationProp>();
   const { profileViews, decrementProfileViews, hasUnlimitedAccess, activateUnlimitedAccess } = useProfileViews();
-  const { 
-    isLocationEnabled, 
-    isLoading: locationLoading, 
-    showLocationPrompt, 
-    currentLocation, 
-    manualLocation 
+  const {
+    isLocationEnabled,
+    isLoading: locationLoading,
+    showLocationPrompt,
+    currentLocation,
+    manualLocation
   } = useLocation();
-  
-  // Animation refs for micro-interactions
-  const likeAnimations = useRef<{ [key: string]: Animated.Value }>({});
-  const commentAnimations = useRef<{ [key: string]: Animated.Value }>({});
-  const shareAnimations = useRef<{ [key: string]: Animated.Value }>({});
 
   useEffect(() => {
     loadPosts();
@@ -120,13 +115,13 @@ const FeedScreen = () => {
           sortedPosts = mockPosts
             .map(post => ({
               ...post,
-              distance: post.professional 
+              distance: post.professional
                 ? LocationService.calculateDistance(
-                    currentLocation.latitude,
-                    currentLocation.longitude,
-                    post.professional.latitude,
-                    post.professional.longitude
-                  )
+                  currentLocation.latitude,
+                  currentLocation.longitude,
+                  post.professional.latitude,
+                  post.professional.longitude
+                )
                 : undefined
             }))
             .sort((a, b) => {
@@ -140,9 +135,9 @@ const FeedScreen = () => {
           sortedPosts = mockPosts.sort((a, b) => {
             const aCityMatch = a.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
             const bCityMatch = b.professional?.city?.toLowerCase().includes(manualLocation.toLowerCase()) ? 0 : 1;
-            
+
             if (aCityMatch !== bCityMatch) return aCityMatch - bCityMatch;
-            
+
             // If both match or both don't match, sort by likes
             return (b.likes_count || 0) - (a.likes_count || 0);
           });
@@ -150,13 +145,6 @@ const FeedScreen = () => {
       }
 
       setPosts(sortedPosts);
-      
-      // Initialize animation values for each post
-      mockPosts.forEach(post => {
-        likeAnimations.current[post.id] = new Animated.Value(1);
-        commentAnimations.current[post.id] = new Animated.Value(1);
-        shareAnimations.current[post.id] = new Animated.Value(1);
-      });
     } catch (error) {
       console.error('Error loading posts:', error);
       Alert.alert('Error', 'Failed to load posts');
@@ -173,7 +161,7 @@ const FeedScreen = () => {
 
   const handleLike = async (postId: string) => {
     const isLiked = likedPosts.has(postId);
-    
+
     // Toggle like state
     if (isLiked) {
       setLikedPosts(prev => {
@@ -184,78 +172,17 @@ const FeedScreen = () => {
     } else {
       setLikedPosts(prev => new Set(prev).add(postId));
     }
-    
-    // Animate like button
-    const animation = likeAnimations.current[postId];
-    if (animation) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 0.8,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 1.1,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-    
+
     console.debug('Like post:', postId, isLiked ? 'unliked' : 'liked');
   };
 
   const handleComment = (postId: string) => {
-    // Animate comment button
-    const animation = commentAnimations.current[postId];
-    if (animation) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 0.7,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-    
     // TODO: Navigate to comment screen or show comment modal
     Alert.alert('Comments', 'Comment functionality will be implemented soon!');
     console.debug('Comment on post:', postId);
   };
 
   const handleShare = (postId: string) => {
-    // Animate share button
-    const animation = shareAnimations.current[postId];
-    if (animation) {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: 0.8,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 1.2,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 150, // Animation.duration.fast,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-    
     // TODO: Implement proper sharing functionality
     Alert.alert('Share', 'Share functionality will be implemented soon!');
     console.debug('Share post:', postId);
@@ -263,7 +190,7 @@ const FeedScreen = () => {
 
   const handleSave = (postId: string) => {
     const isSaved = savedPosts.has(postId);
-    
+
     // Toggle save state
     if (isSaved) {
       setSavedPosts(prev => {
@@ -276,14 +203,14 @@ const FeedScreen = () => {
       setSavedPosts(prev => new Set(prev).add(postId));
       Alert.alert('Saved', 'Post saved to your collection');
     }
-    
+
     console.debug('Save post:', postId, isSaved ? 'unsaved' : 'saved');
   };
 
   const handleDoubleTap = (postId: string) => {
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
-    
+
     if (lastTap && (now - lastTap) < DOUBLE_PRESS_DELAY) {
       // Double tap detected
       handleLike(postId);
@@ -331,7 +258,7 @@ const FeedScreen = () => {
     const now = new Date();
     const postTime = new Date(timestamp);
     const diffInHours = Math.floor((now.getTime() - postTime.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) {
       const diffInMinutes = Math.floor((now.getTime() - postTime.getTime()) / (1000 * 60));
       return `${diffInMinutes}m`;
@@ -353,138 +280,28 @@ const FeedScreen = () => {
   };
 
   const renderPost = ({ item }: { item: PortfolioPost }) => {
-    const creator = item.professional 
-      ? { name: item.professional.name, handle: `@${item.professional.name.toLowerCase().replace(' ', '_')}` }
-      : getCreatorName(item.pro_id);
-    const isLiked = likedPosts.has(item.id);
-    const isSaved = savedPosts.has(item.id);
-    const likeAnimation = likeAnimations.current[item.id];
-    const commentAnimation = commentAnimations.current[item.id];
-    const shareAnimation = shareAnimations.current[item.id];
-
     return (
-      <View style={[styles.postCard, { backgroundColor: colors.white, borderColor: colors.gray100 }]}> // Themed
-        {/* Post Header */}
-        <View style={styles.postHeader}>
-          <TouchableOpacity
-            style={styles.creatorInfo}
-            onPress={() => handleCreatorPress(item.pro_id)}
-          >
-            <View style={styles.avatarContainer}>
-              <View style={[styles.avatarPlaceholder, { backgroundColor: colors.gray100, borderColor: colors.gray200 }]}> // Themed
-                <Ionicons name="person" size={20} color={colors.gray500} />
-              </View>
-            </View>
-            <View style={styles.creatorDetails}>
-              <Text style={[styles.creatorName, { color: colors.gray900 }]}>{creator.name}</Text> // Themed
-              <View style={styles.creatorLocationContainer}>
-                <Ionicons name="location" size={12} color={colors.gray500} />
-                <Text style={[styles.creatorLocation, { color: colors.gray500 }]}> // Themed
-                  {item.professional?.city || 'Unknown Location'}
-                  {item.distance && ` • ${item.distance}km away`}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-          
-          <View style={styles.headerActions}>
-            <Text style={[styles.timestamp, { color: colors.gray500 }]}>{formatTimestamp(item.created_at)}</Text> // Themed
-            <TouchableOpacity style={styles.moreButton}>
-              <Ionicons name="ellipsis-horizontal" size={20} color={colors.gray500} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Media Content */}
-        <TouchableOpacity 
-          style={[styles.mediaContainer, { backgroundColor: colors.gray100 }]} // Themed
-          onPress={() => handleDoubleTap(item.id)}
-          activeOpacity={1}
-        >
-          <Image source={{ uri: item.media_url }} style={styles.media} />
-        </TouchableOpacity>
-
-        {/* Action Buttons */}
-        <View style={styles.actionsContainer}>
-          <View style={styles.leftActions}>
-            <Animated.View style={{ transform: [{ scale: likeAnimation }] }}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleLike(item.id)}
-              >
-                <Ionicons 
-                  name={isLiked ? "heart" : "heart-outline"} 
-                  size={24} 
-                  color={isLiked ? colors.error : colors.gray500} // Changed from colors.likeActive to colors.error
-                />
-              </TouchableOpacity>
-            </Animated.View>
-            
-            <Animated.View style={{ transform: [{ scale: commentAnimation }] }}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleComment(item.id)}
-              >
-                <Ionicons name="chatbubble-outline" size={24} color={colors.gray500} />
-              </TouchableOpacity>
-            </Animated.View>
-            
-            <Animated.View style={{ transform: [{ scale: shareAnimation }] }}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleShare(item.id)}
-              >
-                <Ionicons name="share-outline" size={24} color={colors.gray500} />
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.bookmarkButton}
-            onPress={() => handleSave(item.id)}
-          >
-            <Ionicons 
-              name={isSaved ? "bookmark" : "bookmark-outline"} 
-              size={24} 
-              color={isSaved ? colors.primary : colors.gray500} 
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Post Content */}
-        <View style={styles.postContent}>
-          <View style={styles.likesContainer}>
-            <Text style={[styles.likesText, { color: colors.gray700 }]}> // Themed
-              <Text style={[styles.likesCount, { color: colors.black }]}>{item.likes_count || 0}</Text> likes // Themed
-            </Text>
-          </View>
-          
-          <Text style={[styles.caption, { color: colors.black }]}> // Themed
-            <Text style={[styles.creatorNameInline, { color: colors.black }]}>{creator.name} </Text> // Themed
-            {item.caption}
-          </Text>
-          
-          {item.tags.length > 0 && (
-            <View style={styles.tagsContainer}>
-              {item.tags.map((tag, index) => (
-                <Text key={index} style={[styles.tag, { color: colors.primary }]}> // Themed
-                  #{tag}
-                </Text>
-              ))}
-            </View>
-          )}
-        </View>
-      </View>
+      <PostCard
+        item={item}
+        isLiked={likedPosts.has(item.id)}
+        isSaved={savedPosts.has(item.id)}
+        onLike={handleLike}
+        onComment={handleComment}
+        onShare={handleShare}
+        onSave={handleSave}
+        onPressCreator={handleCreatorPress}
+        onDoubleTap={handleDoubleTap}
+      />
     );
   };
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}> // Themed
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <View style={styles.skeletonContainer}>
-          <View style={[styles.skeletonHeader, { backgroundColor: colors.gray200 }]} /> // Themed
-          <View style={[styles.skeletonMedia, { backgroundColor: colors.gray200 }]} /> // Themed
-          <View style={[styles.skeletonContent, { backgroundColor: colors.gray200 }]} /> // Themed
+          <View style={[styles.skeletonHeader, { backgroundColor: colors.gray200 }]} />
+          <View style={[styles.skeletonMedia, { backgroundColor: colors.gray200 }]} />
+          <View style={[styles.skeletonContent, { backgroundColor: colors.gray200 }]} />
         </View>
       </View>
     );
@@ -509,8 +326,8 @@ const FeedScreen = () => {
               )}
             </View>
           </View>
-          <TouchableOpacity 
-            style={[styles.headerButton, { backgroundColor: colors.gray50 }]} // Themed
+          <TouchableOpacity
+            style={[styles.headerButton, { backgroundColor: colors.gray50 }]}
             activeOpacity={0.7}
             onPress={() => {
               // Navigate to notifications/chat screen
@@ -519,8 +336,8 @@ const FeedScreen = () => {
           >
             <Ionicons name="notifications-outline" size={24} color={colors.primary} />
             {/* Unread notification badge */}
-            <View style={[styles.notificationBadge, { backgroundColor: colors.error, borderColor: colors.white }]}> // Themed
-              <Text style={[styles.notificationBadgeText, { color: colors.white }]}>3</Text> // Themed
+            <View style={[styles.notificationBadge, { backgroundColor: colors.error, borderColor: colors.white }]}>
+              <Text style={[styles.notificationBadgeText, { color: colors.white }]}>3</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -531,8 +348,8 @@ const FeedScreen = () => {
         renderItem={renderPost}
         keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}
@@ -543,8 +360,8 @@ const FeedScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons name="images-outline" size={64} color={colors.gray400} />
-            <Text style={[styles.emptyTitle, { color: colors.gray600 }]}>No posts yet</Text> // Themed
-            <Text style={[styles.emptySubtitle, { color: colors.gray500 }]}> // Themed
+            <Text style={[styles.emptyTitle, { color: colors.gray600 }]}>No posts yet</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.gray500 }]}>
               Be the first to share your photography work
             </Text>
           </View>
@@ -559,38 +376,38 @@ const FeedScreen = () => {
         onRequestClose={() => setShowPaymentModal(false)}
       >
         <View style={[styles.modalOverlay, { backgroundColor: colors.black + '66' }]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.white }]}> // Themed
+          <View style={[styles.modalContent, { backgroundColor: colors.white }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.gray900 }]}>View Profile</Text> // Themed
+              <Text style={[styles.modalTitle, { color: colors.gray900 }]}>View Profile</Text>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
                 <Ionicons name="close" size={24} color={colors.gray600} />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.modalDescription, { color: colors.gray600 }]}> // Themed
+            <Text style={[styles.modalDescription, { color: colors.gray600 }]}>
               You've used all your free profile views. Choose an option to continue:
             </Text>
             <View style={styles.paymentOptions}>
               <TouchableOpacity
-                style={[styles.paymentOption, { borderColor: colors.gray200 }]} // Themed
+                style={[styles.paymentOption, { borderColor: colors.gray200 }]}
                 onPress={() => handlePaymentOption('single')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>View This Profile</Text> // Themed
-                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹59</Text> // Themed
+                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>View This Profile</Text>
+                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹59</Text>
                 </View>
-                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>One-time access to this profile</Text> // Themed
+                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>One-time access to this profile</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.paymentOption, styles.recommendedOption, { borderColor: colors.primary, backgroundColor: colors.primary + '08' }]} // Themed
+                style={[styles.paymentOption, styles.recommendedOption, { borderColor: colors.primary, backgroundColor: colors.primary + '08' }]}
                 onPress={() => handlePaymentOption('unlimited')}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>Unlimited Today</Text> // Themed
-                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹299</Text> // Themed
+                  <Text style={[styles.optionTitle, { color: colors.gray900 }]}>Unlimited Today</Text>
+                  <Text style={[styles.optionPrice, { color: colors.primary }]}>₹299</Text>
                 </View>
-                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>Unlimited profile views for 24 hours</Text> // Themed
-                <View style={[styles.recommendedBadge, { backgroundColor: colors.primary }]}> // Themed
-                  <Text style={[styles.recommendedText, { color: colors.white }]}>Most Value</Text> // Themed
+                <Text style={[styles.optionDescription, { color: colors.gray600 }]}>Unlimited profile views for 24 hours</Text>
+                <View style={[styles.recommendedBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.recommendedText, { color: colors.white }]}>Most Value</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -605,7 +422,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  
+
   // Modern Header Styles
   header: {
     paddingTop: 50,
@@ -669,7 +486,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#FFFFFF', // Static white
   },
-  
+
   // Loading States
   loadingContainer: {
     flex: 1,
@@ -698,12 +515,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     backgroundColor: '#E5E7EB', // Static gray200
   },
-  
+
   // List Styles
   listContainer: {
     paddingBottom: Spacing['2xl'],
   },
-  
+
   // Post Card Styles
   postCard: {
     borderRadius: BorderRadius['2xl'],
@@ -715,7 +532,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#E5E7EB', // Static gray100
   },
-  
+
   // Post Header
   postHeader: {
     flexDirection: 'row',
@@ -780,7 +597,7 @@ const styles = StyleSheet.create({
   moreButton: {
     padding: Spacing.xs,
   },
-  
+
   // Media Styles
   mediaContainer: {
     width: '100%',
@@ -791,7 +608,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  
+
   // Action Buttons
   actionsContainer: {
     flexDirection: 'row',
@@ -811,7 +628,7 @@ const styles = StyleSheet.create({
   bookmarkButton: {
     padding: Spacing.xs,
   },
-  
+
   // Post Content
   postContent: {
     paddingHorizontal: Spacing.lg,
@@ -852,7 +669,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
     color: '#007AFF', // Static primary
   },
-  
+
   // Empty State
   emptyState: {
     alignItems: 'center',
@@ -874,7 +691,7 @@ const styles = StyleSheet.create({
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     color: '#6B7280', // Static gray500
   },
-  
+
   // Modal Styles
   modalOverlay: {
     flex: 1,

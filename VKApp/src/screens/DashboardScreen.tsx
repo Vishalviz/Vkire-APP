@@ -34,36 +34,36 @@ const DashboardScreen: React.FC = () => {
   ];
   const getStatusColor = (status: string) => (status === 'pending' ? colors.warning : colors.success);
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}>
         <Text style={[styles.title, { color: colors.gray900 }]}>Dashboard</Text>
         <Text style={[styles.subtitle, { color: colors.gray600 }]}>Your photography business overview</Text>
       </View>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor: colors.surface }]}> 
+          <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
             <View style={styles.statIcon}>
               <Ionicons name="wallet-outline" size={24} color={colors.primary} />
             </View>
             <Text style={[styles.statValue, { color: colors.gray900 }]}>₹{stats.totalEarnings.toLocaleString()}</Text>
             <Text style={[styles.statLabel, { color: colors.gray500 }]}>Total Earnings</Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.surface }]}> 
+          <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
             <View style={styles.statIcon}>
               <Ionicons name="checkmark-circle-outline" size={24} color={colors.success} />
             </View>
             <Text style={[styles.statValue, { color: colors.gray900 }]}>{stats.completedJobs}</Text>
             <Text style={[styles.statLabel, { color: colors.gray500 }]}>Completed Jobs</Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.surface }]}> 
+          <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
             <View style={styles.statIcon}>
               <Ionicons name="time-outline" size={24} color={colors.warning} />
             </View>
             <Text style={[styles.statValue, { color: colors.gray900 }]}>{stats.pendingInquiries}</Text>
             <Text style={[styles.statLabel, { color: colors.gray500 }]}>Pending Inquiries</Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.surface }]}> 
+          <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
             <View style={styles.statIcon}>
               <Ionicons name="star-outline" size={24} color="#FFD700" />
             </View>
@@ -75,9 +75,12 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.gray900 }]}>Quick Actions</Text>
           <View style={styles.actionsContainer}>
-            <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface }]}> 
-              <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
-              <Text style={[styles.actionText, { color: colors.gray900 }]}>Post Work</Text>
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: colors.surface }]}
+              onPress={() => navigation.navigate('PortfolioManager')}
+            >
+              <Ionicons name="images-outline" size={32} color={colors.primary} />
+              <Text style={[styles.actionText, { color: colors.gray900 }]}>Manage Portfolio</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionCard, { backgroundColor: colors.surface }]} onPress={() => navigation.navigate('PriceListEditor')}>
               <Ionicons name="settings-outline" size={32} color={colors.gray500} />
@@ -98,13 +101,13 @@ const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
           {recentInquiries.map((inquiry) => (
-            <TouchableOpacity key={inquiry.id} style={[styles.inquiryCard, { backgroundColor: colors.surface }]}> 
+            <TouchableOpacity key={inquiry.id} style={[styles.inquiryCard, { backgroundColor: colors.surface }]}>
               <View style={styles.inquiryHeader}>
                 <View style={styles.inquiryInfo}>
                   <Text style={[styles.customerName, { color: colors.gray900 }]}>{inquiry.customerName}</Text>
                   <Text style={[styles.service, { color: colors.gray600 }]}>{inquiry.service}</Text>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(inquiry.status) }]}> 
+                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(inquiry.status) }]}>
                   <Text style={styles.statusText}>{inquiry.status.toUpperCase()}</Text>
                 </View>
               </View>

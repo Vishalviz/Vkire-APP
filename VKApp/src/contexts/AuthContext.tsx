@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../services/supabase';
-import { User, AuthContextType, UserRole } from '../types';
+import { User, AuthContextType, UserRole, ProProfile } from '../types';
 import logger from '../utils/logger';
+import { MockAuthService } from '../services/auth/MockAuthService';
+import { IAuthService } from '../services/auth/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -17,106 +18,66 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+// Initialize the service (in a real app, this might be dependency injected or configured based on environment)
+const authService: IAuthService = new MockAuthService();
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
+    const initAuth = async () => {
+      try {
+        const storedUser = await authService.initialize();
+        if (storedUser) {
+          setUser(storedUser);
+        }
+      } catch (error) {
+        logger.error('Error initializing auth:', error);
+      } finally {
         setLoading(false);
       }
-    });
+    };
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    initAuth();
   }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-      setUser(data);
-    } catch (error) {
-      logger.error('Error fetching user profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const signIn = async (email: string, password: string, name?: string, role?: UserRole) => {
     setLoading(true);
     try {
-      // For demo purposes, create a mock user
-      const userRole = role || 'customer';
-      const mockUser: User = {
-        id: 'demo-user-1',
-        role: userRole,
-        name: name || email.split('@')[0],
-        email,
-        created_at: new Date().toISOString(),
-        profileCompleted: userRole === 'customer', // Customers don't need onboarding
-      };
-      
-      setUser(mockUser);
-      setLoading(false);
+      const loggedInUser = await authService.signIn(email, password, name, role);
+      setUser(loggedInUser);
     } catch (error) {
-      setLoading(false);
+      logger.error('Sign in error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, role: UserRole, name?: string, businessName?: string, city?: string, phone?: string) => {
     setLoading(true);
     try {
-      // For demo purposes, create a mock user
-      const mockUser: User = {
-        id: `demo-user-${Date.now()}`,
-        role,
-        name: name || email.split('@')[0],
-        email,
-        city: city || 'Delhi', // Use provided city or default
-        phone: phone,
-        created_at: new Date().toISOString(),
-        profileCompleted: role === 'customer', // Customers don't need onboarding
-      };
-      
-      setUser(mockUser);
-      setLoading(false);
+      const newUser = await authService.signUp(email, password, role, name, businessName, city, phone);
+      setUser(newUser);
     } catch (error) {
-      setLoading(false);
+      logger.error('Sign up error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     setLoading(true);
     try {
-      // For demo purposes, just clear the user
+      await authService.signOut();
       setUser(null);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
+      logger.error('Sign out error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,36 +85,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) throw new Error('No user logged in');
 
     try {
-      // For demo purposes, update the user state directly
-      const updatedUser = { ...user, ...updates };
+      const updatedUser = await authService.updateProfile(user.id, updates);
       setUser(updatedUser);
-      
-      // In a real app, you would make the database call here:
-      // const { data, error } = await supabase
-      //   .from('users')
-      //   .update(updates)
-      //   .eq('id', user.id)
-      //   .select()
-      //   .single();
-      // if (error) throw error;
-      // setUser(data);
-      
       console.log('Profile updated successfully:', updatedUser);
     } catch (error) {
-      console.error('Auth error:', error);
+      logger.error('Auth error:', error);
       throw error;
     }
   };
 
   const markProfileCompleted = async () => {
     if (!user) throw new Error('No user logged in');
-    
+
     try {
-      const updatedUser = { ...user, profileCompleted: true };
+      const updatedUser = await authService.markProfileCompleted(user.id);
       setUser(updatedUser);
       console.log('Profile marked as completed');
     } catch (error) {
-      console.error('Error marking profile as completed:', error);
+      logger.error('Error marking profile as completed:', error);
+      throw error;
+    }
+  };
+
+  const createProfessionalProfile = async (profile: Partial<ProProfile>) => {
+    if (!user) throw new Error('No user logged in');
+
+    try {
+      await authService.createProfessionalProfile(user.id, profile);
+    } catch (error) {
+      logger.error('Error creating professional profile:', error);
       throw error;
     }
   };
@@ -166,6 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     updateProfile,
     markProfileCompleted,
+    createProfessionalProfile,
   };
 
   return (

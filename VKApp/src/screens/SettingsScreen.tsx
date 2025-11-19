@@ -103,9 +103,11 @@ const SettingsScreen = () => {
       'Your data will be exported and sent to your registered email address.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Export', onPress: () => {
-          Alert.alert('Success', 'Data export initiated. You will receive an email within 24 hours.');
-        }},
+        {
+          text: 'Export', onPress: () => {
+            Alert.alert('Success', 'Data export initiated. You will receive an email within 24 hours.');
+          }
+        },
       ]
     );
   };
@@ -195,9 +197,9 @@ const SettingsScreen = () => {
 
   const renderSettingItem = (item: SettingItem) => {
     return (
-      <View key={item.id} style={[styles.settingItem, { backgroundColor: colors.surface }]}> // Use themed color
+      <View key={item.id} style={[styles.settingItem, { backgroundColor: colors.surface }]}>
         <View style={styles.settingInfo}>
-          <View style={[styles.settingIcon, { backgroundColor: (item.color || colors.primary) + '20' }]}> //
+          <View style={[styles.settingIcon, { backgroundColor: (item.color || colors.primary) + '20' }]}>
             <Ionicons name={item.icon as any} size={20} color={item.color || colors.primary} />
           </View>
           <View style={styles.settingDetails}>
@@ -225,14 +227,14 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.surface }]}> // themed
-      <View style={[styles.container, { backgroundColor: colors.background }]}> // themed
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.surface }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}> // themed
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.gray200 }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color={colors.gray900} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.gray900 }]}>{'Settings'}</Text>
+          <Text style={[styles.headerTitle, { color: colors.gray900 }]}>Settings</Text>
           <View style={styles.headerSpacer} />
         </View>
 

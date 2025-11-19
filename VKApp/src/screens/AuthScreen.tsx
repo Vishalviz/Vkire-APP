@@ -34,7 +34,7 @@ const AuthScreen = () => {
 
   const { signIn, signUp } = useAuth();
   const { colors } = useAppContextTheme();
-  
+
   // Animation refs for smooth transitions
   const customerButtonScale = useRef(new Animated.Value(1)).current;
   const proButtonScale = useRef(new Animated.Value(1)).current;
@@ -99,7 +99,7 @@ const AuthScreen = () => {
   const handleRoleSelection = (role: UserRole) => {
     // Animate the button press
     const buttonScale = role === 'customer' ? customerButtonScale : proButtonScale;
-    
+
     Animated.sequence([
       Animated.timing(buttonScale, {
         toValue: 0.95,
@@ -143,7 +143,7 @@ const AuthScreen = () => {
   const handleAuth = async () => {
     // Dismiss keyboard
     Keyboard.dismiss();
-    
+
     if (!selectedRole) {
       Alert.alert('Error', 'Please select your role');
       return;
@@ -240,7 +240,7 @@ const AuthScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Background Gradient */}
       <View style={styles.backgroundGradient} />
-      
+
       {/* Modern Header */}
       <View style={styles.header}>
         <Text style={[styles.appTitle, { color: colors.primary }]}>Vkire</Text>
@@ -248,30 +248,24 @@ const AuthScreen = () => {
       </View>
 
       {/* Main Content - Centered with Keyboard Awareness */}
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.mainContent}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <ScrollView 
+        <ScrollView
           ref={scrollViewRef}
           style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContainer,
-            { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 20 : 20 }
-          ]}
+          contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          automaticallyAdjustKeyboardInsets={true}
-          contentInsetAdjustmentBehavior="automatic"
-          bounces={false}
         >
           {/* Modern Role Selection */}
           {!selectedRole ? (
             <View style={styles.roleSelectionContainer}>
               <Text style={[styles.roleSelectionTitle, { color: colors.gray900 }]}>Choose your path</Text>
               <Text style={[styles.roleSelectionSubtitle, { color: colors.gray600 }]}>How would you like to use Vkire?</Text>
-              
+
               <View style={styles.roleButtons}>
                 <Animated.View style={{ transform: [{ scale: customerButtonScale }] }}>
                   <TouchableOpacity
@@ -293,7 +287,7 @@ const AuthScreen = () => {
                     </View>
                   </TouchableOpacity>
                 </Animated.View>
-                
+
                 <Animated.View style={{ transform: [{ scale: proButtonScale }] }}>
                   <TouchableOpacity
                     style={styles.roleButton}
@@ -340,7 +334,7 @@ const AuthScreen = () => {
                     {selectedRole === 'pro' ? 'Join as Professional' : 'Find Creatives'}
                   </Text>
                   <Text style={[styles.formSubtitle, { color: colors.gray600 }]}>
-                    {selectedRole === 'pro' 
+                    {selectedRole === 'pro'
                       ? 'Showcase your work'
                       : 'Find creative professionals'
                     }
@@ -449,10 +443,10 @@ const AuthScreen = () => {
                       onPress={() => setShowPassword(!showPassword)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons 
-                        name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                        size={20} 
-                        color={colors.gray500} 
+                      <Ionicons
+                        name={showPassword ? "eye-off-outline" : "eye-outline"}
+                        size={20}
+                        color={colors.gray500}
                       />
                     </TouchableOpacity>
                   </View>
@@ -469,10 +463,10 @@ const AuthScreen = () => {
                   <Text style={[styles.primaryButtonText, { color: colors.white }]}>
                     {loading ? 'Loading...' : selectedRole === 'pro' ? 'Create Account' : 'Sign In'}
                   </Text>
-                  <Ionicons 
-                    name={selectedRole === 'pro' ? "arrow-forward" : "log-in-outline"} 
-                    size={20} 
-                    color={colors.white} 
+                  <Ionicons
+                    name={selectedRole === 'pro' ? "arrow-forward" : "log-in-outline"}
+                    size={20}
+                    color={colors.white}
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
